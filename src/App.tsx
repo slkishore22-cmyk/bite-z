@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SellerDashboard from "./pages/seller/Dashboard.tsx";
 import SellerInventory from "./pages/seller/Inventory.tsx";
+import SellerMenu from "./pages/seller/Menu.tsx";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/seller/inventory" element={<SellerInventory />} />
+          <Route path="/seller/menu" element={<SellerMenu />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
