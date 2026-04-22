@@ -193,32 +193,13 @@ const SellerDashboard = () => {
 
         {/* Action tiles */}
         <section className="mt-6 space-y-3" aria-label="Quick actions">
-          {tiles.map((t) => (
-            <Link
+          {orderedTiles.map((t) => (
+            <TileRow
               key={t.title}
-              to={t.to}
-              className="group flex items-center gap-4 rounded-2xl border border-border bg-gradient-card p-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow active:scale-[0.99]"
-            >
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
-                <span className="material-symbols-outlined">{t.icon}</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-bold leading-tight">{t.title}</p>
-                <p className="mt-0.5 truncate text-sm text-muted-foreground">{t.desc}</p>
-              </div>
-              <button
-                aria-label={`Pin ${t.title}`}
-                onClick={(e) => e.preventDefault()}
-                className="text-muted-foreground/60 transition hover:text-foreground"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                  push_pin
-                </span>
-              </button>
-              <span className="material-symbols-outlined text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground">
-                chevron_right
-              </span>
-            </Link>
+              tile={t}
+              isPinned={pinned.includes(t.title)}
+              onTogglePin={() => togglePin(t.title)}
+            />
           ))}
         </section>
       </div>
@@ -227,3 +208,191 @@ const SellerDashboard = () => {
 };
 
 export default SellerDashboard;
+
+type TileRowProps = {
+  tile: Tile;
+  isPinned: boolean;
+  onTogglePin: () => void;
+};
+
+const TileRow = ({ tile, isPinned, onTogglePin }: TileRowProps) => {
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const startX = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
+  const axisLocked = useRef<"x" | "y" | null>(null);
+  const longPressTimer = useRef<number | null>(null);
+  const longPressFired = useRef(false);
+  const suppressClick = useRef(false);
+
+  const clearLongPress = () => {
+    if (longPressTimer.current !== null) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    startX.current = e.clientX;
+    startY.current = e.clientY;
+    axisLocked.current = null;
+    longPressFired.current = false;
+    suppressClick.current = false;
+    (e.currentTarget as HTMLDivElement).setPointerCapture?.(e.pointerId);
+
+    longPressTimer.current = window.setTimeout(() => {
+      longPressFired.current = true;
+      suppressClick.current = true;
+      onTogglePin();
+      // haptic feedback if available
+      if ("vibrate" in navigator) navigator.vibrate?.(15);
+    }, LONG_PRESS_MS);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (startX.current === null || startY.current === null) return;
+    const dx = e.clientX - startX.current;
+    const dy = e.clientY - startY.current;
+
+    if (!axisLocked.current) {
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        axisLocked.current = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        if (axisLocked.current === "x") {
+          clearLongPress();
+          setIsDragging(true);
+        } else {
+          // vertical scroll: cancel
+          clearLongPress();
+          startX.current = null;
+          startY.current = null;
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (axisLocked.current === "x") {
+      // only allow leftward drag (negative dx)
+      const next = Math.max(-SWIPE_REVEAL_MAX, Math.min(0, dx));
+      setDragX(next);
+      if (Math.abs(dx) > 5) suppressClick.current = true;
+    }
+  };
+
+  const finishDrag = () => {
+    if (axisLocked.current === "x" && Math.abs(dragX) >= SWIPE_PIN_THRESHOLD) {
+      onTogglePin();
+      if ("vibrate" in navigator) navigator.vibrate?.(10);
+    }
+    setDragX(0);
+    setIsDragging(false);
+    axisLocked.current = null;
+    startX.current = null;
+    startY.current = null;
+  };
+
+  const handlePointerUp = () => {
+    clearLongPress();
+    finishDrag();
+  };
+
+  const handlePointerCancel = () => {
+    clearLongPress();
+    setDragX(0);
+    setIsDragging(false);
+    axisLocked.current = null;
+    startX.current = null;
+    startY.current = null;
+  };
+
+  const revealOpacity = Math.min(1, Math.abs(dragX) / SWIPE_PIN_THRESHOLD);
+  const willPin = Math.abs(dragX) >= SWIPE_PIN_THRESHOLD;
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl">
+      {/* Reveal background (action hint) */}
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-end pr-5"
+        style={{
+          background: willPin
+            ? "hsl(var(--primary) / 0.18)"
+            : "hsl(var(--secondary))",
+          opacity: Math.abs(dragX) > 0 ? 1 : 0,
+        }}
+        aria-hidden
+      >
+        <div
+          className="flex items-center gap-1.5 text-sm font-semibold text-primary"
+          style={{ opacity: revealOpacity }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+            push_pin
+          </span>
+          <span>{isPinned ? "Unpin" : "Pin"}</span>
+        </div>
+      </div>
+
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        style={{
+          transform: `translateX(${dragX}px)`,
+          transition: isDragging ? "none" : "transform 220ms ease",
+          touchAction: "pan-y",
+        }}
+      >
+        <Link
+          to={tile.to}
+          onClick={(e) => {
+            if (suppressClick.current || longPressFired.current) {
+              e.preventDefault();
+            }
+          }}
+          className={`group flex select-none items-center gap-4 rounded-2xl border bg-gradient-card p-4 shadow-card transition-all active:scale-[0.99] ${
+            isPinned ? "border-primary/50 shadow-glow" : "border-border hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow"
+          }`}
+        >
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+            <span className="material-symbols-outlined">{tile.icon}</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-bold leading-tight">{tile.title}</p>
+            <p className="mt-0.5 truncate text-sm text-muted-foreground">{tile.desc}</p>
+          </div>
+          <button
+            type="button"
+            aria-label={isPinned ? `Unpin ${tile.title}` : `Pin ${tile.title}`}
+            aria-pressed={isPinned}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onTogglePin();
+            }}
+            className={`transition ${
+              isPinned ? "text-primary" : "text-muted-foreground/60 hover:text-foreground"
+            }`}
+          >
+            <span
+              className="material-symbols-outlined"
+              style={{
+                fontSize: 18,
+                fontVariationSettings: isPinned
+                  ? "'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24"
+                  : undefined,
+              }}
+            >
+              push_pin
+            </span>
+          </button>
+          <span className="material-symbols-outlined text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground">
+            chevron_right
+          </span>
+        </Link>
+      </div>
+    </div>
+  );
+};
