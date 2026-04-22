@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Area,
@@ -33,6 +33,11 @@ const tiles: Tile[] = [
   { icon: "local_offer", title: "Create Offer", desc: "Add discounts and promotions", to: "/seller/offers" },
   { icon: "settings", title: "Settings", desc: "Manage account and preferences", to: "/seller/settings" },
 ];
+
+const PIN_STORAGE_KEY = "bitez.seller.pinnedTiles";
+const SWIPE_PIN_THRESHOLD = 60; // px to trigger pin
+const SWIPE_REVEAL_MAX = 88; // px max drag reveal
+const LONG_PRESS_MS = 500;
 
 const SellerDashboard = () => {
   const today = useMemo(
