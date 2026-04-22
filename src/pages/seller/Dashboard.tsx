@@ -216,13 +216,11 @@ const TileRow = ({ tile, isPinned, onTogglePin }: TileRowProps) => {
     axisLocked.current = null;
     longPressFired.current = false;
     suppressClick.current = false;
-    (e.currentTarget as HTMLDivElement).setPointerCapture?.(e.pointerId);
 
     longPressTimer.current = window.setTimeout(() => {
       longPressFired.current = true;
       suppressClick.current = true;
       onTogglePin();
-      // haptic feedback if available
       if ("vibrate" in navigator) navigator.vibrate?.(15);
     }, LONG_PRESS_MS);
   };
