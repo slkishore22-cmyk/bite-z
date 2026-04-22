@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import SellerHeader from "@/components/seller/SellerHeader";
 
 type Category = "Food" | "Snacks" | "Drinks";
 type InvType = "Active" | "Inactive" | "Quantity Based";
@@ -83,7 +83,18 @@ const SellerInventory = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
-        <SellerHeader />
+        <header className="flex items-center gap-3">
+          <Link
+            to="/seller"
+            aria-label="Back to dashboard"
+            className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
+              arrow_back
+            </span>
+          </Link>
+          <h1 className="text-lg font-extrabold tracking-tight">Add Inventory</h1>
+        </header>
 
         {/* Heading */}
         <section className="mt-7 border-b border-border pb-5">
