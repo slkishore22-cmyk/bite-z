@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import SellerHeader from "@/components/seller/SellerHeader";
 import {
   Area,
   AreaChart,
@@ -88,31 +89,7 @@ const SellerDashboard = () => {
       {/* App shell — phone-first, max width on larger screens */}
       <div className="mx-auto w-full max-w-md px-5 pb-10 pt-6">
         {/* Top bar */}
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary" style={{ fontSize: 26 }}>
-              shield_lock
-            </span>
-            <h1 className="text-xl font-extrabold tracking-tight text-primary">
-              Bitez Admin Panel
-            </h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              aria-label="Notifications"
-              className="relative grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            >
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-destructive" />
-            </button>
-            <button
-              aria-label="Profile"
-              className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-primary"
-            >
-              <span className="material-symbols-outlined">restaurant</span>
-            </button>
-          </div>
-        </header>
+        <SellerHeader />
 
         {/* Heading */}
         <section className="mt-7">
