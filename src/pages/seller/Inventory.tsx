@@ -381,17 +381,32 @@ const SellerInventory = () => {
 
           {/* Icon */}
           <div className="mt-6">
-            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">
-              CHOOSE ICON
-            </p>
-            <div className="mt-3 flex flex-wrap gap-3">
-              {ICONS.map((emoji) => {
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">
+                CHOOSE ICON
+              </p>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {name.trim()
+                  ? `${visibleIcons.length} suggested`
+                  : `${visibleIcons.length} icons`}
+              </span>
+            </div>
+            {name.trim() && (
+              <p className="mt-1 text-[11px] text-muted-foreground/80">
+                Showing icons related to “{name.trim()}”. Clear the name to see all {category} icons.
+              </p>
+            )}
+            <div className="mt-3 flex max-h-56 flex-wrap gap-3 overflow-y-auto pr-1">
+              {visibleIcons.map(({ icon: emoji }) => {
                 const active = icon === emoji;
                 return (
                   <button
                     type="button"
                     key={emoji}
-                    onClick={() => setIcon(emoji)}
+                    onClick={() => {
+                      setIcon(emoji);
+                      setIconTouched(true);
+                    }}
                     aria-label={`Select icon ${emoji}`}
                     className={`grid h-12 w-12 place-items-center rounded-2xl bg-secondary/70 text-2xl transition ${
                       active
