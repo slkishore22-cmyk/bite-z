@@ -50,6 +50,39 @@ const SellerDashboard = () => {
     []
   );
 
+  const [pinned, setPinned] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(PIN_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pinned));
+    } catch {
+      /* ignore */
+    }
+  }, [pinned]);
+
+  const togglePin = (title: string) => {
+    setPinned((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [title, ...prev]
+    );
+  };
+
+  const orderedTiles = useMemo(() => {
+    const pinnedSet = new Set(pinned);
+    const pinnedTiles = pinned
+      .map((t) => tiles.find((x) => x.title === t))
+      .filter((x): x is Tile => Boolean(x));
+    const rest = tiles.filter((t) => !pinnedSet.has(t.title));
+    return [...pinnedTiles, ...rest];
+  }, [pinned]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* App shell — phone-first, max width on larger screens */}
