@@ -255,15 +255,15 @@ const InventoryOfferForm = ({
   selectedItems: string[];
   toggleItem: (id: string) => void;
 }) => (
-  <div className="min-h-screen bg-background text-foreground">
-    <main className="mx-auto w-full max-w-md px-6 pb-14">
+  <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <main className="mx-auto w-full max-w-md px-5 pb-12">
       <PageHeader title="Create Offer" subtitle="Fill in the details" onBack={onBack} />
 
-      <form onSubmit={onSubmit} className="mt-11">
+      <form onSubmit={onSubmit} className="mt-8">
         <FieldLabel>Offer Name</FieldLabel>
         <PlainInput placeholder="e.g. Midnight Feast" />
 
-        <div className="mt-10 grid grid-cols-2 gap-6">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>Start Date</FieldLabel>
             <CompactDateInput />
@@ -274,30 +274,30 @@ const InventoryOfferForm = ({
           </div>
         </div>
 
-        <FieldLabel className="mt-10">Discount Percentage</FieldLabel>
+        <FieldLabel className="mt-5">Discount Percentage</FieldLabel>
         <IconInput placeholder="20" icon="percent" compact />
 
-        <FieldLabel className="mt-10">Condition</FieldLabel>
+        <FieldLabel className="mt-5">Condition</FieldLabel>
         <PlainInput placeholder="Buy more than ₹200 and get 20% off" />
 
-        <div className="mt-10 flex items-center justify-between gap-4">
+        <div className="mt-6 flex items-center justify-between gap-4">
           <FieldLabel>Inventory Selection</FieldLabel>
           <span className="rounded-full bg-accent px-3 py-1 text-xs font-extrabold uppercase text-accent-foreground">Multi-select</span>
         </div>
 
-        <div className="relative mt-5">
-          <span className="material-symbols-outlined pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" style={{ fontSize: 22 }}>
+        <div className="relative mt-3">
+          <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" style={{ fontSize: 20 }}>
             search
           </span>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search menu items..."
-            className="h-16 w-full rounded-full border-0 bg-secondary/60 pl-16 pr-5 text-lg font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/60"
+            className="w-full rounded-full border-0 bg-secondary/70 py-3.5 pl-12 pr-5 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
           />
         </div>
 
-        <div className="mt-7 space-y-4">
+        <div className="mt-4 space-y-3">
           {items.map((item) => {
             const selected = selectedItems.includes(item.id);
             return (
@@ -305,15 +305,15 @@ const InventoryOfferForm = ({
                 type="button"
                 key={item.id}
                 onClick={() => toggleItem(item.id)}
-                className="flex min-h-28 w-full items-center gap-5 rounded-[2rem] bg-card px-6 py-5 text-left transition hover:bg-card/80"
+                className="flex min-h-20 w-full items-center gap-4 rounded-2xl border border-border bg-gradient-card px-4 py-4 text-left shadow-card transition hover:bg-card/80"
               >
-                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-background text-3xl">{item.icon}</span>
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-secondary text-2xl">{item.icon}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-xl font-extrabold">{item.name}</span>
-                  <span className="mt-1 block truncate text-sm font-semibold uppercase tracking-wide text-muted-foreground">{item.group}</span>
+                  <span className="block truncate text-base font-extrabold">{item.name}</span>
+                  <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-wide text-muted-foreground">{item.group}</span>
                 </span>
-                <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40 text-transparent"}`}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40 text-transparent"}`}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 24 }}>
                     check
                   </span>
                 </span>
@@ -322,9 +322,9 @@ const InventoryOfferForm = ({
           })}
         </div>
 
-        <button type="submit" className="mt-14 flex h-20 w-full items-center justify-center gap-4 rounded-full bg-primary text-xl font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
+        <button type="submit" className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
           Create Offer
-          <span className="material-symbols-outlined" style={{ fontSize: 30 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
             arrow_forward
           </span>
         </button>
