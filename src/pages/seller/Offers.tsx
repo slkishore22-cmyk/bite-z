@@ -175,34 +175,34 @@ const OfferTypeCard = ({
 );
 
 const PageHeader = ({ title, subtitle, onBack }: { title: string; subtitle?: string; onBack: () => void }) => (
-  <header className="-mx-6 flex items-center gap-6 bg-card/30 px-6 pb-6 pt-7">
+  <header className="flex items-center gap-3 pt-6">
     <button
       type="button"
       onClick={onBack}
       aria-label="Back to offer selection"
-      className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+      className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground transition hover:bg-secondary/80"
     >
-      <span className="material-symbols-outlined" style={{ fontSize: 34 }}>
+      <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
         arrow_back
       </span>
     </button>
     <div className="min-w-0">
-      <h1 className="truncate text-2xl font-extrabold tracking-tight">{title}</h1>
-      {subtitle && <p className="mt-1 text-sm font-extrabold uppercase tracking-[0.16em] text-muted-foreground">{subtitle}</p>}
+      <h1 className="truncate text-lg font-extrabold tracking-tight">{title}</h1>
+      {subtitle && <p className="mt-0.5 text-xs font-extrabold uppercase tracking-[0.14em] text-muted-foreground">{subtitle}</p>}
     </div>
   </header>
 );
 
 const GeneralOfferForm = ({ onBack, onSubmit }: { onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) => (
-  <div className="min-h-screen bg-background text-foreground">
-    <main className="mx-auto w-full max-w-md px-6 pb-14">
+  <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <main className="mx-auto w-full max-w-md px-5 pb-12">
       <PageHeader title="General Offer" subtitle="Apply discounts across all items" onBack={onBack} />
 
-      <form onSubmit={onSubmit} className="mt-16 rounded-[1.7rem] border border-border bg-card/80 p-7 shadow-card">
+      <form onSubmit={onSubmit} className="mt-8 rounded-3xl border border-border bg-gradient-card p-5 shadow-card">
         <FieldLabel>Offer Name</FieldLabel>
         <IconInput placeholder="Fest Offer" icon="label" />
 
-        <div className="mt-9 grid grid-cols-2 gap-6">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>Start Date</FieldLabel>
             <DateInput />
@@ -213,26 +213,26 @@ const GeneralOfferForm = ({ onBack, onSubmit }: { onBack: () => void; onSubmit: 
           </div>
         </div>
 
-        <FieldLabel className="mt-9">Discount Percentage</FieldLabel>
+        <FieldLabel className="mt-5">Discount Percentage</FieldLabel>
         <IconInput placeholder="Enter discount %" icon="percent" />
 
-        <FieldLabel className="mt-9">Offer Condition (Optional)</FieldLabel>
+        <FieldLabel className="mt-5">Offer Condition (Optional)</FieldLabel>
         <textarea
           placeholder="Enter condition (e.g. Buy above ₹200)"
-          className="mt-4 min-h-32 w-full resize-none rounded-2xl border border-border bg-secondary/45 px-5 py-6 text-xl font-medium text-foreground placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/60"
+          className="mt-2 min-h-24 w-full resize-none rounded-2xl border border-border bg-secondary/70 px-5 py-4 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
         />
 
-        <button type="submit" className="mt-10 flex h-20 w-full items-center justify-center gap-4 rounded-full bg-primary text-xl font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
+        <button type="submit" className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
           Create Offer
-          <span className="material-symbols-outlined" style={{ fontSize: 30 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
             bolt
           </span>
         </button>
       </form>
 
-      <aside className="mt-10 flex items-start gap-5 rounded-[2rem] bg-card/55 px-8 py-7 text-muted-foreground">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground font-extrabold">i</span>
-        <p className="text-lg font-medium leading-relaxed">General offers are applied globally to all active menu items. This action will override any conflicting individual dish discounts.</p>
+      <aside className="mt-6 flex items-start gap-4 rounded-3xl bg-card/55 px-5 py-5 text-muted-foreground">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">i</span>
+        <p className="text-sm font-medium leading-relaxed">General offers are applied globally to all active menu items. This action will override any conflicting individual dish discounts.</p>
       </aside>
     </main>
   </div>
