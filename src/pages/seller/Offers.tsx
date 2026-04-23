@@ -70,36 +70,36 @@ const SellerOffers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto w-full max-w-md px-6 pb-14 pt-9">
-        <header className="flex items-center gap-8">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      <main className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
+        <header className="flex items-center gap-3">
           <Link
             to="/seller"
             aria-label="Back to dashboard"
-            className="grid h-10 w-10 place-items-center rounded-full text-primary transition hover:bg-secondary"
+            className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground transition hover:bg-secondary/80"
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 34 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
               arrow_back
             </span>
           </Link>
-          <h1 className="text-3xl font-extrabold tracking-tight text-primary">Create Offer</h1>
+          <h1 className="text-lg font-extrabold tracking-tight">Create Offer</h1>
         </header>
 
-        <div className="mt-24 grid grid-cols-3 gap-3" aria-label="Step progress">
-          <span className="h-2 rounded-full bg-primary shadow-glow" />
-          <span className="h-2 rounded-full bg-secondary" />
-          <span className="h-2 rounded-full bg-secondary" />
+        <div className="mt-7 grid grid-cols-3 gap-3" aria-label="Step progress">
+          <span className="h-1.5 rounded-full bg-primary shadow-glow" />
+          <span className="h-1.5 rounded-full bg-secondary" />
+          <span className="h-1.5 rounded-full bg-secondary" />
         </div>
 
-        <section className="mt-16">
-          <p className="text-2xl font-extrabold uppercase tracking-wide text-primary">Step 1 of 3</p>
-          <h2 className="mt-6 text-5xl font-extrabold tracking-tight">Choose offer type</h2>
-          <p className="mt-8 text-2xl font-medium leading-relaxed text-muted-foreground">
+        <section className="mt-8">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">Step 1 of 3</p>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight">Choose offer type</h2>
+          <p className="mt-3 text-sm font-medium leading-relaxed text-muted-foreground">
             Define the scope of your discount. General offers target your entire menu, while inventory offers focus on specific culinary categories.
           </p>
         </section>
 
-        <section className="mt-16 space-y-8">
+        <section className="mt-7 space-y-4">
           <OfferTypeCard
             active={offerType === "general"}
             icon="restaurant_menu"
@@ -119,14 +119,14 @@ const SellerOffers = () => {
         <button
           type="button"
           onClick={() => setStep("details")}
-          className="mt-20 flex h-20 w-full items-center justify-center gap-5 rounded-full bg-primary text-xl font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90"
+          className="mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90"
         >
           Continue to Details
-          <span className="material-symbols-outlined" style={{ fontSize: 34 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 24 }}>
             arrow_forward
           </span>
         </button>
-        <p className="mt-7 text-center text-lg font-medium text-muted-foreground">Step 1 of 3: Selection</p>
+        <p className="mt-4 text-center text-sm font-medium text-muted-foreground">Step 1 of 3: Selection</p>
       </main>
     </div>
   );
@@ -148,24 +148,24 @@ const OfferTypeCard = ({
   <button
     type="button"
     onClick={onClick}
-    className={`flex w-full items-center gap-8 rounded-sm border px-8 py-9 text-left transition ${
+    className={`flex w-full items-center gap-4 rounded-2xl border px-4 py-5 text-left transition ${
       active
         ? "border-primary bg-card shadow-glow"
         : "border-transparent bg-card/70 hover:bg-card"
     }`}
   >
-    <span className={`grid h-24 w-24 shrink-0 place-items-center rounded-full ${active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-      <span className="material-symbols-outlined" style={{ fontSize: 48 }}>
+    <span className={`grid h-14 w-14 shrink-0 place-items-center rounded-full ${active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+      <span className="material-symbols-outlined" style={{ fontSize: 30 }}>
         {icon}
       </span>
     </span>
     <span className="min-w-0 flex-1">
-      <span className="block text-3xl font-extrabold tracking-tight">{title}</span>
-      <span className="mt-3 block text-xl font-medium text-muted-foreground">{subtitle}</span>
+      <span className="block text-xl font-extrabold tracking-tight">{title}</span>
+      <span className="mt-1 block text-sm font-medium text-muted-foreground">{subtitle}</span>
       {active && (
-        <span className="mt-7 flex items-center gap-3 text-sm font-extrabold uppercase tracking-[0.22em] text-primary">
+        <span className="mt-3 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
           Selected
-          <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
             check_circle
           </span>
         </span>
@@ -175,34 +175,34 @@ const OfferTypeCard = ({
 );
 
 const PageHeader = ({ title, subtitle, onBack }: { title: string; subtitle?: string; onBack: () => void }) => (
-  <header className="-mx-6 flex items-center gap-6 bg-card/30 px-6 pb-6 pt-7">
+  <header className="flex items-center gap-3 pt-6">
     <button
       type="button"
       onClick={onBack}
       aria-label="Back to offer selection"
-      className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+      className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground transition hover:bg-secondary/80"
     >
-      <span className="material-symbols-outlined" style={{ fontSize: 34 }}>
+      <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
         arrow_back
       </span>
     </button>
     <div className="min-w-0">
-      <h1 className="truncate text-2xl font-extrabold tracking-tight">{title}</h1>
-      {subtitle && <p className="mt-1 text-sm font-extrabold uppercase tracking-[0.16em] text-muted-foreground">{subtitle}</p>}
+      <h1 className="truncate text-lg font-extrabold tracking-tight">{title}</h1>
+      {subtitle && <p className="mt-0.5 text-xs font-extrabold uppercase tracking-[0.14em] text-muted-foreground">{subtitle}</p>}
     </div>
   </header>
 );
 
 const GeneralOfferForm = ({ onBack, onSubmit }: { onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) => (
-  <div className="min-h-screen bg-background text-foreground">
-    <main className="mx-auto w-full max-w-md px-6 pb-14">
+  <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <main className="mx-auto w-full max-w-md px-5 pb-12">
       <PageHeader title="General Offer" subtitle="Apply discounts across all items" onBack={onBack} />
 
-      <form onSubmit={onSubmit} className="mt-16 rounded-[1.7rem] border border-border bg-card/80 p-7 shadow-card">
+      <form onSubmit={onSubmit} className="mt-8 rounded-3xl border border-border bg-gradient-card p-5 shadow-card">
         <FieldLabel>Offer Name</FieldLabel>
         <IconInput placeholder="Fest Offer" icon="label" />
 
-        <div className="mt-9 grid grid-cols-2 gap-6">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>Start Date</FieldLabel>
             <DateInput />
@@ -213,26 +213,26 @@ const GeneralOfferForm = ({ onBack, onSubmit }: { onBack: () => void; onSubmit: 
           </div>
         </div>
 
-        <FieldLabel className="mt-9">Discount Percentage</FieldLabel>
+        <FieldLabel className="mt-5">Discount Percentage</FieldLabel>
         <IconInput placeholder="Enter discount %" icon="percent" />
 
-        <FieldLabel className="mt-9">Offer Condition (Optional)</FieldLabel>
+        <FieldLabel className="mt-5">Offer Condition (Optional)</FieldLabel>
         <textarea
           placeholder="Enter condition (e.g. Buy above ₹200)"
-          className="mt-4 min-h-32 w-full resize-none rounded-2xl border border-border bg-secondary/45 px-5 py-6 text-xl font-medium text-foreground placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/60"
+          className="mt-2 min-h-24 w-full resize-none rounded-2xl border border-border bg-secondary/70 px-5 py-4 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
         />
 
-        <button type="submit" className="mt-10 flex h-20 w-full items-center justify-center gap-4 rounded-full bg-primary text-xl font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
+        <button type="submit" className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
           Create Offer
-          <span className="material-symbols-outlined" style={{ fontSize: 30 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
             bolt
           </span>
         </button>
       </form>
 
-      <aside className="mt-10 flex items-start gap-5 rounded-[2rem] bg-card/55 px-8 py-7 text-muted-foreground">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground font-extrabold">i</span>
-        <p className="text-lg font-medium leading-relaxed">General offers are applied globally to all active menu items. This action will override any conflicting individual dish discounts.</p>
+      <aside className="mt-6 flex items-start gap-4 rounded-3xl bg-card/55 px-5 py-5 text-muted-foreground">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">i</span>
+        <p className="text-sm font-medium leading-relaxed">General offers are applied globally to all active menu items. This action will override any conflicting individual dish discounts.</p>
       </aside>
     </main>
   </div>
@@ -255,15 +255,15 @@ const InventoryOfferForm = ({
   selectedItems: string[];
   toggleItem: (id: string) => void;
 }) => (
-  <div className="min-h-screen bg-background text-foreground">
-    <main className="mx-auto w-full max-w-md px-6 pb-14">
+  <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <main className="mx-auto w-full max-w-md px-5 pb-12">
       <PageHeader title="Create Offer" subtitle="Fill in the details" onBack={onBack} />
 
-      <form onSubmit={onSubmit} className="mt-11">
+      <form onSubmit={onSubmit} className="mt-8">
         <FieldLabel>Offer Name</FieldLabel>
         <PlainInput placeholder="e.g. Midnight Feast" />
 
-        <div className="mt-10 grid grid-cols-2 gap-6">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>Start Date</FieldLabel>
             <CompactDateInput />
@@ -274,30 +274,30 @@ const InventoryOfferForm = ({
           </div>
         </div>
 
-        <FieldLabel className="mt-10">Discount Percentage</FieldLabel>
+        <FieldLabel className="mt-5">Discount Percentage</FieldLabel>
         <IconInput placeholder="20" icon="percent" compact />
 
-        <FieldLabel className="mt-10">Condition</FieldLabel>
+        <FieldLabel className="mt-5">Condition</FieldLabel>
         <PlainInput placeholder="Buy more than ₹200 and get 20% off" />
 
-        <div className="mt-10 flex items-center justify-between gap-4">
+        <div className="mt-6 flex items-center justify-between gap-4">
           <FieldLabel>Inventory Selection</FieldLabel>
           <span className="rounded-full bg-accent px-3 py-1 text-xs font-extrabold uppercase text-accent-foreground">Multi-select</span>
         </div>
 
-        <div className="relative mt-5">
-          <span className="material-symbols-outlined pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" style={{ fontSize: 22 }}>
+        <div className="relative mt-3">
+          <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" style={{ fontSize: 20 }}>
             search
           </span>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search menu items..."
-            className="h-16 w-full rounded-full border-0 bg-secondary/60 pl-16 pr-5 text-lg font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/60"
+            className="w-full rounded-full border-0 bg-secondary/70 py-3.5 pl-12 pr-5 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
           />
         </div>
 
-        <div className="mt-7 space-y-4">
+        <div className="mt-4 space-y-3">
           {items.map((item) => {
             const selected = selectedItems.includes(item.id);
             return (
@@ -305,15 +305,15 @@ const InventoryOfferForm = ({
                 type="button"
                 key={item.id}
                 onClick={() => toggleItem(item.id)}
-                className="flex min-h-28 w-full items-center gap-5 rounded-[2rem] bg-card px-6 py-5 text-left transition hover:bg-card/80"
+                className="flex min-h-20 w-full items-center gap-4 rounded-2xl border border-border bg-gradient-card px-4 py-4 text-left shadow-card transition hover:bg-card/80"
               >
-                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-background text-3xl">{item.icon}</span>
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-secondary text-2xl">{item.icon}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-xl font-extrabold">{item.name}</span>
-                  <span className="mt-1 block truncate text-sm font-semibold uppercase tracking-wide text-muted-foreground">{item.group}</span>
+                  <span className="block truncate text-base font-extrabold">{item.name}</span>
+                  <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-wide text-muted-foreground">{item.group}</span>
                 </span>
-                <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40 text-transparent"}`}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40 text-transparent"}`}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 24 }}>
                     check
                   </span>
                 </span>
@@ -322,9 +322,9 @@ const InventoryOfferForm = ({
           })}
         </div>
 
-        <button type="submit" className="mt-14 flex h-20 w-full items-center justify-center gap-4 rounded-full bg-primary text-xl font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
+        <button type="submit" className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
           Create Offer
-          <span className="material-symbols-outlined" style={{ fontSize: 30 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
             arrow_forward
           </span>
         </button>
@@ -334,40 +334,40 @@ const InventoryOfferForm = ({
 );
 
 const FieldLabel = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <label className={`block text-sm font-extrabold uppercase tracking-wide text-muted-foreground ${className}`}>{children}</label>
+  <label className={`block text-xs font-extrabold uppercase tracking-[0.16em] text-muted-foreground ${className}`}>{children}</label>
 );
 
 const PlainInput = ({ placeholder }: { placeholder: string }) => (
   <input
     placeholder={placeholder}
-    className="mt-5 h-16 w-full rounded-full border-0 bg-secondary/60 px-6 text-lg font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/60"
+    className="mt-2 w-full rounded-full border-0 bg-secondary/70 px-5 py-3.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
   />
 );
 
 const IconInput = ({ placeholder, icon, compact = false }: { placeholder: string; icon: string; compact?: boolean }) => (
-  <div className={`mt-4 flex items-center rounded-2xl border border-border bg-secondary/45 px-5 focus-within:ring-2 focus-within:ring-primary/60 ${compact ? "h-16 rounded-full" : "h-20"}`}>
+  <div className={`mt-2 flex items-center border border-border bg-secondary/70 px-5 focus-within:ring-2 focus-within:ring-primary/60 ${compact ? "rounded-full py-3.5" : "rounded-full py-3.5"}`}>
     <input
       placeholder={placeholder}
-      className="min-w-0 flex-1 border-0 bg-transparent text-xl font-medium text-foreground placeholder:text-muted-foreground/50 outline-none"
+      className="min-w-0 flex-1 border-0 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none"
     />
-    <span className="material-symbols-outlined shrink-0 text-primary" style={{ fontSize: 28 }}>
+    <span className="material-symbols-outlined shrink-0 text-primary" style={{ fontSize: 20 }}>
       {icon}
     </span>
   </div>
 );
 
 const DateInput = () => (
-  <div className="mt-4 flex h-20 items-center rounded-2xl border border-border bg-secondary/45 px-4 focus-within:ring-2 focus-within:ring-primary/60">
-    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-lg font-medium text-foreground outline-none [color-scheme:dark]" />
+  <div className="mt-2 flex rounded-full border border-border bg-secondary/70 px-4 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
+    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]" />
   </div>
 );
 
 const CompactDateInput = () => (
-  <div className="mt-5 flex h-16 items-center rounded-full bg-secondary/60 px-4 focus-within:ring-2 focus-within:ring-primary/60">
+  <div className="mt-2 flex items-center rounded-full bg-secondary/70 px-4 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
     <span className="material-symbols-outlined mr-3 shrink-0 text-primary" style={{ fontSize: 20 }}>
       calendar_today
     </span>
-    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-base font-medium text-foreground outline-none [color-scheme:dark]" />
+    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]" />
   </div>
 );
 

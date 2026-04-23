@@ -290,7 +290,7 @@ const SellerInventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
         <header className="flex items-center gap-3">
           <Link
@@ -396,7 +396,7 @@ const SellerInventory = () => {
                 Showing icons related to “{name.trim()}”. Clear the name to see all {category} icons.
               </p>
             )}
-            <div className="mt-3 flex max-h-56 flex-wrap gap-3 overflow-y-auto pr-1">
+            <div className="mt-3 grid max-h-56 grid-cols-5 gap-3 overflow-y-auto overflow-x-hidden pr-1">
               {visibleIcons.map(({ icon: emoji }) => {
                 const active = icon === emoji;
                 return (
@@ -408,7 +408,7 @@ const SellerInventory = () => {
                       setIconTouched(true);
                     }}
                     aria-label={`Select icon ${emoji}`}
-                    className={`grid h-12 w-12 place-items-center rounded-2xl bg-secondary/70 text-2xl transition ${
+                    className={`grid aspect-square w-full place-items-center rounded-2xl bg-secondary/70 text-2xl transition ${
                       active
                         ? "ring-2 ring-primary shadow-glow"
                         : "hover:bg-secondary"

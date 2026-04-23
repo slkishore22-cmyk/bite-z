@@ -53,23 +53,23 @@ const SellerStaff = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto w-full max-w-md px-6 pb-12 pt-9">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      <main className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
         <header>
-          <p className="text-2xl font-extrabold tracking-tight">Staff Management</p>
+          <p className="text-xl font-extrabold tracking-tight">Staff Management</p>
         </header>
 
-        <section className="mt-20">
-          <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-5 py-3 text-xs font-extrabold uppercase tracking-[0.16em] text-primary">
+        <section className="mt-10">
+          <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
             Administration
           </span>
-          <h1 className="mt-7 text-5xl font-extrabold tracking-tight">Create Staff</h1>
-          <p className="mt-4 text-xl font-semibold leading-relaxed text-muted-foreground">
+          <h1 className="mt-5 text-3xl font-extrabold tracking-tight">Create Staff</h1>
+          <p className="mt-2 text-sm font-medium leading-relaxed text-muted-foreground">
             Add staff for billing and token management
           </p>
         </section>
 
-        <form onSubmit={createStaff} className="mt-14 rounded-[2rem] bg-card/80 p-7 shadow-card">
+        <form onSubmit={createStaff} className="mt-6 rounded-3xl border border-border bg-gradient-card p-5 shadow-card">
           <label className="block text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
             Staff Name
           </label>
@@ -77,53 +77,53 @@ const SellerStaff = () => {
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Enter staff name"
-            className="mt-4 h-20 w-full rounded-2xl border-0 bg-secondary/40 px-5 text-xl font-medium text-foreground placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/60"
+            className="mt-2 w-full rounded-full border-0 bg-secondary/70 px-5 py-3.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
           />
 
-          <label className="mt-8 block text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+          <label className="mt-5 block text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
             Staff ID
           </label>
-          <div className="mt-4 flex h-20 items-center rounded-2xl bg-secondary/40 px-5 focus-within:ring-2 focus-within:ring-primary/60">
+          <div className="mt-2 flex items-center rounded-full bg-secondary/70 px-5 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
             <input
               value={staffId}
               onChange={(event) => setStaffId(event.target.value)}
               placeholder="Create staff ID"
-              className="min-w-0 flex-1 border-0 bg-transparent text-xl font-medium text-foreground placeholder:text-muted-foreground/50 outline-none"
+              className="min-w-0 flex-1 border-0 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none"
             />
-            <span className="ml-3 shrink-0 text-sm font-extrabold text-muted-foreground">token_01</span>
+            <span className="ml-3 shrink-0 text-xs font-extrabold text-muted-foreground">token_01</span>
           </div>
 
-          <label className="mt-8 block text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+          <label className="mt-5 block text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
             Password
           </label>
-          <div className="mt-4 flex h-20 items-center rounded-2xl bg-secondary/40 px-5 focus-within:ring-2 focus-within:ring-primary/60">
+          <div className="mt-2 flex items-center rounded-full bg-secondary/70 px-5 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
             <input
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               type={showPassword ? "text" : "password"}
               placeholder="Create password"
-              className="min-w-0 flex-1 border-0 bg-transparent text-xl font-medium text-foreground placeholder:text-muted-foreground/50 outline-none"
+              className="min-w-0 flex-1 border-0 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none"
             />
             <button
               type="button"
               onClick={() => setShowPassword((value) => !value)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 24 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
                 {showPassword ? "visibility_off" : "visibility"}
               </span>
             </button>
           </div>
 
-          <div className="mt-9 flex h-20 items-center justify-between rounded-2xl bg-secondary/45 px-5">
+          <div className="mt-6 flex items-center justify-between rounded-2xl bg-secondary/45 px-4 py-4">
             <div className="flex min-w-0 items-center gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent/20 text-accent">
-                <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/20 text-accent">
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
                   verified_user
                 </span>
               </span>
-              <p className="truncate text-lg font-extrabold">Billing Staff</p>
+              <p className="truncate text-base font-extrabold">Billing Staff</p>
             </div>
             <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-muted-foreground">
               Default
@@ -132,37 +132,37 @@ const SellerStaff = () => {
 
           <button
             type="submit"
-            className="mt-9 h-20 w-full rounded-full bg-primary text-lg font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90"
+            className="mt-7 w-full rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90"
           >
             Create Staff
           </button>
         </form>
 
-        <section className="mt-16">
+        <section className="mt-8">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-3xl font-extrabold tracking-tight">Staff Members</h2>
-            <span className="rounded-full bg-muted px-5 py-2 text-sm font-extrabold text-muted-foreground">
+            <h2 className="text-xl font-extrabold tracking-tight">Staff Members</h2>
+            <span className="rounded-full bg-muted px-4 py-1.5 text-xs font-extrabold text-muted-foreground">
               {activeCount} Active
             </span>
           </div>
 
-          <div className="mt-9 space-y-5">
+          <div className="mt-4 space-y-3">
             {staff.map((member) => (
               <article
                 key={member.id}
-                className="flex min-h-24 items-center justify-between gap-4 rounded-[2rem] bg-card/70 px-6 py-5"
+                className="flex min-h-20 items-center justify-between gap-4 rounded-2xl border border-border bg-gradient-card px-4 py-4 shadow-card"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-xl font-extrabold leading-tight">{member.name}</p>
-                  <p className="mt-1 truncate text-base font-semibold text-muted-foreground">{member.staffId}</p>
+                  <p className="truncate text-base font-extrabold leading-tight">{member.name}</p>
+                  <p className="mt-1 truncate text-sm font-semibold text-muted-foreground">{member.staffId}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => removeStaff(member.id)}
                   aria-label={`Delete ${member.name}`}
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-destructive transition hover:bg-destructive/10"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-destructive transition hover:bg-destructive/10"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: 24 }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
                     delete
                   </span>
                 </button>
