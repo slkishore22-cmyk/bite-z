@@ -334,40 +334,40 @@ const InventoryOfferForm = ({
 );
 
 const FieldLabel = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <label className={`block text-sm font-extrabold uppercase tracking-wide text-muted-foreground ${className}`}>{children}</label>
+  <label className={`block text-xs font-extrabold uppercase tracking-[0.16em] text-muted-foreground ${className}`}>{children}</label>
 );
 
 const PlainInput = ({ placeholder }: { placeholder: string }) => (
   <input
     placeholder={placeholder}
-    className="mt-5 h-16 w-full rounded-full border-0 bg-secondary/60 px-6 text-lg font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/60"
+    className="mt-2 w-full rounded-full border-0 bg-secondary/70 px-5 py-3.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
   />
 );
 
 const IconInput = ({ placeholder, icon, compact = false }: { placeholder: string; icon: string; compact?: boolean }) => (
-  <div className={`mt-4 flex items-center rounded-2xl border border-border bg-secondary/45 px-5 focus-within:ring-2 focus-within:ring-primary/60 ${compact ? "h-16 rounded-full" : "h-20"}`}>
+  <div className={`mt-2 flex items-center border border-border bg-secondary/70 px-5 focus-within:ring-2 focus-within:ring-primary/60 ${compact ? "rounded-full py-3.5" : "rounded-full py-3.5"}`}>
     <input
       placeholder={placeholder}
-      className="min-w-0 flex-1 border-0 bg-transparent text-xl font-medium text-foreground placeholder:text-muted-foreground/50 outline-none"
+      className="min-w-0 flex-1 border-0 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none"
     />
-    <span className="material-symbols-outlined shrink-0 text-primary" style={{ fontSize: 28 }}>
+    <span className="material-symbols-outlined shrink-0 text-primary" style={{ fontSize: 20 }}>
       {icon}
     </span>
   </div>
 );
 
 const DateInput = () => (
-  <div className="mt-4 flex h-20 items-center rounded-2xl border border-border bg-secondary/45 px-4 focus-within:ring-2 focus-within:ring-primary/60">
-    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-lg font-medium text-foreground outline-none [color-scheme:dark]" />
+  <div className="mt-2 flex rounded-full border border-border bg-secondary/70 px-4 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
+    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]" />
   </div>
 );
 
 const CompactDateInput = () => (
-  <div className="mt-5 flex h-16 items-center rounded-full bg-secondary/60 px-4 focus-within:ring-2 focus-within:ring-primary/60">
+  <div className="mt-2 flex items-center rounded-full bg-secondary/70 px-4 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
     <span className="material-symbols-outlined mr-3 shrink-0 text-primary" style={{ fontSize: 20 }}>
       calendar_today
     </span>
-    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-base font-medium text-foreground outline-none [color-scheme:dark]" />
+    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]" />
   </div>
 );
 
