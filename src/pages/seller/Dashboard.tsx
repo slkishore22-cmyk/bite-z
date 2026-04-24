@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SellerHeader from "@/components/seller/SellerHeader";
 import {
   Area,
@@ -40,6 +40,19 @@ const SWIPE_REVEAL_MAX = 88; // px max drag reveal
 const LONG_PRESS_MS = 500;
 
 const SellerDashboard = () => {
+  const navigate = useNavigate();
+  const lastChartTap = useRef(0);
+
+  const handleChartTap = () => {
+    const now = Date.now();
+    if (now - lastChartTap.current < 350) {
+      navigate("/seller/sales");
+      lastChartTap.current = 0;
+    } else {
+      lastChartTap.current = now;
+    }
+  };
+
   const today = useMemo(
     () =>
       new Date().toLocaleDateString("en-US", {
