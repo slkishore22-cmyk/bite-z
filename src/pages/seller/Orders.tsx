@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type TabKey = "live" | "history";
 type ViewKey = "bulk" | "individual";
@@ -19,6 +24,7 @@ type Order = {
   payment: "Online" | "Cash";
   total: number;
   items: OrderItem[];
+  completedAt?: Date;
 };
 
 const bulkRows: BulkRow[] = [
@@ -60,6 +66,22 @@ const liveOrders: Order[] = [
   },
 ];
 
+const startOfDay = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+};
+const endOfDay = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(23, 59, 59, 999);
+  return x;
+};
+const daysAgo = (n: number) => {
+  const x = new Date();
+  x.setDate(x.getDate() - n);
+  return x;
+};
+
 const historyOrders: Order[] = [
   {
     id: "2280",
@@ -70,6 +92,7 @@ const historyOrders: Order[] = [
       { emoji: "🍛", name: "Chole Poori", qty: 2 },
       { emoji: "🥤", name: "Juice", qty: 2 },
     ],
+    completedAt: new Date(),
   },
   {
     id: "2279",
@@ -77,6 +100,23 @@ const historyOrders: Order[] = [
     payment: "Cash",
     total: 180,
     items: [{ emoji: "🍔", name: "Burger", qty: 1 }],
+    completedAt: new Date(),
+  },
+  {
+    id: "2275",
+    agoMinutes: 60 * 26,
+    payment: "Online",
+    total: 320,
+    items: [{ emoji: "🍔", name: "Cheese Burst Burger", qty: 1 }],
+    completedAt: daysAgo(1),
+  },
+  {
+    id: "2270",
+    agoMinutes: 60 * 24 * 4,
+    payment: "Cash",
+    total: 240,
+    items: [{ emoji: "🍟", name: "Fries", qty: 2 }],
+    completedAt: daysAgo(4),
   },
 ];
 
@@ -96,8 +136,19 @@ const SellerOrders = () => {
   const [tab, setTab] = useState<TabKey>("live");
   const [view, setView] = useState<ViewKey>("bulk");
   const [query, setQuery] = useState("");
+  const [startDate, setStartDate] = useState<Date>(() => startOfDay(new Date()));
+  const [endDate, setEndDate] = useState<Date>(() => endOfDay(new Date()));
 
-  const sourceOrders = tab === "live" ? liveOrders : historyOrders;
+  const sourceOrders = useMemo(() => {
+    if (tab === "live") return liveOrders;
+    const from = startOfDay(startDate).getTime();
+    const to = endOfDay(endDate).getTime();
+    return historyOrders.filter((o) => {
+      if (!o.completedAt) return false;
+      const t = o.completedAt.getTime();
+      return t >= from && t <= to;
+    });
+  }, [tab, startDate, endDate]);
 
   const filteredOrders = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -147,25 +198,35 @@ const SellerOrders = () => {
           })}
         </div>
 
-        {/* View segmented */}
-        <div className="mt-5 inline-flex rounded-full bg-secondary/70 p-1">
-          {(["bulk", "individual"] as ViewKey[]).map((k) => {
-            const active = view === k;
-            return (
-              <button
-                key={k}
-                onClick={() => setView(k)}
-                className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition ${
-                  active ? "bg-background text-primary shadow-card" : "text-muted-foreground"
-                }`}
-              >
-                {k}
-              </button>
-            );
-          })}
-        </div>
+        {/* View segmented — only on Live */}
+        {tab === "live" && (
+          <div className="mt-5 inline-flex rounded-full bg-secondary/70 p-1">
+            {(["bulk", "individual"] as ViewKey[]).map((k) => {
+              const active = view === k;
+              return (
+                <button
+                  key={k}
+                  onClick={() => setView(k)}
+                  className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition ${
+                    active ? "bg-background text-primary shadow-card" : "text-muted-foreground"
+                  }`}
+                >
+                  {k}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-        {view === "bulk" ? (
+        {/* Date range — only on History */}
+        {tab === "history" && (
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <DateField label="Start date" value={startDate} onChange={(d) => setStartDate(startOfDay(d))} />
+            <DateField label="End date" value={endDate} onChange={(d) => setEndDate(endOfDay(d))} />
+          </div>
+        )}
+
+        {tab === "live" && view === "bulk" ? (
           <section className="mt-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-bold tracking-[0.2em] text-muted-foreground">
