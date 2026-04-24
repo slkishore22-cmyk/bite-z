@@ -32,7 +32,6 @@ const tiles: Tile[] = [
   { icon: "restaurant_menu", title: "Manage Menu", desc: "Update dishes and categories", to: "/seller/menu" },
   { icon: "badge", title: "Create Staff", desc: "Add and manage staff members", to: "/seller/staff" },
   { icon: "local_offer", title: "Create Offer", desc: "Add discounts and promotions", to: "/seller/offers" },
-  { icon: "settings", title: "Settings", desc: "Manage account and preferences", to: "/seller/settings" },
 ];
 
 const PIN_STORAGE_KEY = "bitez.seller.pinnedTiles";
