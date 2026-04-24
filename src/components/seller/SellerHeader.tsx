@@ -20,12 +20,13 @@ const SellerHeader = () => {
           <span className="material-symbols-outlined">notifications</span>
           <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-destructive" />
         </Link>
-        <button
-          aria-label="Profile"
-          className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-primary"
+        <Link
+          to="/seller/settings"
+          aria-label="Profile & settings"
+          className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-primary transition hover:bg-secondary/80"
         >
           <span className="material-symbols-outlined">restaurant</span>
-        </button>
+        </Link>
       </div>
     </header>
   );
