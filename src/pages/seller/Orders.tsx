@@ -1,0 +1,308 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+
+type TabKey = "live" | "history";
+type ViewKey = "bulk" | "individual";
+
+type BulkRow = {
+  emoji: string;
+  name: string;
+  category: string;
+  units: number;
+  tone: "primary" | "accent" | "warning";
+};
+
+type OrderItem = { emoji: string; name: string; qty: number };
+type Order = {
+  id: string;
+  agoMinutes: number;
+  payment: "Online" | "Cash";
+  total: number;
+  items: OrderItem[];
+};
+
+const bulkRows: BulkRow[] = [
+  { emoji: "🍛", name: "Chole Poori", category: "Main Course", units: 100, tone: "primary" },
+  { emoji: "🍔", name: "Burger", category: "Snacks", units: 45, tone: "accent" },
+  { emoji: "🥤", name: "Juice", category: "Beverages", units: 30, tone: "warning" },
+];
+
+const liveOrders: Order[] = [
+  {
+    id: "2299",
+    agoMinutes: 2,
+    payment: "Online",
+    total: 480,
+    items: [
+      { emoji: "🍔", name: "Cheese Burst Burger", qty: 2 },
+      { emoji: "🥤", name: "Iced Peach Tea", qty: 1 },
+    ],
+  },
+  {
+    id: "2298",
+    agoMinutes: 5,
+    payment: "Cash",
+    total: 220,
+    items: [
+      { emoji: "🍛", name: "Chole Poori", qty: 1 },
+      { emoji: "🥤", name: "Juice", qty: 1 },
+    ],
+  },
+  {
+    id: "2297",
+    agoMinutes: 9,
+    payment: "Online",
+    total: 360,
+    items: [
+      { emoji: "🍔", name: "Burger", qty: 2 },
+      { emoji: "🍟", name: "Fries", qty: 1 },
+    ],
+  },
+];
+
+const historyOrders: Order[] = [
+  {
+    id: "2280",
+    agoMinutes: 65,
+    payment: "Online",
+    total: 540,
+    items: [
+      { emoji: "🍛", name: "Chole Poori", qty: 2 },
+      { emoji: "🥤", name: "Juice", qty: 2 },
+    ],
+  },
+  {
+    id: "2279",
+    agoMinutes: 90,
+    payment: "Cash",
+    total: 180,
+    items: [{ emoji: "🍔", name: "Burger", qty: 1 }],
+  },
+];
+
+const toneClasses: Record<BulkRow["tone"], string> = {
+  primary: "text-primary",
+  accent: "text-accent",
+  warning: "text-warning",
+};
+
+const formatAgo = (m: number) => {
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  return `${h} hr ago`;
+};
+
+const SellerOrders = () => {
+  const [tab, setTab] = useState<TabKey>("live");
+  const [view, setView] = useState<ViewKey>("bulk");
+  const [query, setQuery] = useState("");
+
+  const sourceOrders = tab === "live" ? liveOrders : historyOrders;
+
+  const filteredOrders = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return sourceOrders;
+    return sourceOrders.filter(
+      (o) =>
+        o.id.includes(q) ||
+        o.items.some((i) => i.name.toLowerCase().includes(q))
+    );
+  }, [sourceOrders, query]);
+
+  const totalOrders = sourceOrders.length;
+
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      <div className="mx-auto w-full max-w-md px-5 pb-24 pt-6">
+        {/* Header */}
+        <header className="flex items-center gap-3">
+          <Link
+            to="/seller"
+            aria-label="Back"
+            className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </Link>
+          <h1 className="text-2xl font-extrabold tracking-tight text-primary">Orders</h1>
+        </header>
+
+        {/* Tabs */}
+        <div className="mt-6 flex items-center gap-6 border-b border-border">
+          {(["live", "history"] as TabKey[]).map((k) => {
+            const active = tab === k;
+            return (
+              <button
+                key={k}
+                onClick={() => setTab(k)}
+                className={`relative pb-3 text-sm font-bold tracking-wide transition ${
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {k === "live" ? "Live Orders" : "History"}
+                {active && (
+                  <span className="absolute -bottom-px left-0 h-0.5 w-8 rounded-full bg-primary" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* View segmented */}
+        <div className="mt-5 inline-flex rounded-full bg-secondary/70 p-1">
+          {(["bulk", "individual"] as ViewKey[]).map((k) => {
+            const active = view === k;
+            return (
+              <button
+                key={k}
+                onClick={() => setView(k)}
+                className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition ${
+                  active ? "bg-background text-primary shadow-card" : "text-muted-foreground"
+                }`}
+              >
+                {k}
+              </button>
+            );
+          })}
+        </div>
+
+        {view === "bulk" ? (
+          <section className="mt-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-bold tracking-[0.2em] text-muted-foreground">
+                BULK SUMMARY
+              </h2>
+              <span className="rounded-full bg-primary/15 px-3 py-1 text-[11px] font-bold tracking-[0.15em] text-primary">
+                FROM {totalOrders} ORDERS
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {bulkRows.map((row) => (
+                <div
+                  key={row.name}
+                  className="flex items-center gap-4 rounded-2xl border border-border bg-gradient-card p-4 shadow-card"
+                >
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-secondary text-2xl">
+                    {row.emoji}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-base font-bold leading-tight">{row.name}</p>
+                    <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                      {row.category}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-2xl font-extrabold ${toneClasses[row.tone]}`}>
+                      {row.units}
+                    </p>
+                    <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground">
+                      UNITS
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="mt-6">
+            <div className="relative">
+              <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" style={{ fontSize: 20 }}>
+                search
+              </span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by order ID or item"
+                className="w-full rounded-full border border-border bg-secondary/60 py-3 pl-11 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div className="mt-4 space-y-4">
+              {filteredOrders.length === 0 && (
+                <p className="rounded-2xl border border-dashed border-border bg-secondary/40 p-6 text-center text-sm text-muted-foreground">
+                  No orders found
+                </p>
+              )}
+              {filteredOrders.map((o) => (
+                <article
+                  key={o.id}
+                  className="rounded-2xl border border-border bg-gradient-card p-4 shadow-card"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
+                        ORDER ID
+                      </p>
+                      <p className="mt-1 text-2xl font-extrabold tracking-tight">#{o.id}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
+                        STATUS
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-primary">
+                        {formatAgo(o.agoMinutes)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 rounded-xl bg-secondary/50 p-3">
+                    {o.items.map((it, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between py-1.5 text-sm"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-base">{it.emoji}</span>
+                          <span className="truncate font-semibold">{it.name}</span>
+                        </div>
+                        <span className="font-bold text-muted-foreground">x{it.qty}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 flex items-end justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
+                        PAYMENT
+                      </p>
+                      <p
+                        className={`mt-0.5 text-sm font-bold ${
+                          o.payment === "Online" ? "text-warning" : "text-success"
+                        }`}
+                      >
+                        {o.payment}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
+                        TOTAL
+                      </p>
+                      <p className="mt-0.5 text-xl font-extrabold">₹{o.total}</p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* Live syncing pill */}
+      {tab === "live" && (
+        <div className="pointer-events-none fixed bottom-5 left-0 right-0 flex justify-center">
+          <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2 shadow-card backdrop-blur">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-destructive" />
+            </span>
+            <span className="text-[11px] font-bold tracking-[0.2em] text-foreground">
+              LIVE SYNCING
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SellerOrders;
