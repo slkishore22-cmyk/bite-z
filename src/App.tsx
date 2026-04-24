@@ -13,6 +13,7 @@ import SellerOffers from "./pages/seller/Offers.tsx";
 import SellerSettings from "./pages/seller/Settings.tsx";
 import SellerOrders from "./pages/seller/Orders.tsx";
 import SalesDashboard from "./pages/seller/SalesDashboard.tsx";
+import SalesReports from "./pages/seller/SalesReports.tsx";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/seller/settings" element={<SellerSettings />} />
           <Route path="/seller/orders" element={<SellerOrders />} />
           <Route path="/seller/sales" element={<SalesDashboard />} />
+          <Route path="/seller/sales/reports" element={<SalesReports />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
