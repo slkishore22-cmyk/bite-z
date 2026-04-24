@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type RangeKey = "today" | "week" | "month";
 
@@ -46,6 +46,7 @@ const categories: Category[] = [
 ];
 
 const SalesDashboard = () => {
+  const navigate = useNavigate();
   const [range, setRange] = useState<RangeKey>("today");
   const [openKey, setOpenKey] = useState<string | null>("food");
 
@@ -54,22 +55,16 @@ const SalesDashboard = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
-        {/* Header */}
-        <header className="flex items-center gap-3">
+        {/* Title */}
+        <section className="flex items-start gap-3">
           <Link
             to="/seller"
             aria-label="Back"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+            className="mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </Link>
-          <h1 className="text-base font-extrabold tracking-tight text-primary">
-            Admin Dashboard
-          </h1>
-        </header>
-
-        {/* Title */}
-        <section className="mt-6">
+          <div className="min-w-0 flex-1">
           <h2 className="text-3xl font-extrabold tracking-tight">Sales Dashboard</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Track your canteen performance
@@ -97,12 +92,16 @@ const SalesDashboard = () => {
                 );
               })}
             </div>
-            <button className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-4 py-2 text-xs font-bold uppercase tracking-wide text-primary transition hover:bg-primary/20">
+            <button
+              onClick={() => navigate("/seller/sales/reports")}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-4 py-2 text-xs font-bold uppercase tracking-wide text-primary transition hover:bg-primary/20"
+            >
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 bar_chart
               </span>
               View Reports
             </button>
+          </div>
           </div>
         </section>
 
