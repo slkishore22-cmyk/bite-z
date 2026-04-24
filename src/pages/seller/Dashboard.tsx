@@ -136,7 +136,14 @@ const SellerDashboard = () => {
             </span>
           </div>
 
-          <div className="mt-4 h-40 w-full">
+          <div
+            className="mt-4 h-40 w-full cursor-pointer select-none"
+            onClick={handleChartTap}
+            onTouchEnd={handleChartTap}
+            role="button"
+            aria-label="Open sales dashboard"
+            title="Double-tap to open Sales Dashboard"
+          >
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={salesData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
