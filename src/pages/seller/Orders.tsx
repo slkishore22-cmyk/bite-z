@@ -367,3 +367,40 @@ const SellerOrders = () => {
 };
 
 export default SellerOrders;
+
+type DateFieldProps = {
+  label: string;
+  value: Date;
+  onChange: (d: Date) => void;
+};
+
+const DateField = ({ label, value, onChange }: DateFieldProps) => {
+  return (
+    <div>
+      <p className="mb-1.5 text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
+        {label.toUpperCase()}
+      </p>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            className={cn(
+              "flex w-full items-center justify-between rounded-full border border-border bg-secondary/60 px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40"
+            )}
+          >
+            <span>{format(value, "dd MMM yyyy")}</span>
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={value}
+            onSelect={(d) => d && onChange(d)}
+            initialFocus
+            className={cn("p-3 pointer-events-auto")}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
