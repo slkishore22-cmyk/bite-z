@@ -12,13 +12,14 @@ const SellerHeader = () => {
         </h1>
       </Link>
       <div className="flex items-center gap-3">
-        <button
-          aria-label="Notifications"
+        <Link
+          to="/seller/orders"
+          aria-label="Orders"
           className="relative grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
           <span className="material-symbols-outlined">notifications</span>
           <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-destructive" />
-        </button>
+        </Link>
         <button
           aria-label="Profile"
           className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-primary"
