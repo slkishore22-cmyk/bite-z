@@ -14,6 +14,9 @@ import SellerSettings from "./pages/seller/Settings.tsx";
 import SellerOrders from "./pages/seller/Orders.tsx";
 import SalesDashboard from "./pages/seller/SalesDashboard.tsx";
 import SalesReports from "./pages/seller/SalesReports.tsx";
+import SellerLogin from "./pages/seller/Login.tsx";
+import { SellerAuthProvider } from "./contexts/SellerAuthContext";
+import { SellerGuard } from "./components/seller/SellerGuard";
 
 const queryClient = new QueryClient();
 
@@ -23,20 +26,23 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/seller" element={<SellerDashboard />} />
-          <Route path="/seller/inventory" element={<SellerInventory />} />
-          <Route path="/seller/menu" element={<SellerMenu />} />
-          <Route path="/seller/staff" element={<SellerStaff />} />
-          <Route path="/seller/offers" element={<SellerOffers />} />
-          <Route path="/seller/settings" element={<SellerSettings />} />
-          <Route path="/seller/orders" element={<SellerOrders />} />
-          <Route path="/seller/sales" element={<SalesDashboard />} />
-          <Route path="/seller/sales/reports" element={<SalesReports />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <SellerAuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/seller/login" element={<SellerLogin />} />
+            <Route path="/seller" element={<SellerGuard><SellerDashboard /></SellerGuard>} />
+            <Route path="/seller/inventory" element={<SellerGuard><SellerInventory /></SellerGuard>} />
+            <Route path="/seller/menu" element={<SellerGuard><SellerMenu /></SellerGuard>} />
+            <Route path="/seller/staff" element={<SellerGuard><SellerStaff /></SellerGuard>} />
+            <Route path="/seller/offers" element={<SellerGuard><SellerOffers /></SellerGuard>} />
+            <Route path="/seller/settings" element={<SellerGuard><SellerSettings /></SellerGuard>} />
+            <Route path="/seller/orders" element={<SellerGuard><SellerOrders /></SellerGuard>} />
+            <Route path="/seller/sales" element={<SellerGuard><SalesDashboard /></SellerGuard>} />
+            <Route path="/seller/sales/reports" element={<SellerGuard><SalesReports /></SellerGuard>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </SellerAuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

@@ -5,66 +5,12 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useOrders, useUpdateOrderStatus } from "@/hooks/useSellerData";
+import { SkeletonRow } from "@/components/seller/SkeletonRow";
+import { EmptyState } from "@/components/seller/EmptyState";
+import { toast } from "sonner";
 
 type TabKey = "live" | "history";
-type ViewKey = "bulk" | "individual";
-
-type BulkRow = {
-  emoji: string;
-  name: string;
-  category: string;
-  units: number;
-  tone: "primary" | "accent" | "warning";
-};
-
-type OrderItem = { emoji: string; name: string; qty: number };
-type Order = {
-  id: string;
-  agoMinutes: number;
-  payment: "Online" | "Cash";
-  total: number;
-  items: OrderItem[];
-  completedAt?: Date;
-};
-
-const bulkRows: BulkRow[] = [
-  { emoji: "🍛", name: "Chole Poori", category: "Main Course", units: 100, tone: "primary" },
-  { emoji: "🍔", name: "Burger", category: "Snacks", units: 45, tone: "accent" },
-  { emoji: "🥤", name: "Juice", category: "Beverages", units: 30, tone: "warning" },
-];
-
-const liveOrders: Order[] = [
-  {
-    id: "2299",
-    agoMinutes: 2,
-    payment: "Online",
-    total: 480,
-    items: [
-      { emoji: "🍔", name: "Cheese Burst Burger", qty: 2 },
-      { emoji: "🥤", name: "Iced Peach Tea", qty: 1 },
-    ],
-  },
-  {
-    id: "2298",
-    agoMinutes: 5,
-    payment: "Cash",
-    total: 220,
-    items: [
-      { emoji: "🍛", name: "Chole Poori", qty: 1 },
-      { emoji: "🥤", name: "Juice", qty: 1 },
-    ],
-  },
-  {
-    id: "2297",
-    agoMinutes: 9,
-    payment: "Online",
-    total: 360,
-    items: [
-      { emoji: "🍔", name: "Burger", qty: 2 },
-      { emoji: "🍟", name: "Fries", qty: 1 },
-    ],
-  },
-];
 
 const startOfDay = (d: Date) => {
   const x = new Date(d);
@@ -76,96 +22,83 @@ const endOfDay = (d: Date) => {
   x.setHours(23, 59, 59, 999);
   return x;
 };
-const daysAgo = (n: number) => {
-  const x = new Date();
-  x.setDate(x.getDate() - n);
-  return x;
-};
 
-const historyOrders: Order[] = [
-  {
-    id: "2280",
-    agoMinutes: 65,
-    payment: "Online",
-    total: 540,
-    items: [
-      { emoji: "🍛", name: "Chole Poori", qty: 2 },
-      { emoji: "🥤", name: "Juice", qty: 2 },
-    ],
-    completedAt: new Date(),
-  },
-  {
-    id: "2279",
-    agoMinutes: 90,
-    payment: "Cash",
-    total: 180,
-    items: [{ emoji: "🍔", name: "Burger", qty: 1 }],
-    completedAt: new Date(),
-  },
-  {
-    id: "2275",
-    agoMinutes: 60 * 26,
-    payment: "Online",
-    total: 320,
-    items: [{ emoji: "🍔", name: "Cheese Burst Burger", qty: 1 }],
-    completedAt: daysAgo(1),
-  },
-  {
-    id: "2270",
-    agoMinutes: 60 * 24 * 4,
-    payment: "Cash",
-    total: 240,
-    items: [{ emoji: "🍟", name: "Fries", qty: 2 }],
-    completedAt: daysAgo(4),
-  },
-];
-
-const toneClasses: Record<BulkRow["tone"], string> = {
-  primary: "text-primary",
-  accent: "text-accent",
-  warning: "text-warning",
-};
-
-const formatAgo = (m: number) => {
+const formatAgo = (iso: string) => {
+  const m = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
+  if (m < 1) return "just now";
   if (m < 60) return `${m} min ago`;
   const h = Math.floor(m / 60);
-  return `${h} hr ago`;
+  if (h < 24) return `${h} hr ago`;
+  const d = Math.floor(h / 24);
+  return `${d} d ago`;
+};
+
+const STATUS_FLOW: Record<string, string | null> = {
+  pending: "confirmed",
+  confirmed: "preparing",
+  preparing: "out_for_delivery",
+  out_for_delivery: "delivered",
+  delivered: null,
+  cancelled: null,
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Accept",
+  confirmed: "Mark Preparing",
+  preparing: "Mark Ready",
+  out_for_delivery: "Mark Delivered",
 };
 
 const SellerOrders = () => {
   const [tab, setTab] = useState<TabKey>("live");
-  const [view, setView] = useState<ViewKey>("bulk");
   const [query, setQuery] = useState("");
   const [startDate, setStartDate] = useState<Date>(() => startOfDay(new Date()));
   const [endDate, setEndDate] = useState<Date>(() => endOfDay(new Date()));
 
-  const sourceOrders = useMemo(() => {
-    if (tab === "live") return liveOrders;
-    const from = startOfDay(startDate).getTime();
-    const to = endOfDay(endDate).getTime();
-    return historyOrders.filter((o) => {
-      if (!o.completedAt) return false;
-      const t = o.completedAt.getTime();
-      return t >= from && t <= to;
-    });
-  }, [tab, startDate, endDate]);
+  const liveQuery = useOrders({ liveOnly: true });
+  const historyQuery = useOrders({
+    status: ["delivered"],
+    from: startOfDay(startDate),
+    to: endOfDay(endDate),
+  });
+  const update = useUpdateOrderStatus();
 
-  const filteredOrders = useMemo(() => {
+  const orders = tab === "live" ? liveQuery.data ?? [] : historyQuery.data ?? [];
+  const loading = tab === "live" ? liveQuery.isLoading : historyQuery.isLoading;
+
+  const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return sourceOrders;
-    return sourceOrders.filter(
+    if (!q) return orders;
+    return orders.filter(
       (o) =>
-        o.id.includes(q) ||
-        o.items.some((i) => i.name.toLowerCase().includes(q))
+        o.order_number.toLowerCase().includes(q) ||
+        (o.order_items ?? []).some((i) => i.name.toLowerCase().includes(q))
     );
-  }, [sourceOrders, query]);
+  }, [orders, query]);
 
-  const totalOrders = sourceOrders.length;
+  const advance = async (id: string, current: string) => {
+    const next = STATUS_FLOW[current];
+    if (!next) return;
+    try {
+      await update.mutateAsync({ id, status: next });
+      toast.success(`Order moved to ${next.replace(/_/g, " ")}`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    }
+  };
+
+  const cancel = async (id: string) => {
+    try {
+      await update.mutateAsync({ id, status: "cancelled" });
+      toast.success("Order cancelled");
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    }
+  };
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="mx-auto w-full max-w-md px-5 pb-24 pt-6">
-        {/* Header */}
         <header className="flex items-center gap-3">
           <Link
             to="/seller"
@@ -177,7 +110,6 @@ const SellerOrders = () => {
           <h1 className="text-2xl font-extrabold tracking-tight text-primary">Orders</h1>
         </header>
 
-        {/* Tabs */}
         <div className="mt-6 flex items-center gap-6 border-b border-border">
           {(["live", "history"] as TabKey[]).map((k) => {
             const active = tab === k;
@@ -190,35 +122,12 @@ const SellerOrders = () => {
                 }`}
               >
                 {k === "live" ? "Live Orders" : "History"}
-                {active && (
-                  <span className="absolute -bottom-px left-0 h-0.5 w-8 rounded-full bg-primary" />
-                )}
+                {active && <span className="absolute -bottom-px left-0 h-0.5 w-8 rounded-full bg-primary" />}
               </button>
             );
           })}
         </div>
 
-        {/* View segmented — only on Live */}
-        {tab === "live" && (
-          <div className="mt-5 inline-flex rounded-full bg-secondary/70 p-1">
-            {(["bulk", "individual"] as ViewKey[]).map((k) => {
-              const active = view === k;
-              return (
-                <button
-                  key={k}
-                  onClick={() => setView(k)}
-                  className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition ${
-                    active ? "bg-background text-primary shadow-card" : "text-muted-foreground"
-                  }`}
-                >
-                  {k}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Date range — only on History */}
         {tab === "history" && (
           <div className="mt-5 grid grid-cols-2 gap-3">
             <DateField label="Start date" value={startDate} onChange={(d) => setStartDate(startOfDay(d))} />
@@ -226,181 +135,118 @@ const SellerOrders = () => {
           </div>
         )}
 
-        {tab === "live" && view === "bulk" ? (
-          <section className="mt-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold tracking-[0.2em] text-muted-foreground">
-                BULK SUMMARY
-              </h2>
-              <span className="rounded-full bg-primary/15 px-3 py-1 text-[11px] font-bold tracking-[0.15em] text-primary">
-                FROM {totalOrders} ORDERS
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {bulkRows.map((row) => (
-                <div
-                  key={row.name}
-                  className="flex items-center gap-4 rounded-2xl border border-border bg-gradient-card p-4 shadow-card"
-                >
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-secondary text-2xl">
-                    {row.emoji}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-base font-bold leading-tight">{row.name}</p>
-                    <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                      {row.category}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className={`text-2xl font-extrabold ${toneClasses[row.tone]}`}>
-                      {row.units}
-                    </p>
-                    <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground">
-                      UNITS
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : (
-          <section className="mt-6">
-            <div className="relative">
-              <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" style={{ fontSize: 20 }}>
-                search
-              </span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by order ID or item"
-                className="w-full rounded-full border border-border bg-secondary/60 py-3 pl-11 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-
-            <div className="mt-4 space-y-4">
-              {filteredOrders.length === 0 && (
-                <p className="rounded-2xl border border-dashed border-border bg-secondary/40 p-6 text-center text-sm text-muted-foreground">
-                  No orders found
-                </p>
-              )}
-              {filteredOrders.map((o) => (
-                <article
-                  key={o.id}
-                  className="rounded-2xl border border-border bg-gradient-card p-4 shadow-card"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-                        ORDER ID
-                      </p>
-                      <p className="mt-1 text-2xl font-extrabold tracking-tight">#{o.id}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-                        STATUS
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-primary">
-                        {formatAgo(o.agoMinutes)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 rounded-xl bg-secondary/50 p-3">
-                    {o.items.map((it, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between py-1.5 text-sm"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-base">{it.emoji}</span>
-                          <span className="truncate font-semibold">{it.name}</span>
-                        </div>
-                        <span className="font-bold text-muted-foreground">x{it.qty}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-3 flex items-end justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-                        PAYMENT
-                      </p>
-                      <p
-                        className={`mt-0.5 text-sm font-bold ${
-                          o.payment === "Online" ? "text-warning" : "text-success"
-                        }`}
-                      >
-                        {o.payment}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-                        TOTAL
-                      </p>
-                      <p className="mt-0.5 text-xl font-extrabold">₹{o.total}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
-
-      {/* Live syncing pill */}
-      {tab === "live" && (
-        <div className="pointer-events-none fixed bottom-5 left-0 right-0 flex justify-center">
-          <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2 shadow-card backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-destructive" />
+        <section className="mt-6">
+          <div className="relative">
+            <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" style={{ fontSize: 20 }}>
+              search
             </span>
-            <span className="text-[11px] font-bold tracking-[0.2em] text-foreground">
-              LIVE SYNCING
-            </span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by order # or item"
+              className="w-full rounded-full border border-border bg-secondary/60 py-3 pl-11 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
           </div>
-        </div>
-      )}
+
+          <div className="mt-4">
+            {loading ? (
+              <SkeletonRow count={3} />
+            ) : filtered.length === 0 ? (
+              <EmptyState
+                icon={tab === "live" ? "receipt_long" : "history"}
+                title={tab === "live" ? "No live orders" : "No completed orders"}
+                description={
+                  tab === "live"
+                    ? "When customers place orders, they'll appear here."
+                    : "Try a wider date range."
+                }
+              />
+            ) : (
+              <div className="space-y-4">
+                {filtered.map((o) => {
+                  const next = STATUS_FLOW[o.status];
+                  return (
+                    <article key={o.id} className="rounded-2xl border border-border bg-gradient-card p-4 shadow-card">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">ORDER</p>
+                          <p className="mt-1 text-xl font-extrabold tracking-tight">{o.order_number}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">STATUS</p>
+                          <p className="mt-1 text-sm font-semibold capitalize text-primary">
+                            {o.status.replace(/_/g, " ")}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">{formatAgo(o.placed_at)}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 rounded-xl bg-secondary/50 p-3">
+                        {(o.order_items ?? []).map((it) => (
+                          <div key={it.id} className="flex items-center justify-between py-1.5 text-sm">
+                            <span className="truncate font-semibold">{it.name}</span>
+                            <span className="font-bold text-muted-foreground">x{it.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-3 flex items-end justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">TOTAL</p>
+                          <p className="mt-0.5 text-xl font-extrabold">₹{Number(o.total).toLocaleString("en-IN")}</p>
+                        </div>
+                        {tab === "live" && next && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => cancel(o.id)}
+                              className="rounded-full border border-destructive/40 px-3 py-2 text-xs font-bold text-destructive transition hover:bg-destructive/10"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => advance(o.id, o.status)}
+                              className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
+                            >
+                              {STATUS_LABEL[o.status] ?? "Next"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
 
 export default SellerOrders;
 
-type DateFieldProps = {
+const DateField = ({
+  label,
+  value,
+  onChange,
+}: {
   label: string;
   value: Date;
   onChange: (d: Date) => void;
-};
-
-const DateField = ({ label, value, onChange }: DateFieldProps) => {
-  return (
-    <div>
-      <p className="mb-1.5 text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-        {label.toUpperCase()}
-      </p>
-      <Popover>
-        <PopoverTrigger asChild>
-          <button
-            className={cn(
-              "flex w-full items-center justify-between rounded-full border border-border bg-secondary/60 px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40"
-            )}
-          >
-            <span>{format(value, "dd MMM yyyy")}</span>
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={value}
-            onSelect={(d) => d && onChange(d)}
-            initialFocus
-            className={cn("p-3 pointer-events-auto")}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-};
+}) => (
+  <div>
+    <p className="mb-1.5 text-[10px] font-bold tracking-[0.2em] text-muted-foreground">{label.toUpperCase()}</p>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className={cn("flex w-full items-center justify-between rounded-full border border-border bg-secondary/60 px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40")}>
+          <span>{format(value, "dd MMM yyyy")}</span>
+          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar mode="single" selected={value} onSelect={(d) => d && onChange(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+      </PopoverContent>
+    </Popover>
+  </div>
+);

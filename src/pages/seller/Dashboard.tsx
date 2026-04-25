@@ -9,16 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const salesData = [
-  { time: "08:00 AM", value: 800 },
-  { time: "10:00 AM", value: 2200 },
-  { time: "12:00 PM", value: 3100 },
-  { time: "02:00 PM", value: 1800 },
-  { time: "04:00 PM", value: 1200 },
-  { time: "06:00 PM", value: 3400 },
-  { time: "08:00 PM", value: 4200 },
-];
+import { useSales } from "@/hooks/useSellerData";
 
 type Tile = {
   icon: string;
@@ -42,6 +33,9 @@ const LONG_PRESS_MS = 500;
 const SellerDashboard = () => {
   const navigate = useNavigate();
   const lastChartTap = useRef(0);
+  const { data: sales, isLoading: salesLoading } = useSales("today");
+  const salesData = sales?.hourly ?? [];
+  const todayTotal = sales?.totalSales ?? 0;
 
   const handleChartTap = () => {
     const now = Date.now();
@@ -127,12 +121,14 @@ const SellerDashboard = () => {
             TODAY&apos;S SALES
           </p>
           <div className="mt-2 flex items-end justify-between gap-3">
-            <p className="text-4xl font-extrabold tracking-tight">₹12,450</p>
+            <p className="text-4xl font-extrabold tracking-tight">
+              {salesLoading ? "—" : `₹${todayTotal.toLocaleString("en-IN")}`}
+            </p>
             <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 trending_up
               </span>
-              +12%
+              Live
             </span>
           </div>
 
