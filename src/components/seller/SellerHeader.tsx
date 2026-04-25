@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useSellerAuth } from "@/contexts/SellerAuthContext";
 
 const PROFILE_STORAGE_KEY = "bitez.seller.profile";
 
@@ -17,7 +16,6 @@ const readCanteenIcon = (): string | null => {
 };
 
 const SellerHeader = () => {
-  const { sellerProfile } = useSellerAuth();
   const [canteenIcon, setCanteenIcon] = useState<string | null>(() => readCanteenIcon());
 
   useEffect(() => {
@@ -31,16 +29,14 @@ const SellerHeader = () => {
     };
   }, []);
 
-  const businessName = sellerProfile?.business_name ?? "Bitez Admin Panel";
-
   return (
     <header className="flex items-center justify-between">
-      <Link to="/seller" className="flex min-w-0 items-center gap-2">
+      <Link to="/seller" className="flex items-center gap-2">
         <span className="material-symbols-outlined text-primary" style={{ fontSize: 26 }}>
           shield_lock
         </span>
-        <h1 className="truncate text-xl font-extrabold tracking-tight text-primary">
-          {businessName}
+        <h1 className="text-xl font-extrabold tracking-tight text-primary">
+          Bitez Admin Panel
         </h1>
       </Link>
       <div className="flex items-center gap-3">
