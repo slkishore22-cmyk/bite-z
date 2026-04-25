@@ -9,16 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const salesData = [
-  { time: "08:00 AM", value: 800 },
-  { time: "10:00 AM", value: 2200 },
-  { time: "12:00 PM", value: 3100 },
-  { time: "02:00 PM", value: 1800 },
-  { time: "04:00 PM", value: 1200 },
-  { time: "06:00 PM", value: 3400 },
-  { time: "08:00 PM", value: 4200 },
-];
+import { useSales } from "@/hooks/useSellerData";
 
 type Tile = {
   icon: string;
@@ -42,6 +33,9 @@ const LONG_PRESS_MS = 500;
 const SellerDashboard = () => {
   const navigate = useNavigate();
   const lastChartTap = useRef(0);
+  const { data: sales, isLoading: salesLoading } = useSales("today");
+  const salesData = sales?.hourly ?? [];
+  const todayTotal = sales?.totalSales ?? 0;
 
   const handleChartTap = () => {
     const now = Date.now();
