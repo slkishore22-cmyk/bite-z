@@ -39,6 +39,7 @@ const loadProfile = (): Profile => {
 };
 
 const SellerSettings = () => {
+  const { sellerProfile, refreshSellerProfile, signOut } = useSellerAuth();
   const [profile, setProfile] = useState<Profile>(loadProfile);
   const [draft, setDraft] = useState<Profile>(profile);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -77,7 +78,7 @@ const SellerSettings = () => {
     setIsEditing(false);
   };
 
-  const saveSettings = (event: FormEvent<HTMLFormElement>) => {
+  const saveSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const required: Array<[keyof Profile, string]> = [
       ["canteenName", "Canteen Name"],
@@ -98,6 +99,21 @@ const SellerSettings = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     } catch {
       /* ignore */
+    }
+    // Sync canteen name + slogan to seller_profile so it shows in header
+    if (sellerProfile) {
+      const { error } = await supabase
+        .from("seller_profiles")
+        .update({
+          business_name: draft.canteenName.trim(),
+          description: draft.slogan.trim(),
+        })
+        .eq("id", sellerProfile.id);
+      if (error) {
+        toast.error("Failed to sync to backend: " + error.message);
+      } else {
+        await refreshSellerProfile();
+      }
     }
     if (newPassword || currentPassword) {
       setCurrentPassword("");
@@ -143,6 +159,14 @@ const SellerSettings = () => {
               Edit
             </button>
           )}
+          <button
+            type="button"
+            onClick={signOut}
+            className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3.5 py-2 text-xs font-bold text-destructive transition hover:bg-destructive/20"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>logout</span>
+            Logout
+          </button>
         </header>
 
         {!isEditing && isComplete ? (
