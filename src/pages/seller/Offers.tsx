@@ -11,16 +11,12 @@ type InventoryItem = {
   group: string;
 };
 
-const inventoryItems: InventoryItem[] = [
-  { id: "burger", icon: "🍔", name: "Signature Cheeseburger", group: "Premium Selection" },
-  { id: "fries", icon: "🍟", name: "Truffle Parmesan Fries", group: "Popular Sides" },
-  { id: "cola", icon: "🥤", name: "Craft Vanilla Cola", group: "Cold Beverages" },
-];
+const inventoryItems: InventoryItem[] = [];
 
 const SellerOffers = () => {
   const [step, setStep] = useState<"select" | "details">("select");
   const [offerType, setOfferType] = useState<OfferType>("general");
-  const [selectedItems, setSelectedItems] = useState<string[]>(["burger", "cola"]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [query, setQuery] = useState("");
 
   const filteredItems = useMemo(() => {

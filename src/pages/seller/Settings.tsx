@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useSellerAuth } from "@/contexts/SellerAuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const canteenIcons = ["🍽️", "🍛", "🍔", "🍕", "🏪", "🥗", "☕"];
 const STORAGE_KEY = "bitez.seller.profile";
