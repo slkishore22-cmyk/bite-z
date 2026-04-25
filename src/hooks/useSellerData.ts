@@ -143,10 +143,10 @@ export const useOrders = (params: {
         .order("placed_at", { ascending: false });
 
       if (params.liveOnly) {
-        q = q.in("status", ["pending", "confirmed", "preparing", "ready", "out_for_delivery"]);
+        q = q.in("status", ["pending", "confirmed", "preparing", "out_for_delivery"] as const);
       }
       if (params.status && params.status.length) {
-        q = q.in("status", params.status);
+        q = q.in("status", params.status as any);
       }
       if (params.from) q = q.gte("placed_at", params.from.toISOString());
       if (params.to) q = q.lte("placed_at", params.to.toISOString());
