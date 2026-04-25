@@ -121,12 +121,14 @@ const SellerDashboard = () => {
             TODAY&apos;S SALES
           </p>
           <div className="mt-2 flex items-end justify-between gap-3">
-            <p className="text-4xl font-extrabold tracking-tight">₹12,450</p>
+            <p className="text-4xl font-extrabold tracking-tight">
+              {salesLoading ? "—" : `₹${todayTotal.toLocaleString("en-IN")}`}
+            </p>
             <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 trending_up
               </span>
-              +12%
+              Live
             </span>
           </div>
 
