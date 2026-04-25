@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 type StaffMember = {
@@ -55,7 +56,16 @@ const SellerStaff = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <main className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
-        <header>
+        <header className="flex items-center gap-3">
+          <Link
+            to="/seller"
+            aria-label="Back to dashboard"
+            className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
+              arrow_back
+            </span>
+          </Link>
           <p className="text-xl font-extrabold tracking-tight">Staff Management</p>
         </header>
 
