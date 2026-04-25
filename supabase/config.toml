@@ -1,1 +1,4 @@
 project_id = "umayieigsqcbxgaqwssu"
+
+[functions.seed-test-seller]
+verify_jwt = false
