@@ -94,7 +94,7 @@ const SalesDashboard = () => {
             </div>
             <button
               onClick={() => navigate("/seller/sales/reports")}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-secondary/70 px-4 py-2 text-xs font-bold uppercase tracking-wide text-muted-foreground transition hover:bg-secondary"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-4 py-2 text-xs font-bold uppercase tracking-wide text-primary transition hover:bg-primary/20"
             >
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 bar_chart
