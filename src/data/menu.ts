@@ -187,6 +187,69 @@ export const menuItems: MenuItem[] = [
 // Simulate a tiny network delay so React Query's cache benefits become obvious.
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+export const campusOffers: CampusOffer[] = [
+  {
+    id: "co1",
+    canteen: "The Main Square",
+    title: "Mega Midnight Deal",
+    highlight: "-40% OFF",
+    subtitle: "On orders above ₹100",
+    active: true,
+    accent: "primary",
+  },
+  {
+    id: "co2",
+    canteen: "North Canteen",
+    title: "Burger Bonanza",
+    highlight: "FREE SIDES",
+    subtitle: "Valid on all combos",
+    active: true,
+    accent: "warning",
+  },
+];
+
+export const canteens: Canteen[] = [
+  {
+    id: "c1",
+    name: "The Main Square",
+    tagline: "Fastest bites on campus",
+    isOpen: true,
+    emoji: "🍔",
+  },
+  {
+    id: "c2",
+    name: "The Library Cafe",
+    tagline: "Brewing ideas & coffee",
+    isOpen: true,
+    emoji: "☕",
+  },
+  {
+    id: "c3",
+    name: "Sunset Diner",
+    tagline: "Classic comfort food",
+    isOpen: false,
+    emoji: "🌅",
+  },
+];
+
+// Items the user reorders most often (mock).
+export const frequentItemIds = ["m1", "m2", "m7"];
+
+export async function fetchCampusOffers(): Promise<CampusOffer[]> {
+  await delay(120);
+  return campusOffers;
+}
+
+export async function fetchCanteens(): Promise<Canteen[]> {
+  await delay(120);
+  return canteens;
+}
+
+export async function fetchFrequentItems(): Promise<MenuItem[]> {
+  await delay(150);
+  return menuItems.filter((i) => frequentItemIds.includes(i.id));
+}
+
 export async function fetchOffers(): Promise<Offer[]> {
   await delay(120);
   return offers;
