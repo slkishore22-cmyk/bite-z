@@ -1,4 +1,6 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,17 +16,39 @@ import SellerSettings from "./pages/seller/Settings.tsx";
 import SellerOrders from "./pages/seller/Orders.tsx";
 import SalesDashboard from "./pages/seller/SalesDashboard.tsx";
 import SalesReports from "./pages/seller/SalesReports.tsx";
+import UserHome from "./pages/user/Home.tsx";
 
-const queryClient = new QueryClient();
+// Aggressive caching tuned for low-bandwidth campus networks.
+// Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
+// localStorage so a returning user sees instant results offline.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 60 * 24,
+      refetchOnWindowFocus: false,
+      retry: 2,
+    },
+  },
+});
+
+const persister =
+  typeof window !== "undefined"
+    ? createSyncStoragePersister({ storage: window.localStorage, key: "bitez-cache" })
+    : undefined;
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <PersistQueryClientProvider
+    client={queryClient}
+    persistOptions={{ persister: persister!, maxAge: 1000 * 60 * 60 * 24 }}
+  >
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/home" element={<UserHome />} />
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/seller/inventory" element={<SellerInventory />} />
           <Route path="/seller/menu" element={<SellerMenu />} />
@@ -39,7 +63,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </PersistQueryClientProvider>
 );
 
 export default App;
