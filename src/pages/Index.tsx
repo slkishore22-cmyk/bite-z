@@ -16,6 +16,9 @@ const Index = () => {
           <Link to="/seller" className="rounded-2xl bg-gradient-primary px-5 py-4 font-semibold text-primary-foreground shadow-glow">
             Seller Dashboard
           </Link>
+          <Link to="/home" className="rounded-2xl border border-border bg-secondary px-5 py-4 font-semibold text-foreground">
+            User App
+          </Link>
         </div>
       </div>
     </main>
