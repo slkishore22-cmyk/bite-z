@@ -3,81 +3,61 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  fetchCategories,
-  fetchMenuItems,
-  fetchOffers,
+  fetchCampusOffers,
+  fetchCanteens,
+  fetchFrequentItems,
+  type Canteen,
+  type CampusOffer,
   type MenuItem,
-  type Offer,
 } from "@/data/menu";
 
-const accentClasses: Record<Offer["accent"], string> = {
-  primary: "from-primary/30 to-primary/5 border-primary/40 text-primary",
-  warning: "from-amber-500/30 to-amber-500/5 border-amber-500/40 text-amber-300",
-  success: "from-success/30 to-success/5 border-success/40 text-success",
+const greetingFor = (h: number) => {
+  if (h < 12) return "GOOD MORNING";
+  if (h < 17) return "GOOD AFTERNOON";
+  return "GOOD EVENING";
+};
+
+const offerAccent: Record<CampusOffer["accent"], string> = {
+  primary: "from-primary/30 via-primary/10 to-transparent border-primary/40",
+  warning: "from-amber-500/30 via-amber-500/10 to-transparent border-amber-500/40",
+  success: "from-success/30 via-success/10 to-transparent border-success/40",
+};
+
+const offerHighlightTone: Record<CampusOffer["accent"], string> = {
+  primary: "text-primary",
+  warning: "text-amber-300",
+  success: "text-success",
 };
 
 const UserHome = () => {
-  const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [query, setQuery] = useState("");
   const [cart, setCart] = useState<Record<string, number>>({});
 
-  const offersQ = useQuery({ queryKey: ["offers"], queryFn: fetchOffers });
-  const categoriesQ = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
-  const itemsQ = useQuery({ queryKey: ["menu-items"], queryFn: fetchMenuItems });
+  const offersQ = useQuery({ queryKey: ["campus-offers"], queryFn: fetchCampusOffers });
+  const frequentQ = useQuery({ queryKey: ["frequent-items"], queryFn: fetchFrequentItems });
+  const canteensQ = useQuery({ queryKey: ["canteens"], queryFn: fetchCanteens });
 
-  const filtered = useMemo(() => {
-    const items = itemsQ.data ?? [];
-    const q = query.trim().toLowerCase();
-    return items.filter((i) => {
-      const inCat = activeCategory === "all" || i.categoryId === activeCategory;
-      const matches = !q || i.name.toLowerCase().includes(q) || i.description.toLowerCase().includes(q);
-      return inCat && matches;
-    });
-  }, [itemsQ.data, activeCategory, query]);
+  const greeting = useMemo(() => greetingFor(new Date().getHours()), []);
 
-  const popular = useMemo(
-    () => (itemsQ.data ?? []).filter((i) => i.popular).slice(0, 6),
-    [itemsQ.data]
-  );
-
-  const cartTotals = useMemo(() => {
-    const items = itemsQ.data ?? [];
-    let count = 0;
-    let total = 0;
-    for (const [id, qty] of Object.entries(cart)) {
-      const it = items.find((m) => m.id === id);
-      if (!it) continue;
-      count += qty;
-      total += it.price * qty;
-    }
-    return { count, total };
-  }, [cart, itemsQ.data]);
-
-  const updateQty = (id: string, delta: number) => {
+  const setQty = (id: string, next: number) =>
     setCart((c) => {
-      const next = { ...c };
-      const v = (next[id] ?? 0) + delta;
-      if (v <= 0) delete next[id];
-      else next[id] = v;
-      return next;
+      const copy = { ...c };
+      if (next <= 0) delete copy[id];
+      else copy[id] = next;
+      return copy;
     });
-  };
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <div className="mx-auto w-full max-w-md px-5 pb-32 pt-6">
-        {/* Top bar */}
-        <header className="flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-              DELIVER TO
+      <div className="mx-auto w-full max-w-md px-5 pb-28 pt-6">
+        {/* Greeting */}
+        <header className="flex items-start justify-between">
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.25em] text-muted-foreground">
+              {greeting}
             </p>
-            <p className="mt-0.5 flex items-center gap-1 text-base font-bold">
-              Campus Block A
-              <span className="material-symbols-outlined text-primary" style={{ fontSize: 18 }}>
-                expand_more
-              </span>
-            </p>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
+              Hey, Alex <span aria-hidden>👋</span>
+            </h1>
           </div>
           <Link
             to="/"
@@ -88,296 +68,255 @@ const UserHome = () => {
           </Link>
         </header>
 
-        {/* Greeting */}
-        <div className="mt-5">
-          <h1 className="text-2xl font-extrabold tracking-tight">
-            Hungry? <span className="text-primary">Let's bite.</span>
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Hot picks from your campus, delivered fast.
-          </p>
-        </div>
-
-        {/* Search */}
-        <div className="relative mt-4">
-          <span
-            className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-            style={{ fontSize: 20 }}
-          >
-            search
-          </span>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search burgers, biryani, drinks…"
-            className="w-full rounded-full border border-border bg-secondary/60 py-3 pl-11 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-        </div>
-
-        {/* Offers */}
-        <section className="mt-6">
-          <SectionHeader title="Offers for you" action="See all" />
+        {/* Today's Offers */}
+        <section className="mt-7">
+          <SectionHeader title={<>Today's Offers <span aria-hidden>🔥</span></>} action="See all" />
           <div className="-mx-5 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {offersQ.isLoading
               ? Array.from({ length: 2 }).map((_, i) => (
-                  <Skeleton key={i} className="h-28 w-64 shrink-0 rounded-2xl" />
+                  <Skeleton key={i} className="h-40 w-72 shrink-0 rounded-2xl" />
                 ))
-              : offersQ.data?.map((o) => (
-                  <article
-                    key={o.id}
-                    className={`relative w-64 shrink-0 snap-start overflow-hidden rounded-2xl border bg-gradient-to-br p-4 shadow-card ${accentClasses[o.accent]}`}
-                  >
-                    <span className="material-symbols-outlined absolute -right-2 -top-2 opacity-30" style={{ fontSize: 96 }}>
-                      local_offer
-                    </span>
-                    <p className="text-[10px] font-bold tracking-[0.2em] opacity-80">LIMITED</p>
-                    <p className="mt-1 text-xl font-extrabold text-foreground">{o.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{o.subtitle}</p>
-                    <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-[11px] font-bold tracking-[0.18em]">
-                      <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
-                        sell
-                      </span>
-                      {o.code}
-                    </div>
-                  </article>
-                ))}
+              : offersQ.data?.map((o) => <OfferCard key={o.id} offer={o} />)}
           </div>
         </section>
 
-        {/* Categories */}
-        <section className="mt-6">
-          <SectionHeader title="Categories" />
-          <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categoriesQ.isLoading
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-24 shrink-0 rounded-full" />
-                ))
-              : categoriesQ.data?.map((c) => {
-                  const active = activeCategory === c.id;
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => setActiveCategory(c.id)}
-                      className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
-                        active
-                          ? "bg-gradient-primary text-primary-foreground shadow-glow"
-                          : "border border-border bg-secondary/60 text-foreground"
-                      }`}
-                    >
-                      <span>{c.emoji}</span>
-                      {c.name}
-                    </button>
-                  );
-                })}
-          </div>
-        </section>
-
-        {/* Popular */}
-        {activeCategory === "all" && !query && popular.length > 0 && (
-          <section className="mt-6">
-            <SectionHeader title="Popular now" action="See all" />
-            <div className="-mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {popular.map((it) => (
-                <PopularCard key={it.id} item={it} qty={cart[it.id] ?? 0} onAdd={() => updateQty(it.id, 1)} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Items list */}
-        <section className="mt-6">
+        {/* Frequent Orders */}
+        <section className="mt-7">
           <SectionHeader
-            title={
-              activeCategory === "all"
-                ? "All items"
-                : (categoriesQ.data?.find((c) => c.id === activeCategory)?.name ?? "Items")
-            }
-            action={`${filtered.length} item${filtered.length === 1 ? "" : "s"}`}
+            title="Your Frequent Orders"
+            subtitle="Order your favorites quickly"
           />
           <div className="mt-3 space-y-3">
-            {itemsQ.isLoading &&
+            {frequentQ.isLoading &&
               Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+                <Skeleton key={i} className="h-20 w-full rounded-2xl" />
               ))}
-            {!itemsQ.isLoading && filtered.length === 0 && (
-              <p className="rounded-2xl border border-dashed border-border bg-secondary/40 p-8 text-center text-sm text-muted-foreground">
-                Nothing matches your search.
-              </p>
-            )}
-            {filtered.map((it) => (
-              <ItemRow
+            {frequentQ.data?.map((it) => (
+              <FrequentRow
                 key={it.id}
                 item={it}
-                qty={cart[it.id] ?? 0}
-                onInc={() => updateQty(it.id, 1)}
-                onDec={() => updateQty(it.id, -1)}
+                qty={cart[it.id] ?? 1}
+                onChange={(n) => setQty(it.id, n)}
               />
+            ))}
+          </div>
+        </section>
+
+        {/* Canteens */}
+        <section className="mt-7">
+          <SectionHeader title="Our Canteens" subtitle="Tap to explore menu" />
+          <div className="mt-3 space-y-3">
+            {canteensQ.isLoading &&
+              Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+              ))}
+            {canteensQ.data?.map((c) => (
+              <CanteenRow key={c.id} canteen={c} />
             ))}
           </div>
         </section>
       </div>
 
-      {/* Cart bar */}
-      {cartTotals.count > 0 && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-4 flex justify-center px-5">
-          <button className="pointer-events-auto flex w-full max-w-md items-center justify-between rounded-2xl bg-gradient-primary px-5 py-3.5 text-primary-foreground shadow-glow">
-            <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-background/20">
-                <span className="material-symbols-outlined">shopping_bag</span>
-              </span>
-              <div className="text-left">
-                <p className="text-[10px] font-bold tracking-[0.18em] opacity-80">
-                  {cartTotals.count} ITEM{cartTotals.count === 1 ? "" : "S"}
-                </p>
-                <p className="text-base font-extrabold">₹{cartTotals.total}</p>
-              </div>
-            </div>
-            <span className="flex items-center gap-1 text-sm font-bold">
-              View cart
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                arrow_forward
-              </span>
-            </span>
-          </button>
-        </div>
-      )}
+      {/* Bottom nav */}
+      <BottomNav />
     </div>
   );
 };
 
-const SectionHeader = ({ title, action }: { title: string; action?: string }) => (
-  <div className="flex items-end justify-between">
-    <h2 className="text-base font-extrabold tracking-tight">{title}</h2>
+const SectionHeader = ({
+  title,
+  subtitle,
+  action,
+}: {
+  title: React.ReactNode;
+  subtitle?: string;
+  action?: string;
+}) => (
+  <div className="flex items-end justify-between gap-3">
+    <div className="min-w-0">
+      <h2 className="text-lg font-extrabold tracking-tight">{title}</h2>
+      {subtitle && (
+        <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+      )}
+    </div>
     {action && (
-      <span className="text-[11px] font-bold tracking-[0.15em] text-primary">{action}</span>
+      <button className="text-[11px] font-bold tracking-[0.18em] text-primary">
+        {action}
+      </button>
     )}
   </div>
 );
 
-const VegBadge = ({ isVeg }: { isVeg: boolean }) => (
-  <span
-    className={`grid h-4 w-4 place-items-center rounded-sm border ${
-      isVeg ? "border-success" : "border-destructive"
-    }`}
+const OfferCard = ({ offer }: { offer: CampusOffer }) => (
+  <article
+    className={`relative w-72 shrink-0 snap-start overflow-hidden rounded-2xl border bg-gradient-to-br ${offerAccent[offer.accent]} bg-card p-4 shadow-card`}
   >
     <span
-      className={`h-2 w-2 rounded-full ${isVeg ? "bg-success" : "bg-destructive"}`}
-    />
-  </span>
+      className="material-symbols-outlined pointer-events-none absolute -right-3 -bottom-3 text-foreground/5"
+      style={{ fontSize: 140 }}
+    >
+      local_fire_department
+    </span>
+
+    <div className="flex items-start justify-between">
+      <p className="text-xs font-semibold text-muted-foreground">{offer.canteen}</p>
+      {offer.active && (
+        <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold tracking-[0.18em] text-success">
+          ACTIVE
+        </span>
+      )}
+    </div>
+
+    <p className="mt-3 text-xl font-extrabold leading-tight text-foreground">
+      {offer.title}
+    </p>
+    <p className={`mt-2 text-2xl font-extrabold ${offerHighlightTone[offer.accent]}`}>
+      {offer.highlight}
+    </p>
+    <p className="mt-1 text-xs text-muted-foreground">{offer.subtitle}</p>
+  </article>
 );
 
-const PopularCard = ({
+const FrequentRow = ({
   item,
   qty,
-  onAdd,
+  onChange,
 }: {
   item: MenuItem;
   qty: number;
-  onAdd: () => void;
-}) => (
-  <article className="w-44 shrink-0 overflow-hidden rounded-2xl border border-border bg-gradient-card shadow-card">
-    <div className="relative aspect-square w-full">
-      <img
-        src={item.image}
-        alt={item.name}
-        loading="lazy"
-        className="h-full w-full object-cover"
-      />
-      <span className="absolute left-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] text-foreground backdrop-blur">
-        ★ {item.rating}
-      </span>
-    </div>
-    <div className="p-3">
-      <div className="flex items-center gap-1.5">
-        <VegBadge isVeg={item.isVeg} />
-        <p className="truncate text-sm font-bold">{item.name}</p>
+  onChange: (n: number) => void;
+}) => {
+  const emojiByCategory: Record<string, string> = {
+    snacks: "🍔",
+    food: "🍕",
+    drinks: "☕",
+    desserts: "🍰",
+  };
+  const emoji = emojiByCategory[item.categoryId] ?? "🍽️";
+  const isHot = item.popular;
+
+  return (
+    <article className="flex items-center gap-3 rounded-2xl border border-border bg-gradient-card p-3 shadow-card">
+      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-secondary text-3xl">
+        {emoji}
       </div>
-      <div className="mt-2 flex items-center justify-between">
-        <p className="text-base font-extrabold">₹{item.price}</p>
-        <button
-          onClick={onAdd}
-          className="rounded-full bg-primary/15 px-3 py-1 text-xs font-bold text-primary"
-        >
-          {qty > 0 ? `${qty} in cart` : "ADD +"}
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-sm font-bold">{item.name}</p>
+          {isHot && <span aria-hidden>🔥</span>}
+        </div>
+        <p className="mt-0.5 text-base font-extrabold">₹{item.price}</p>
+      </div>
+
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-1 rounded-full border border-border bg-secondary/60 px-1 py-0.5">
+          <button
+            onClick={() => onChange(qty - 1)}
+            className="grid h-6 w-6 place-items-center rounded-full text-foreground"
+            aria-label="Decrease"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+              remove
+            </span>
+          </button>
+          <span className="min-w-[1ch] text-center text-xs font-extrabold">{qty}</span>
+          <button
+            onClick={() => onChange(qty + 1)}
+            className="grid h-6 w-6 place-items-center rounded-full text-foreground"
+            aria-label="Increase"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+              add
+            </span>
+          </button>
+        </div>
+        <button className="rounded-full bg-gradient-primary px-3 py-1 text-[11px] font-bold tracking-wide text-primary-foreground shadow-glow">
+          Order Now
         </button>
       </div>
-    </div>
-  </article>
-);
+    </article>
+  );
+};
 
-const ItemRow = ({
-  item,
-  qty,
-  onInc,
-  onDec,
-}: {
-  item: MenuItem;
-  qty: number;
-  onInc: () => void;
-  onDec: () => void;
-}) => (
-  <article className="flex gap-3 rounded-2xl border border-border bg-gradient-card p-3 shadow-card">
-    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl">
-      <img
-        src={item.image}
-        alt={item.name}
-        loading="lazy"
-        className="h-full w-full object-cover"
-      />
-    </div>
-    <div className="flex min-w-0 flex-1 flex-col">
-      <div className="flex items-center gap-1.5">
-        <VegBadge isVeg={item.isVeg} />
-        <p className="truncate text-sm font-bold">{item.name}</p>
+const CanteenRow = ({ canteen }: { canteen: Canteen }) => {
+  const open = canteen.isOpen;
+  return (
+    <button
+      type="button"
+      disabled={!open}
+      className={`flex w-full items-center gap-3 rounded-2xl border border-border bg-gradient-card p-3 text-left shadow-card transition ${
+        open ? "hover:border-primary/40" : "opacity-60"
+      }`}
+    >
+      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-secondary text-3xl">
+        {canteen.emoji}
       </div>
-      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-        {item.description}
-      </p>
-      <div className="mt-auto flex items-center justify-between pt-2">
-        <div className="flex items-baseline gap-2">
-          <p className="text-base font-extrabold">₹{item.price}</p>
-          {item.oldPrice && (
-            <p className="text-xs font-semibold text-muted-foreground line-through">
-              ₹{item.oldPrice}
-            </p>
-          )}
-          <span className="text-[10px] font-bold tracking-[0.15em] text-muted-foreground">
-            • {item.prepMinutes}m
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate text-sm font-bold">{canteen.name}</p>
+          <span
+            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] ${
+              open ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
+            }`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${open ? "bg-success" : "bg-muted-foreground"}`} />
+            {open ? "Open now" : "Closed"}
           </span>
         </div>
-        {qty === 0 ? (
-          <button
-            onClick={onInc}
-            className="rounded-full bg-gradient-primary px-4 py-1.5 text-xs font-bold text-primary-foreground shadow-glow"
-          >
-            ADD +
-          </button>
-        ) : (
-          <div className="flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-1 py-0.5">
-            <button
-              onClick={onDec}
-              className="grid h-7 w-7 place-items-center rounded-full text-primary"
-              aria-label="Decrease"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                remove
-              </span>
-            </button>
-            <span className="min-w-[1ch] text-sm font-extrabold text-primary">{qty}</span>
-            <button
-              onClick={onInc}
-              className="grid h-7 w-7 place-items-center rounded-full text-primary"
-              aria-label="Increase"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                add
-              </span>
-            </button>
-          </div>
-        )}
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">{canteen.tagline}</p>
       </div>
-    </div>
-  </article>
-);
+
+      <span className="material-symbols-outlined text-muted-foreground" style={{ fontSize: 22 }}>
+        {open ? "arrow_forward" : "lock"}
+      </span>
+    </button>
+  );
+};
+
+const BottomNav = () => {
+  const items = [
+    { icon: "home", label: "Home", active: true },
+    { icon: "receipt_long", label: "My Orders" },
+    { icon: "shopping_cart", label: "My Cart", primary: true },
+    { icon: "event", label: "Events" },
+  ];
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur">
+      <div className="mx-auto grid w-full max-w-md grid-cols-4 px-3 pt-2 pb-3">
+        {items.map((it) => {
+          if (it.primary) {
+            return (
+              <div key={it.label} className="flex flex-col items-center -mt-7">
+                <button className="grid h-14 w-14 place-items-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow">
+                  <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
+                    {it.icon}
+                  </span>
+                </button>
+                <span className="mt-1 text-[10px] font-bold tracking-[0.15em] text-foreground">
+                  {it.label}
+                </span>
+              </div>
+            );
+          }
+          return (
+            <button
+              key={it.label}
+              className={`flex flex-col items-center gap-1 ${
+                it.active ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 24 }}>
+                {it.icon}
+              </span>
+              <span className="text-[10px] font-bold tracking-[0.12em]">{it.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};
 
 export default UserHome;
