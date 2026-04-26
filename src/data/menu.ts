@@ -11,6 +11,24 @@ export type Offer = {
   accent: "primary" | "warning" | "success";
 };
 
+export type CampusOffer = {
+  id: string;
+  canteen: string;
+  title: string;
+  highlight: string;
+  subtitle: string;
+  active: boolean;
+  accent: "primary" | "warning" | "success";
+};
+
+export type Canteen = {
+  id: string;
+  name: string;
+  tagline: string;
+  isOpen: boolean;
+  emoji: string;
+};
+
 export type Category = {
   id: string;
   name: string;
