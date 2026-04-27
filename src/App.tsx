@@ -17,6 +17,9 @@ import SellerOrders from "./pages/seller/Orders.tsx";
 import SalesDashboard from "./pages/seller/SalesDashboard.tsx";
 import SalesReports from "./pages/seller/SalesReports.tsx";
 import UserHome from "./pages/user/Home.tsx";
+import UserCart from "./pages/user/Cart.tsx";
+import UserOrders from "./pages/user/Orders.tsx";
+import UserProfile from "./pages/user/Profile.tsx";
 
 // Aggressive caching tuned for low-bandwidth campus networks.
 // Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
@@ -49,6 +52,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<UserHome />} />
+          <Route path="/cart" element={<UserCart />} />
+          <Route path="/orders" element={<UserOrders />} />
+          <Route path="/profile" element={<UserProfile />} />
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/seller/inventory" element={<SellerInventory />} />
           <Route path="/seller/menu" element={<SellerMenu />} />

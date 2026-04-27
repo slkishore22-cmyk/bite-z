@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { motion, useMotionValue, animate, type PanInfo } from "framer-motion";
-import { Home, ReceiptText, ShoppingCart, CalendarDays, type LucideIcon } from "lucide-react";
+import { Home, ReceiptText, ShoppingCart, User, type LucideIcon } from "lucide-react";
 
 type NavItem = {
   id: string;
@@ -13,7 +13,7 @@ const items: NavItem[] = [
   { id: "home", label: "Home", icon: Home },
   { id: "orders", label: "Orders", icon: ReceiptText },
   { id: "cart", label: "Cart", icon: ShoppingCart, badge: true },
-  { id: "events", label: "Events", icon: CalendarDays },
+  { id: "profile", label: "Profile", icon: User },
 ];
 
 const iconSpring = { type: "spring" as const, stiffness: 500, damping: 18, mass: 0.7 };
@@ -87,6 +87,15 @@ export const LiquidGlassNav = ({
     setActive(id);
     onChange?.(id);
   };
+
+  // Keep internal active in sync with external activeId (e.g. route changes)
+  useEffect(() => {
+    if (activeId && activeId !== active && indexById[activeId] != null) {
+      setDistance(indexById[activeId] - indexById[active]);
+      setActive(activeId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     setDragging(false);

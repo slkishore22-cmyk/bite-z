@@ -8,7 +8,7 @@ import {
   type Canteen,
   type MenuItem,
 } from "@/data/menu";
-import LiquidGlassNav from "@/components/LiquidGlassNav";
+import UserLayout from "@/components/user/UserLayout";
 
 const itemEmoji: Record<string, string> = { m1: "🍔", m2: "🍕", m7: "☕" };
 const itemHot: Record<string, boolean> = { m1: true };
@@ -35,6 +35,7 @@ const Home = () => {
     });
 
   return (
+    <UserLayout>
     <div
       className="min-h-screen pb-32 antialiased"
       style={{
@@ -94,9 +95,8 @@ const Home = () => {
           </div>
         </section>
       </main>
-
-      <LiquidGlassNav activeId="home" />
     </div>
+    </UserLayout>
   );
 };
 
