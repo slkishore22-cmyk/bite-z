@@ -88,6 +88,15 @@ export const LiquidGlassNav = ({
     onChange?.(id);
   };
 
+  // Keep internal active in sync with external activeId (e.g. route changes)
+  useEffect(() => {
+    if (activeId && activeId !== active && indexById[activeId] != null) {
+      setDistance(indexById[activeId] - indexById[active]);
+      setActive(activeId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
+
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     setDragging(false);
     if (rects.length === 0) return;
