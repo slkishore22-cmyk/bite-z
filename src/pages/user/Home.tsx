@@ -1,186 +1,152 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   fetchCampusOffers,
   fetchCanteens,
   fetchFrequentItems,
-  type Canteen,
   type CampusOffer,
+  type Canteen,
   type MenuItem,
 } from "@/data/menu";
+import LiquidGlassNav from "@/components/LiquidGlassNav";
 
-const greetingFor = (h: number) => {
-  if (h < 12) return "GOOD MORNING";
-  if (h < 17) return "GOOD AFTERNOON";
-  return "GOOD EVENING";
+const itemEmoji: Record<string, string> = { m1: "🍔", m2: "🍕", m7: "☕" };
+const itemHot: Record<string, boolean> = { m1: true };
+
+const canteenIcon: Record<string, string> = {
+  c1: "restaurant",
+  c2: "local_cafe",
+  c3: "lock",
 };
 
-const offerAccentBar: Record<CampusOffer["accent"], string> = {
-  primary: "bg-primary",
-  warning: "bg-amber-400",
-  success: "bg-success",
-};
-
-const offerHighlight: Record<CampusOffer["accent"], string> = {
-  primary: "text-primary",
-  warning: "text-amber-300",
-  success: "text-success",
-};
-
-const canteenImages: Record<string, string> = {
-  c1: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&q=70&auto=format&fit=crop",
-  c2: "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=200&q=70&auto=format&fit=crop",
-  c3: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&q=70&auto=format&fit=crop",
-};
-
-const itemEmoji: Record<string, string> = {
-  m1: "🍔",
-  m2: "🍕",
-  m7: "☕",
-};
-
-const UserHome = () => {
+const Home = () => {
   const [cart, setCart] = useState<Record<string, number>>({});
 
   const offersQ = useQuery({ queryKey: ["campus-offers"], queryFn: fetchCampusOffers });
   const frequentQ = useQuery({ queryKey: ["frequent-items"], queryFn: fetchFrequentItems });
   const canteensQ = useQuery({ queryKey: ["canteens"], queryFn: fetchCanteens });
 
-  const greeting = useMemo(() => greetingFor(new Date().getHours()), []);
-
-  const setQty = (id: string, next: number) =>
+  const setQty = (id: string, n: number) =>
     setCart((c) => {
       const copy = { ...c };
-      if (next <= 0) delete copy[id];
-      else copy[id] = next;
+      if (n <= 0) delete copy[id];
+      else copy[id] = n;
       return copy;
     });
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <div className="mx-auto w-full max-w-md px-5 pb-32 pt-8">
-        {/* Greeting */}
-        <header>
-          <p className="text-[11px] font-extrabold tracking-[0.25em] text-primary">
-            {greeting}
-          </p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
-            Hey, Alex <span aria-hidden>👋</span>
-          </h1>
-        </header>
+    <div
+      className="min-h-screen pb-32 antialiased"
+      style={{
+        background: "#F5F5F7",
+        color: "#1D1D1F",
+        fontFamily:
+          "-apple-system, 'SF Pro Display', 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif",
+      }}
+    >
+      <main className="px-6 space-y-12 mx-auto w-full max-w-md">
+        <h1
+          className="text-2xl font-bold tracking-tight mt-12 mb-8"
+          style={{ color: "#1D1D1F" }}
+        >
+          Hey, Alex 👋
+        </h1>
 
         {/* Today's Offers */}
-        <section className="mt-8">
-          <SectionHeader
-            title={
-              <>
-                Today's Offers <span aria-hidden>🔥</span>
-              </>
-            }
-            action="See all"
-          />
-          <div className="-mx-5 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {offersQ.isLoading
-              ? Array.from({ length: 2 }).map((_, i) => (
-                  <Skeleton key={i} className="h-44 w-[280px] shrink-0 rounded-2xl" />
-                ))
-              : offersQ.data?.map((o) => <OfferCard key={o.id} offer={o} />)}
+        <section>
+          <div className="flex gap-5 overflow-x-auto no-scrollbar relative z-10 py-4 -mx-6 px-6">
+            {(offersQ.data ?? []).map((o) => (
+              <OfferCard key={o.id} offer={o} />
+            ))}
           </div>
         </section>
 
         {/* Frequent Orders */}
-        <section className="mt-8">
-          <SectionHeader title="Your Frequent Orders" subtitle="Order your favorites quickly" />
-          <div className="-mx-5 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {frequentQ.isLoading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-32 w-[260px] shrink-0 rounded-2xl" />
-                ))
-              : frequentQ.data?.map((it) => (
-                  <FrequentCard
-                    key={it.id}
-                    item={it}
-                    qty={cart[it.id] ?? 1}
-                    onChange={(n) => setQty(it.id, n)}
-                  />
-                ))}
+        <section>
+          <div className="mb-4">
+            <h2 className="text-xl font-bold tracking-tight" style={{ color: "#1D1D1F" }}>
+              On Repeat!
+            </h2>
+          </div>
+          <div className="flex overflow-x-auto no-scrollbar -mx-6 px-6 gap-6 pb-2">
+            {(frequentQ.data ?? []).map((it) => (
+              <FrequentCard
+                key={it.id}
+                item={it}
+                qty={cart[it.id] ?? 1}
+                onChange={(n) => setQty(it.id, n)}
+              />
+            ))}
           </div>
         </section>
 
         {/* Canteens */}
-        <section className="mt-8">
-          <SectionHeader title="Our Canteens" subtitle="Tap to explore menu" />
-          <div className="mt-4 space-y-3">
-            {canteensQ.isLoading &&
-              Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full rounded-2xl" />
-              ))}
-            {canteensQ.data?.map((c) => (
+        <section>
+          <div className="mb-4">
+            <h2 className="text-xl font-bold tracking-tight" style={{ color: "#1D1D1F" }}>
+              Pick a Spot?
+            </h2>
+          </div>
+          <div className="flex flex-col gap-4">
+            {(canteensQ.data ?? []).map((c) => (
               <CanteenRow key={c.id} canteen={c} />
             ))}
           </div>
         </section>
-      </div>
+      </main>
 
-      <BottomNav />
+      <LiquidGlassNav activeId="home" />
     </div>
   );
 };
 
-/* ---------- Section header ---------- */
-const SectionHeader = ({
-  title,
-  subtitle,
-  action,
-}: {
-  title: React.ReactNode;
-  subtitle?: string;
-  action?: string;
-}) => (
-  <div className="flex items-end justify-between gap-3">
-    <div className="min-w-0">
-      <h2 className="text-xl font-extrabold tracking-tight">{title}</h2>
-      {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
-    </div>
-    {action && (
-      <button className="shrink-0 text-sm font-bold text-primary">{action}</button>
-    )}
-  </div>
-);
-
-/* ---------- Offer card ---------- */
+/* ---------- Offer card (liquid glass) ---------- */
 const OfferCard = ({ offer }: { offer: CampusOffer }) => (
-  <article className="relative w-[280px] shrink-0 snap-start overflow-hidden rounded-2xl bg-card shadow-card">
-    {/* Left accent bar */}
-    <span
-      aria-hidden
-      className={`absolute left-0 top-0 h-full w-1 ${offerAccentBar[offer.accent]}`}
-    />
-    <div className="p-4 pl-5">
-      <div className="flex items-start justify-between gap-2">
-        <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+  <div className="lg-card p-5 w-[260px] h-[150px]">
+    <div className="relative z-10 flex flex-col h-full">
+      <div className="flex justify-between items-center mb-auto">
+        <span
+          className="glass-text font-bold uppercase"
+          style={{ fontSize: 11, letterSpacing: 2, color: "#6E6E73" }}
+        >
           {offer.canteen}
         </span>
         {offer.active && (
-          <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Active
-          </span>
+          <div className="active-pill flex items-center gap-1.5 shadow-sm relative z-10">
+            <span
+              className="w-1.5 h-1.5 rounded-full animate-pulse"
+              style={{ background: "#2563EB" }}
+            />
+            <span className="text-[10px] font-black" style={{ color: "#1D1D1F" }}>
+              ACTIVE
+            </span>
+          </div>
         )}
       </div>
-
-      <p className="mt-4 text-lg font-extrabold leading-tight">{offer.title}</p>
-      <p className={`mt-2 text-2xl font-extrabold tracking-tight ${offerHighlight[offer.accent]}`}>
-        {offer.highlight}
-      </p>
-      <p className="mt-1 text-xs text-muted-foreground">{offer.subtitle}</p>
+      <div>
+        <h3
+          className="glass-text mb-1 tracking-tight"
+          style={{ fontSize: 17, fontWeight: 600, color: "#1D1D1F", letterSpacing: "-0.025em" }}
+        >
+          {offer.title}
+        </h3>
+        <div
+          className="glass-text tracking-tight"
+          style={{
+            fontSize: 30,
+            fontWeight: 800,
+            letterSpacing: "-0.025em",
+            color: offer.accent === "primary" ? "#30D158" : "#30D158",
+          }}
+        >
+          {offer.highlight}
+        </div>
+      </div>
     </div>
-  </article>
+  </div>
 );
 
-/* ---------- Frequent order card (horizontal scroll) ---------- */
+/* ---------- Frequent order card ---------- */
 const FrequentCard = ({
   item,
   qty,
@@ -191,140 +157,122 @@ const FrequentCard = ({
   onChange: (n: number) => void;
 }) => {
   const emoji = itemEmoji[item.id] ?? "🍽️";
-  const isHot = !!item.popular;
-
+  const hot = itemHot[item.id];
   return (
-    <article className="flex w-[260px] shrink-0 snap-start flex-col rounded-2xl bg-card p-3 shadow-card">
-      <div className="flex items-center gap-3">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-secondary text-2xl">
-          {emoji}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <p className="truncate text-sm font-extrabold">{item.name}</p>
-            {isHot && <span aria-hidden>🔥</span>}
+    <div className="lg-card flex flex-col min-w-[240px] p-4 justify-center" style={{ height: "auto" }}>
+      <div className="relative z-10 flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-12 h-12 flex items-center justify-center rounded-full shrink-0 text-3xl leading-none"
+            style={{
+              background: "rgba(255,255,255,0.4)",
+              backdropFilter: "blur(4px)",
+              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.04)",
+            }}
+          >
+            {emoji}
           </div>
-          <p className="mt-0.5 text-sm font-extrabold text-primary">₹{item.price}</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3
+                className="glass-text truncate text-lg"
+                style={{ color: "#1D1D1F", fontWeight: 600, letterSpacing: "-0.01em" }}
+              >
+                {item.name}
+              </h3>
+              {hot && <span className="text-base leading-none">🔥</span>}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-2 mt-1">
+          <div
+            className="flex items-center rounded-full px-1.5 py-0.5 gap-2 shadow-sm"
+            style={{
+              background: "rgba(255,255,255,0.4)",
+              backdropFilter: "blur(4px)",
+              border: "1px solid rgba(255,255,255,0.2)",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => onChange(qty - 1)}
+              className="w-7 h-7 flex items-center justify-center text-lg font-bold"
+              style={{ color: "#6E6E73" }}
+              aria-label="decrease"
+            >
+              -
+            </button>
+            <span className="text-[13px] font-bold" style={{ color: "#1D1D1F" }}>
+              {qty}
+            </span>
+            <button
+              type="button"
+              onClick={() => onChange(qty + 1)}
+              className="w-7 h-7 flex items-center justify-center text-lg font-bold"
+              style={{ color: "#2563EB" }}
+              aria-label="increase"
+            >
+              +
+            </button>
+          </div>
+          <button
+            type="button"
+            className="text-[12px] font-bold px-3 py-2 rounded-full transition-all active:scale-95"
+            style={{
+              background: "#2563EB",
+              color: "#FFFFFF",
+              boxShadow: "0 8px 18px -6px rgba(37,99,235,0.45)",
+            }}
+          >
+            Order Now
+          </button>
         </div>
       </div>
-
-      <div className="mt-3 flex items-center gap-2">
-        <div className="flex items-center gap-1 rounded-full bg-secondary px-1.5 py-1">
-          <button
-            onClick={() => onChange(qty - 1)}
-            aria-label="Decrease"
-            className="grid h-6 w-6 place-items-center rounded-full text-primary"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-              remove
-            </span>
-          </button>
-          <span className="min-w-[1.25rem] text-center text-xs font-extrabold">{qty}</span>
-          <button
-            onClick={() => onChange(qty + 1)}
-            aria-label="Increase"
-            className="grid h-6 w-6 place-items-center rounded-full text-primary"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-              add
-            </span>
-          </button>
-        </div>
-        <button className="flex-1 rounded-full bg-gradient-primary px-3 py-1.5 text-xs font-extrabold tracking-wide text-primary-foreground shadow-glow">
-          Order Now
-        </button>
-      </div>
-    </article>
+    </div>
   );
 };
 
 /* ---------- Canteen row ---------- */
 const CanteenRow = ({ canteen }: { canteen: Canteen }) => {
-  const open = canteen.isOpen;
+  const icon = canteenIcon[canteen.id] ?? "restaurant";
   return (
     <button
       type="button"
-      disabled={!open}
-      className={`flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-card transition ${
-        open ? "active:scale-[0.99]" : "opacity-70"
-      }`}
+      className="lg-canteen flex justify-between items-center px-6 py-4 h-[88px] text-left w-full"
     >
-      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
-        <img
-          src={canteenImages[canteen.id]}
-          alt={canteen.name}
-          loading="lazy"
-          className={`h-full w-full object-cover ${open ? "" : "grayscale"}`}
-        />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-base font-extrabold leading-tight">{canteen.name}</p>
+      <div className="flex items-center gap-4 flex-1">
+        <div
+          className="overflow-hidden rounded-full shrink-0 flex items-center justify-center w-12 h-12"
+          style={{
+            background: "rgba(255,255,255,0.4)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            backdropFilter: "blur(4px)",
+            boxShadow: "inset 0 2px 4px rgba(0,0,0,0.04)",
+          }}
+        >
           <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.15em] ${
-              open
-                ? "bg-success/15 text-success"
-                : "bg-secondary text-muted-foreground"
-            }`}
+            className="material-symbols-outlined text-2xl"
+            style={{ color: "#2563EB" }}
           >
-            {open ? "Open now" : "Closed"}
+            {icon}
           </span>
         </div>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{canteen.tagline}</p>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3
+              className="font-semibold tracking-tight"
+              style={{ color: "#1D1D1F" }}
+            >
+              {canteen.name}
+            </h3>
+          </div>
+          <p className="text-sm" style={{ color: "#6E6E73" }}>
+            {canteen.tagline}
+          </p>
+        </div>
       </div>
-
-      {open ? (
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow">
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-            arrow_forward
-          </span>
-        </span>
-      ) : (
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-            lock
-          </span>
-        </span>
-      )}
     </button>
   );
 };
 
-/* ---------- Bottom nav (pill) ---------- */
-const BottomNav = () => {
-  const items = [
-    { icon: "home", label: "HOME", active: true },
-    { icon: "receipt_long", label: "MY ORDERS" },
-    { icon: "shopping_cart", label: "MY CART", badge: true },
-    { icon: "event", label: "EVENTS" },
-  ];
-  return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-3 z-30 flex justify-center px-4">
-      <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-1 rounded-full border border-border bg-card/95 px-3 py-2 shadow-card backdrop-blur">
-        {items.map((it) => (
-          <button
-            key={it.label}
-            className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-full px-2 py-1.5 ${
-              it.active ? "bg-secondary text-foreground" : "text-muted-foreground"
-            }`}
-          >
-            <span className="relative">
-              <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
-                {it.icon}
-              </span>
-              {it.badge && (
-                <span className="absolute -right-1 -top-0.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
-              )}
-            </span>
-            <span className="text-[9px] font-extrabold tracking-[0.12em]">
-              {it.label}
-            </span>
-          </button>
-        ))}
-      </div>
-    </nav>
-  );
-};
-
-export default UserHome;
+export default Home;
