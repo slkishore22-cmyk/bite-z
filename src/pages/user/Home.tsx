@@ -55,7 +55,7 @@ const Home = () => {
 
         {/* Today's Offers */}
         <section>
-          <div className="flex gap-5 overflow-x-auto no-scrollbar relative z-10 py-4 -mx-6 px-6">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 py-2 snap-x snap-mandatory">
             {(offersQ.data ?? []).map((o) => (
               <OfferCard key={o.id} offer={o} />
             ))}
@@ -100,47 +100,86 @@ const Home = () => {
   );
 };
 
-/* ---------- Offer card (liquid glass) ---------- */
+/* ---------- Offer card (rebuilt from scratch to match reference) ---------- */
 const OfferCard = ({ offer }: { offer: CampusOffer }) => (
-  <div className="lg-card p-5 w-[260px] h-[150px]">
-    <div className="relative z-10 flex flex-col h-full">
-      <div className="flex justify-between items-center mb-auto">
-        <span
-          className="glass-text font-bold uppercase"
-          style={{ fontSize: 11, letterSpacing: 2, color: "#6E6E73" }}
-        >
-          {offer.canteen}
-        </span>
-        {offer.active && (
-          <div className="active-pill flex items-center gap-1.5 shadow-sm relative z-10">
-            <span
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: "#2563EB" }}
-            />
-            <span className="text-[10px] font-black" style={{ color: "#1D1D1F" }}>
-              ACTIVE
-            </span>
-          </div>
-        )}
-      </div>
-      <div>
-        <h3
-          className="glass-text mb-1 tracking-tight"
-          style={{ fontSize: 17, fontWeight: 600, color: "#1D1D1F", letterSpacing: "-0.025em" }}
-        >
-          {offer.title}
-        </h3>
+  <div
+    className="shrink-0 snap-start flex flex-col justify-between"
+    style={{
+      width: 260,
+      height: 170,
+      padding: "20px 22px",
+      borderRadius: 28,
+      background: "#FFFFFF",
+      boxShadow:
+        "0 1px 0 rgba(255,255,255,0.9) inset, 0 8px 24px rgba(17, 24, 39, 0.05), 0 2px 6px rgba(17, 24, 39, 0.03)",
+    }}
+  >
+    {/* Top row: canteen label + ACTIVE pill */}
+    <div className="flex items-center justify-between">
+      <span
+        className="uppercase"
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: "0.18em",
+          color: "#8A8A8E",
+        }}
+      >
+        {offer.canteen}
+      </span>
+      {offer.active && (
         <div
-          className="glass-text tracking-tight"
+          className="flex items-center gap-1.5"
           style={{
-            fontSize: 30,
-            fontWeight: 800,
-            letterSpacing: "-0.025em",
-            color: offer.accent === "primary" ? "#30D158" : "#30D158",
+            background: "#FFFFFF",
+            border: "1px solid #ECECEE",
+            borderRadius: 999,
+            padding: "3px 10px",
+            boxShadow: "0 1px 2px rgba(17, 24, 39, 0.04)",
           }}
         >
-          {offer.highlight}
+          <span
+            className="rounded-full animate-pulse"
+            style={{ width: 6, height: 6, background: "#2563EB" }}
+          />
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 800,
+              letterSpacing: "0.08em",
+              color: "#1D1D1F",
+            }}
+          >
+            ACTIVE
+          </span>
         </div>
+      )}
+    </div>
+
+    {/* Bottom: title + discount */}
+    <div>
+      <h3
+        style={{
+          fontSize: 19,
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
+          color: "#1D1D1F",
+          lineHeight: 1.15,
+          marginBottom: 6,
+        }}
+      >
+        {offer.title}
+      </h3>
+      <div
+        style={{
+          fontSize: 32,
+          fontWeight: 800,
+          letterSpacing: "-0.025em",
+          color: "#22C55E",
+          lineHeight: 1,
+        }}
+      >
+        {offer.highlight}
       </div>
     </div>
   </div>
