@@ -33,7 +33,7 @@ const Home = () => {
         style={{
           background: "#F5F5F7",
           color: "#1D1D1F",
-          paddingBottom: 96,
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)",
           fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
         }}
       >
