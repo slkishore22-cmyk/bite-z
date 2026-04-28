@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { motion, useMotionValue, animate, type PanInfo } from "framer-motion";
-import { Home, ReceiptText, ShoppingCart, type LucideIcon } from "lucide-react";
+import { Home, ReceiptText, ShoppingCart, CalendarDays, type LucideIcon } from "lucide-react";
 
 type NavItem = {
   id: string;
@@ -13,6 +13,7 @@ const items: NavItem[] = [
   { id: "home", label: "Home", icon: Home },
   { id: "orders", label: "Orders", icon: ReceiptText },
   { id: "cart", label: "Cart", icon: ShoppingCart, badge: true },
+  { id: "events", label: "Events", icon: CalendarDays },
 ];
 
 const iconSpring = { type: "spring" as const, stiffness: 500, damping: 18, mass: 0.7 };

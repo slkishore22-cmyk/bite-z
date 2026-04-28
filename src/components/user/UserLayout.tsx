@@ -5,7 +5,7 @@ const tabToPath: Record<string, string> = {
   home: "/home",
   orders: "/orders",
   cart: "/cart",
-  profile: "/profile",
+  events: "/events",
 };
 
 const pathToTab = (pathname: string) => {
