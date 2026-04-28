@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
 type Repeat = { emoji: string; name: string; tag: string | null };
-type Spot = { icon: string; name: string; sub: string };
+type Spot = { id: string; icon: string; name: string; sub: string };
 
 const offers: Offer[] = [
   { canteen: "THE MAIN SQUARE", title: "Mega Midnight Deal", discount: "40% OFF", active: true },
@@ -16,12 +17,13 @@ const repeats: Repeat[] = [
 ];
 
 const spots: Spot[] = [
-  { icon: "restaurant", name: "The Main Square", sub: "Fastest bites on campus" },
-  { icon: "local_cafe", name: "The Main Square", sub: "Fastest bites on campus" },
+  { id: "c1", icon: "restaurant", name: "The Main Square", sub: "Fastest bites on campus" },
+  { id: "c2", icon: "local_cafe", name: "The Main Square", sub: "Fastest bites on campus" },
 ];
 
 const Home = () => {
   const [qty, setQty] = useState<Record<number, number>>({ 0: 1, 1: 1 });
+  const navigate = useNavigate();
 
   const setCount = (i: number, n: number) =>
     setQty((q) => ({ ...q, [i]: Math.max(0, n) }));
@@ -110,7 +112,7 @@ const Home = () => {
           style={{ paddingLeft: 24, paddingRight: 24 }}
         >
           {spots.map((s, i) => (
-            <CanteenCard key={i} spot={s} />
+            <CanteenCard key={i} spot={s} onClick={() => navigate(`/canteen/${s.id}`)} />
           ))}
         </div>
       </div>
@@ -309,9 +311,10 @@ const RepeatCard = ({
 );
 
 /* ---------------- Canteen Card ---------------- */
-const CanteenCard = ({ spot }: { spot: Spot }) => (
+const CanteenCard = ({ spot, onClick }: { spot: Spot; onClick?: () => void }) => (
   <button
     type="button"
+    onClick={onClick}
     className="cb-pill flex items-center justify-between text-left w-full"
     style={{
       height: 88,
