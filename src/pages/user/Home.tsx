@@ -311,9 +311,10 @@ const RepeatCard = ({
 );
 
 /* ---------------- Canteen Card ---------------- */
-const CanteenCard = ({ spot }: { spot: Spot }) => (
+const CanteenCard = ({ spot, onClick }: { spot: Spot; onClick?: () => void }) => (
   <button
     type="button"
+    onClick={onClick}
     className="cb-pill flex items-center justify-between text-left w-full"
     style={{
       height: 88,
