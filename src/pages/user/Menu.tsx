@@ -78,7 +78,7 @@ const Menu = () => {
             </div>
             <h1
               style={{
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: 800,
                 letterSpacing: "-0.02em",
                 color: "#1D1D1F",
@@ -96,9 +96,9 @@ const Menu = () => {
           <div
             className="flex items-center gap-2"
             style={{
-              height: 48,
+              height: 56,
               borderRadius: 999,
-              padding: "0 18px",
+              padding: "0 20px",
               background: "rgba(255,255,255,0.55)",
               backdropFilter: "blur(20px) saturate(180%)",
               WebkitBackdropFilter: "blur(20px) saturate(180%)",
@@ -125,7 +125,7 @@ const Menu = () => {
         {/* Category pills */}
         <div
           className="no-scrollbar flex gap-3 overflow-x-auto"
-          style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 24 }}
+          style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginTop: 8, marginBottom: 32 }}
         >
           {categories.map((c) => {
             const isActive = c.id === activeCat;
@@ -136,8 +136,8 @@ const Menu = () => {
                 onClick={() => setActiveCat(c.id)}
                 className="shrink-0 flex items-center gap-2"
                 style={{
-                  height: 44,
-                  padding: "0 18px",
+                  height: 48,
+                  padding: "0 24px",
                   borderRadius: 999,
                   background: isActive ? "rgba(37,99,235,0.12)" : "rgba(255,255,255,0.55)",
                   backdropFilter: "blur(20px) saturate(180%)",
@@ -150,7 +150,7 @@ const Menu = () => {
               >
                 <span
                   style={{
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: 700,
                     letterSpacing: "-0.01em",
                     color: isActive ? "#2563EB" : "#1D1D1F",
@@ -181,7 +181,7 @@ const Menu = () => {
         </h2>
 
         {/* Items */}
-        <div className="flex flex-col gap-4" style={{ paddingLeft: 24, paddingRight: 24 }}>
+        <div className="flex flex-col gap-5" style={{ paddingLeft: 24, paddingRight: 24 }}>
           {visible.map((item) => (
             <MenuItemCard
               key={item.id}
@@ -218,14 +218,14 @@ const MenuItemCard = ({
   qty: number;
   onChange: (n: number) => void;
 }) => (
-  <div className="cb-glass" style={{ padding: 14 }}>
-    <div className="relative z-10 flex gap-3">
+  <div className="cb-glass" style={{ padding: 16, minHeight: 88 }}>
+    <div className="relative z-10 flex gap-4">
       {/* Image */}
       <div
         className="shrink-0 overflow-hidden"
         style={{
-          width: 88,
-          height: 88,
+          width: 96,
+          height: 96,
           borderRadius: 18,
           background: "rgba(255,255,255,0.6)",
           boxShadow: "inset 0 0 20px rgba(0,0,0,0.08)",
@@ -283,7 +283,7 @@ const MenuItemCard = ({
             <h3
               className="truncate"
               style={{
-                fontSize: 16,
+                fontSize: 17,
                 fontWeight: 700,
                 letterSpacing: "-0.01em",
                 color: "#1D1D1F",
@@ -294,16 +294,16 @@ const MenuItemCard = ({
             </h3>
             <p
               className="line-clamp-1"
-              style={{ fontSize: 12, color: "#6E6E73", marginTop: 2 }}
+              style={{ fontSize: 13, color: "#6E6E73", marginTop: 4 }}
             >
               {item.description}
             </p>
           </div>
         </div>
 
-        <div className="flex items-end justify-between mt-2">
+        <div className="flex items-end justify-between mt-3">
           <div className="flex items-baseline gap-1.5">
-            <span style={{ fontSize: 17, fontWeight: 800, color: "#1D1D1F", letterSpacing: "-0.01em" }}>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "#1D1D1F", letterSpacing: "-0.01em" }}>
               ₹{item.price}
             </span>
             {item.oldPrice && (
@@ -331,7 +331,8 @@ const MenuItemCard = ({
                 color: "#FFFFFF",
                 fontSize: 12,
                 fontWeight: 700,
-                padding: "8px 16px",
+                height: 36,
+                padding: "0 20px",
                 borderRadius: 999,
                 boxShadow: "0 8px 18px -6px rgba(37,99,235,0.45)",
               }}
@@ -346,7 +347,7 @@ const MenuItemCard = ({
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
                 borderRadius: 999,
-                padding: "2px 6px",
+                padding: 8,
                 gap: 6,
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9)",
               }}
@@ -355,7 +356,7 @@ const MenuItemCard = ({
                 type="button"
                 onClick={() => onChange(qty - 1)}
                 aria-label="decrease"
-                style={{ width: 26, height: 26, fontSize: 18, fontWeight: 700, color: "#6E6E73" }}
+                style={{ width: 28, height: 28, fontSize: 18, fontWeight: 700, color: "#6E6E73" }}
               >
                 −
               </button>
@@ -363,7 +364,7 @@ const MenuItemCard = ({
                 style={{
                   minWidth: 14,
                   textAlign: "center",
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: 800,
                   color: "#1D1D1F",
                 }}
@@ -374,7 +375,7 @@ const MenuItemCard = ({
                 type="button"
                 onClick={() => onChange(qty + 1)}
                 aria-label="increase"
-                style={{ width: 26, height: 26, fontSize: 18, fontWeight: 700, color: "#2563EB" }}
+                style={{ width: 28, height: 28, fontSize: 18, fontWeight: 700, color: "#2563EB" }}
               >
                 +
               </button>
