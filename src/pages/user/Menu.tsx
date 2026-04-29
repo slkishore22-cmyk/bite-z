@@ -131,7 +131,7 @@ const Menu = () => {
           className="mx-auto"
           style={{
             paddingTop: 96,
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)",
             paddingLeft: 16,
             paddingRight: 16,
             maxWidth: 672,
@@ -239,7 +239,7 @@ const Menu = () => {
               ...liquidGlass,
               left: 16,
               right: 16,
-              bottom: "calc(env(safe-area-inset-bottom, 0px) + 96px)",
+              bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
               padding: 16,
             }}
           >
