@@ -22,6 +22,7 @@ import UserOrders from "./pages/user/Orders.tsx";
 import UserProfile from "./pages/user/Profile.tsx";
 import UserEvents from "./pages/user/Events.tsx";
 import UserMenu from "./pages/user/Menu.tsx";
+import UserPayment from "./pages/user/Payment.tsx";
 
 // Aggressive caching tuned for low-bandwidth campus networks.
 // Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/events" element={<UserEvents />} />
           <Route path="/canteen/:id" element={<UserMenu />} />
+          <Route path="/payment" element={<UserPayment />} />
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/seller/inventory" element={<SellerInventory />} />
           <Route path="/seller/menu" element={<SellerMenu />} />
