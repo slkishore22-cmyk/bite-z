@@ -1,0 +1,242 @@
+import { useNavigate } from "react-router-dom";
+
+const liquidGlass: React.CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  backdropFilter: "blur(40px)",
+  WebkitBackdropFilter: "blur(40px)",
+  borderRadius: 26,
+  boxShadow:
+    "inset 0 1.5px 0 0 rgba(255,255,255,0.55), 0 8px 32px rgba(0,0,0,0.06)",
+  position: "relative",
+  overflow: "hidden",
+  border: "1px solid rgba(0,0,0,0.03)",
+};
+
+const glassHighlight: React.CSSProperties = {
+  content: '""',
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  height: "45%",
+  background:
+    "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)",
+  pointerEvents: "none",
+  zIndex: 1,
+};
+
+const HERO_IMG =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuCiwJoiptyTfJjocBll2nIls6RlxY48tdulifddR5Ese8rvs5cmf6-rAcmLqNJxycS-Dr7ud8C7bRLZRUD8N8A5ClckwSyiZ_53kZFF9u5ZDYD5J8K1_wyYKp6HVxKbxaknaAEVb8RLOCcRXNnp5rNMMv94vETDcFlU2eZrm_p6ruQmZFNwjJWcWWFNNfZGOR3CbPJ7D-ISlZkiKOjKJmaxhuWB07R05v80Qyr406FF2HO2IXveIpxwF4qF68gr1dwINcGXsEKikaWe";
+
+const Payment = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div
+      style={{ background: "#F5F5F7", minHeight: "100vh", color: "#1D1D1F", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+    >
+      {/* TopAppBar */}
+      <header
+        className="fixed top-0 w-full z-50 flex items-center px-6"
+        style={{
+          background: "rgba(245,245,247,0.8)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          height: 64,
+        }}
+      >
+        <div className="flex items-center w-full">
+          <button
+            onClick={() => navigate(-1)}
+            className="transition-all duration-[400ms] ease-in-out p-2 rounded-full active:scale-95 mr-2 hover:bg-black/5"
+          >
+            <span className="material-symbols-outlined" style={{ color: "#1D1D1F" }}>
+              arrow_back
+            </span>
+          </button>
+          <h1
+            className="font-bold text-lg tracking-tight"
+            style={{ color: "#1D1D1F" }}
+          >
+            Select Payment Method
+          </h1>
+        </div>
+      </header>
+
+      {/* Main Content Canvas */}
+      <main
+        className="max-w-4xl mx-auto flex flex-col"
+        style={{ paddingTop: 96, paddingLeft: 24, paddingRight: 24, gap: 48 }}
+      >
+        {/* Branding Hero Moment */}
+        <div
+          className="relative overflow-hidden flex items-end"
+          style={{
+            borderRadius: 26,
+            height: 256,
+            padding: 32,
+            boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+          }}
+        >
+          <img
+            alt="Premium Light Aesthetic"
+            src={HERO_IMG}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0.2), transparent)",
+            }}
+          />
+          <div className="relative z-10">
+            <span
+              className="uppercase font-bold"
+              style={{
+                background: "#1D1D1F",
+                color: "#FFFFFF",
+                fontSize: 10,
+                letterSpacing: "0.1em",
+                padding: "4px 12px",
+                borderRadius: 9999,
+              }}
+            >
+              Secure Checkout
+            </span>
+            <h2
+              className="font-extrabold tracking-tighter"
+              style={{ fontSize: 30, marginTop: 8, color: "#1D1D1F" }}
+            >
+              Finalize Order
+            </h2>
+            <p
+              className="font-medium"
+              style={{ color: "#6E6E73", fontSize: 14, marginTop: 4 }}
+            >
+              Choose your preferred way to pay
+            </p>
+          </div>
+        </div>
+
+        {/* Payment Options Stack */}
+        <section className="flex flex-col" style={{ gap: 24 }}>
+          {/* UPI Card */}
+          <button
+            type="button"
+            className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
+            style={{ ...liquidGlass, padding: 32 }}
+          >
+            <span style={glassHighlight} aria-hidden />
+            <div className="flex items-center relative z-10" style={{ gap: 24 }}>
+              <div
+                className="flex items-center justify-center group-hover:scale-105 transition-transform duration-[400ms]"
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 16,
+                  background: "rgba(0,102,204,0.10)",
+                  color: "#0066CC",
+                }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: 36, fontVariationSettings: "'FILL' 1" }}
+                >
+                  account_balance_wallet
+                </span>
+              </div>
+              <div>
+                <h3
+                  className="font-bold tracking-tight"
+                  style={{ color: "#1D1D1F", fontSize: 20 }}
+                >
+                  UPI Payment
+                </h3>
+                <p style={{ color: "#6E6E73", fontSize: 14, marginTop: 4 }}>
+                  Pay via UPI
+                </p>
+              </div>
+            </div>
+            <div
+              className="flex items-center justify-center transition-colors duration-[400ms] relative z-10 group-hover:bg-[#1D1D1F]"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 9999,
+                background: "rgba(0,0,0,0.05)",
+              }}
+            >
+              <span
+                className="material-symbols-outlined group-hover:text-white"
+                style={{ color: "#1D1D1F" }}
+              >
+                chevron_right
+              </span>
+            </div>
+          </button>
+
+          {/* Cash Card */}
+          <button
+            type="button"
+            className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
+            style={{ ...liquidGlass, padding: 32 }}
+          >
+            <span style={glassHighlight} aria-hidden />
+            <div className="flex items-center relative z-10" style={{ gap: 24 }}>
+              <div
+                className="flex items-center justify-center group-hover:scale-105 transition-transform duration-[400ms]"
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 16,
+                  background: "rgba(52,199,89,0.10)",
+                  color: "#34C759",
+                }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: 36, fontVariationSettings: "'FILL' 1" }}
+                >
+                  payments
+                </span>
+              </div>
+              <div>
+                <h3
+                  className="font-bold tracking-tight"
+                  style={{ color: "#1D1D1F", fontSize: 20 }}
+                >
+                  Cash on Delivery
+                </h3>
+                <p style={{ color: "#6E6E73", fontSize: 14, marginTop: 4 }}>
+                  Pay with Cash
+                </p>
+              </div>
+            </div>
+            <div
+              className="flex items-center justify-center transition-colors duration-[400ms] relative z-10 group-hover:bg-[#1D1D1F]"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 9999,
+                background: "rgba(0,0,0,0.05)",
+              }}
+            >
+              <span
+                className="material-symbols-outlined group-hover:text-white"
+                style={{ color: "#1D1D1F" }}
+              >
+                chevron_right
+              </span>
+            </div>
+          </button>
+        </section>
+
+        {/* Extra padding at bottom */}
+        <div style={{ height: 48 }} />
+      </main>
+    </div>
+  );
+};
+
+export default Payment;
