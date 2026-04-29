@@ -1,28 +1,84 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
-import { canteens, categories, menuItems, type MenuItem } from "@/data/menu";
+import { canteens } from "@/data/menu";
+
+type Item = { emoji: string; name: string; desc: string; price: number };
+type CategoryKey = "food" | "snacks" | "drinks";
+
+const DATA: Record<CategoryKey, Item[]> = {
+  food: [
+    { emoji: "🍱", name: "Artisan Bento Box", desc: "Premium salmon, tempura, and organic greens.", price: 450 },
+    { emoji: "🍜", name: "Midnight Miso Ramen", desc: "12-hour broth with slow-cooked pork belly.", price: 380 },
+    { emoji: "🌮", name: "Truffle Steak Tacos", desc: "Wagyu beef with truffle oil and cilantro.", price: 520 },
+    { emoji: "🍤", name: "Rock Shrimp Tempura", desc: "Crispy shrimp with spicy mayo glaze.", price: 420 },
+  ],
+  snacks: [
+    { emoji: "🥪", name: "Club Sandwich", desc: "Grilled chicken, cheese and crispy bacon.", price: 180 },
+    { emoji: "🍟", name: "Loaded Fries", desc: "Cheese, jalapeños, and house sauce.", price: 160 },
+    { emoji: "🥨", name: "Soft Pretzel", desc: "Warm pretzel with mustard dip.", price: 120 },
+    { emoji: "🌭", name: "Gourmet Hot Dog", desc: "Smoked sausage with caramelised onions.", price: 220 },
+  ],
+  drinks: [
+    { emoji: "🧃", name: "Cold Pressed Mango", desc: "Fresh Alphonso mango, no added sugar.", price: 90 },
+    { emoji: "🥤", name: "Sparkling Lemonade", desc: "House-made with mint and lime.", price: 80 },
+    { emoji: "☕", name: "Iced Caramel Latte", desc: "Double espresso, milk, caramel drizzle.", price: 140 },
+    { emoji: "🍵", name: "Matcha Cloud", desc: "Ceremonial matcha with oat foam.", price: 160 },
+  ],
+};
+
+const TABS: { key: CategoryKey; label: string; emoji: string }[] = [
+  { key: "food", label: "Food", emoji: "🍛" },
+  { key: "snacks", label: "Snacks", emoji: "🍟" },
+  { key: "drinks", label: "Drinks", emoji: "🥤" },
+];
+
+const liquidGlass: React.CSSProperties = {
+  background: "rgba(255,255,255,0.4)",
+  backdropFilter: "blur(40px)",
+  WebkitBackdropFilter: "blur(40px)",
+  boxShadow:
+    "0 4px 24px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.8), inset 0 24px 24px -12px rgba(255,255,255,0.5)",
+  borderRadius: 22,
+};
+
+const textGlass: React.CSSProperties = {
+  textShadow: "0 1px 2px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.05)",
+};
 
 const Menu = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const canteen = canteens.find((c) => c.id === id) ?? canteens[0];
+  const canteen = canteens.find((c) => c.id === id);
+  const title = canteen?.name ?? "Main Block Canteen";
 
+  const [active, setActive] = useState<CategoryKey>("food");
   const [query, setQuery] = useState("");
-  const [activeCat, setActiveCat] = useState<string>("all");
   const [qty, setQty] = useState<Record<string, number>>({});
+
+  const setCount = (key: string, n: number) =>
+    setQty((s) => ({ ...s, [key]: Math.max(0, n) }));
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return menuItems.filter((m) => {
-      if (activeCat !== "all" && m.categoryId !== activeCat) return false;
-      if (!q) return true;
-      return m.name.toLowerCase().includes(q) || m.description.toLowerCase().includes(q);
-    });
-  }, [query, activeCat]);
+    return DATA[active].filter(
+      (it) => !q || it.name.toLowerCase().includes(q) || it.desc.toLowerCase().includes(q),
+    );
+  }, [active, query]);
 
-  const setCount = (id: string, n: number) =>
-    setQty((s) => ({ ...s, [id]: Math.max(0, n) }));
+  const { totalItems, totalPrice } = useMemo(() => {
+    let items = 0;
+    let price = 0;
+    (Object.keys(DATA) as CategoryKey[]).forEach((cat) => {
+      DATA[cat].forEach((it) => {
+        const k = `${cat}:${it.name}`;
+        const n = qty[k] ?? 0;
+        items += n;
+        price += n * it.price;
+      });
+    });
+    return { totalItems: items, totalPrice: price };
+  }, [qty]);
 
   return (
     <UserLayout>
@@ -30,361 +86,359 @@ const Menu = () => {
         className="min-h-screen antialiased"
         style={{
           background: "#F5F5F7",
-          color: "#1D1D1F",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)",
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          color: "#111827",
+          fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
-        {/* Header with back */}
+        {/* Fixed header */}
         <div
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
           style={{
-            paddingTop: 48,
-            paddingLeft: 24,
-            paddingRight: 24,
-            marginBottom: 20,
+            padding: "16px 24px",
+            background: "rgba(245,245,247,0.85)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
           }}
-          className="flex items-center gap-3"
         >
           <button
             type="button"
             onClick={() => navigate(-1)}
             aria-label="Back"
-            className="flex items-center justify-center"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.7)",
-              backdropFilter: "blur(20px) saturate(180%)",
-              WebkitBackdropFilter: "blur(20px) saturate(180%)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 4px 14px rgba(0,0,0,0.04)",
-            }}
+            className="flex items-center gap-3"
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 22, color: "#1D1D1F" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: 24, color: "#4B5563" }}
+            >
               arrow_back
             </span>
-          </button>
-          <div className="min-w-0">
-            <div
+            <span
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                color: "#6E6E73",
-                textTransform: "uppercase",
-              }}
-            >
-              Menu
-            </div>
-            <h1
-              style={{
-                fontSize: 28,
-                fontWeight: 800,
+                fontSize: 22,
+                fontWeight: 600,
                 letterSpacing: "-0.02em",
-                color: "#1D1D1F",
-                lineHeight: 1.1,
+                color: "#111827",
               }}
-              className="truncate"
             >
-              {canteen.name}
-            </h1>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div style={{ paddingLeft: 24, paddingRight: 24, marginBottom: 20 }}>
-          <div
-            className="flex items-center gap-2"
-            style={{
-              height: 56,
-              borderRadius: 999,
-              padding: "0 20px",
-              background: "rgba(255,255,255,0.55)",
-              backdropFilter: "blur(20px) saturate(180%)",
-              WebkitBackdropFilter: "blur(20px) saturate(180%)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 6px 18px rgba(0,0,0,0.04)",
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 22, color: "#6E6E73" }}>
-              search
+              {title}
             </span>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search menu items..."
-              className="flex-1 bg-transparent outline-none"
-              style={{
-                fontSize: 15,
-                color: "#1D1D1F",
-                fontFamily: "inherit",
-              }}
-            />
-          </div>
+          </button>
+          <div style={{ width: 40, height: 40 }} />
         </div>
 
-        {/* Category pills */}
+        {/* Main content */}
         <div
-          className="no-scrollbar flex gap-3 overflow-x-auto"
-          style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginTop: 8, marginBottom: 32 }}
-        >
-          {categories.map((c) => {
-            const isActive = c.id === activeCat;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setActiveCat(c.id)}
-                className="shrink-0 flex items-center gap-2"
-                style={{
-                  height: 48,
-                  padding: "0 24px",
-                  borderRadius: 999,
-                  background: isActive ? "rgba(37,99,235,0.12)" : "rgba(255,255,255,0.55)",
-                  backdropFilter: "blur(20px) saturate(180%)",
-                  WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                  boxShadow: isActive
-                    ? "inset 0 0 0 1px rgba(37,99,235,0.35), 0 6px 18px rgba(37,99,235,0.12)"
-                    : "inset 0 1px 0 rgba(255,255,255,0.8), 0 4px 14px rgba(0,0,0,0.04)",
-                  transition: "all 200ms ease",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 700,
-                    letterSpacing: "-0.01em",
-                    color: isActive ? "#2563EB" : "#1D1D1F",
-                  }}
-                >
-                  {c.name}
-                </span>
-                <span style={{ fontSize: 16, lineHeight: 1 }}>{c.emoji}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Section heading */}
-        <h2
+          className="mx-auto"
           style={{
-            paddingLeft: 24,
-            paddingRight: 24,
-            fontSize: 11,
-            fontWeight: 800,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "#2563EB",
-            marginBottom: 16,
+            paddingTop: 96,
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)",
+            paddingLeft: 16,
+            paddingRight: 16,
+            maxWidth: 672,
           }}
         >
-          {activeCat === "all" ? "All Items" : categories.find((c) => c.id === activeCat)?.name}
-        </h2>
-
-        {/* Items */}
-        <div className="flex flex-col gap-5" style={{ paddingLeft: 24, paddingRight: 24 }}>
-          {visible.map((item) => (
-            <MenuItemCard
-              key={item.id}
-              item={item}
-              qty={qty[item.id] ?? 0}
-              onChange={(n) => setCount(item.id, n)}
-            />
-          ))}
-          {visible.length === 0 && (
+          {/* Sticky: search + tabs */}
+          <div
+            className="sticky z-40"
+            style={{ top: 64, paddingTop: 8, background: "transparent" }}
+          >
+            {/* Search */}
             <div
+              className="flex items-center gap-2"
               style={{
-                textAlign: "center",
-                padding: "48px 0",
-                color: "#6E6E73",
-                fontSize: 14,
+                ...liquidGlass,
+                height: 52,
+                borderRadius: 9999,
+                padding: "0 16px",
               }}
             >
-              No items match your search.
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: 22, color: "#2563eb" }}
+              >
+                search
+              </span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search for dishes or cravings..."
+                className="flex-1 bg-transparent outline-none"
+                style={{
+                  fontSize: 14,
+                  color: "#111827",
+                  fontFamily: "inherit",
+                }}
+              />
             </div>
-          )}
+
+            {/* Tabs */}
+            <div
+              className="no-scrollbar flex gap-3 overflow-x-auto"
+              style={{ marginTop: 32, marginBottom: 32 }}
+            >
+              {TABS.map((t) => {
+                const isActive = t.key === active;
+                return (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => setActive(t.key)}
+                    className="shrink-0"
+                    style={{
+                      ...liquidGlass,
+                      borderRadius: 9999,
+                      padding: "8px 20px",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: isActive ? "#2563eb" : "#4B5563",
+                      transition: "all 400ms ease",
+                    }}
+                  >
+                    {t.label} {t.emoji}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Food list */}
+          <div className="space-y-8">
+            {visible.map((it, idx) => {
+              const k = `${active}:${it.name}`;
+              const n = qty[k] ?? 0;
+              return (
+                <FoodCard
+                  key={k}
+                  item={it}
+                  qty={n}
+                  onChange={(v) => setCount(k, v)}
+                  delay={idx * 60}
+                />
+              );
+            })}
+            {visible.length === 0 && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "48px 0",
+                  color: "#6B7280",
+                  fontSize: 14,
+                }}
+              >
+                No items match your search.
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Floating order panel */}
+        {totalItems > 0 && (
+          <div
+            className="fixed z-50 flex items-center justify-between"
+            style={{
+              ...liquidGlass,
+              left: 16,
+              right: 16,
+              bottom: "calc(env(safe-area-inset-bottom, 0px) + 96px)",
+              padding: 16,
+            }}
+          >
+            <div className="min-w-0">
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "#6B7280",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                CURRENT ORDER
+              </div>
+              <div
+                style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginTop: 2 }}
+              >
+                {totalItems} item{totalItems === 1 ? "" : "s"} • ₹{totalPrice}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                style={{ fontSize: 12, fontWeight: 700, color: "#6B7280" }}
+              >
+                Add to Cart
+              </button>
+              <button
+                type="button"
+                style={{
+                  background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+                  color: "#FFFFFF",
+                  padding: "10px 20px",
+                  borderRadius: 9999,
+                  boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
+              >
+                Pay Now
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </UserLayout>
   );
 };
 
-/* ---------------- Menu Item Card ---------------- */
-const MenuItemCard = ({
+const FoodCard = ({
   item,
   qty,
   onChange,
+  delay,
 }: {
-  item: MenuItem;
+  item: Item;
   qty: number;
   onChange: (n: number) => void;
-}) => (
-  <div className="cb-glass" style={{ padding: 16, minHeight: 88 }}>
-    <div className="relative z-10 flex gap-4">
-      {/* Image */}
+  delay: number;
+}) => {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="flex items-center animate-fade-in"
+      style={{
+        ...liquidGlass,
+        background: hover ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.4)",
+        padding: 12,
+        gap: 12,
+        transition: "background 400ms ease",
+        animationDelay: `${delay}ms`,
+        animationFillMode: "both",
+      }}
+    >
       <div
-        className="shrink-0 overflow-hidden"
-        style={{
-          width: 96,
-          height: 96,
-          borderRadius: 18,
-          background: "rgba(255,255,255,0.6)",
-          boxShadow: "inset 0 0 20px rgba(0,0,0,0.08)",
-        }}
+        className="flex items-center justify-center shrink-0"
+        style={{ width: 48, height: 48, fontSize: 30 }}
       >
-        <img
-          src={item.image}
-          alt={item.name}
-          loading="lazy"
-          className="w-full h-full object-cover"
-        />
+        {item.emoji}
       </div>
-
-      {/* Body */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span
-                className="inline-block"
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 3,
-                  border: `1.5px solid ${item.isVeg ? "#22C55E" : "#EF4444"}`,
-                  position: "relative",
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    inset: 2,
-                    borderRadius: 999,
-                    background: item.isVeg ? "#22C55E" : "#EF4444",
-                  }}
-                />
-              </span>
-              {item.popular && (
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 800,
-                    letterSpacing: "0.08em",
-                    color: "#B45309",
-                    background: "rgba(255,181,150,0.4)",
-                    padding: "2px 6px",
-                    borderRadius: 999,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Popular
-                </span>
-              )}
-            </div>
-            <h3
-              className="truncate"
-              style={{
-                fontSize: 17,
-                fontWeight: 700,
-                letterSpacing: "-0.01em",
-                color: "#1D1D1F",
-                marginTop: 4,
-              }}
-            >
-              {item.name}
-            </h3>
-            <p
-              className="line-clamp-1"
-              style={{ fontSize: 13, color: "#6E6E73", marginTop: 4 }}
-            >
-              {item.description}
-            </p>
-          </div>
+      <div className="flex-1 min-w-0">
+        <div
+          style={{
+            ...textGlass,
+            fontWeight: 600,
+            fontSize: 15,
+            color: "#111827",
+          }}
+          className="truncate"
+        >
+          {item.name}
         </div>
-
-        <div className="flex items-end justify-between mt-3">
-          <div className="flex items-baseline gap-1.5">
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#1D1D1F", letterSpacing: "-0.01em" }}>
-              ₹{item.price}
-            </span>
-            {item.oldPrice && (
-              <span
-                style={{
-                  fontSize: 12,
-                  color: "#8A8A8E",
-                  textDecoration: "line-through",
-                }}
-              >
-                ₹{item.oldPrice}
-              </span>
-            )}
-            <span style={{ fontSize: 11, color: "#6E6E73", marginLeft: 6 }}>
-              · {item.prepMinutes} min
-            </span>
-          </div>
-
-          {qty === 0 ? (
+        <div
+          className="truncate"
+          style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}
+        >
+          {item.desc}
+        </div>
+        <div
+          style={{
+            ...textGlass,
+            fontSize: 14,
+            fontWeight: 700,
+            color: "#2563eb",
+            marginTop: 4,
+          }}
+        >
+          ₹{item.price}
+        </div>
+      </div>
+      <div className="shrink-0">
+        {qty === 0 ? (
+          <button
+            type="button"
+            onClick={() => onChange(1)}
+            style={{
+              background: "rgba(255,255,255,0.5)",
+              borderRadius: 9999,
+              padding: "6px 16px",
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "#374151",
+              transition: "all 400ms ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.85)";
+              e.currentTarget.style.color = "#2563eb";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.5)";
+              e.currentTarget.style.color = "#374151";
+            }}
+          >
+            Add
+          </button>
+        ) : (
+          <div
+            className="flex items-center"
+            style={{
+              gap: 8,
+              background: "rgba(255,255,255,0.4)",
+              border: "1px solid rgba(255,255,255,0.5)",
+              borderRadius: 9999,
+              padding: 4,
+            }}
+          >
             <button
               type="button"
-              onClick={() => onChange(1)}
+              onClick={() => onChange(qty - 1)}
+              aria-label="decrease"
               style={{
-                background: "#2563EB",
-                color: "#FFFFFF",
+                width: 24,
+                height: 24,
+                color: "#4B5563",
+                fontSize: 16,
+                lineHeight: 1,
+              }}
+            >
+              −
+            </button>
+            <span
+              style={{
                 fontSize: 12,
                 fontWeight: 700,
-                height: 36,
-                padding: "0 20px",
-                borderRadius: 999,
-                boxShadow: "0 8px 18px -6px rgba(37,99,235,0.45)",
+                color: "#111827",
+                minWidth: 16,
+                textAlign: "center",
               }}
             >
-              Add +
-            </button>
-          ) : (
-            <div
-              className="flex items-center"
+              {qty}
+            </span>
+            <button
+              type="button"
+              onClick={() => onChange(qty + 1)}
+              aria-label="increase"
+              className="flex items-center justify-center"
               style={{
-                background: "rgba(255,255,255,0.65)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                borderRadius: 999,
-                padding: 8,
-                gap: 6,
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9)",
+                width: 24,
+                height: 24,
+                background: "#2563eb",
+                color: "#FFFFFF",
+                borderRadius: "50%",
+                boxShadow: "0 2px 6px rgba(37,99,235,0.35)",
               }}
             >
-              <button
-                type="button"
-                onClick={() => onChange(qty - 1)}
-                aria-label="decrease"
-                style={{ width: 28, height: 28, fontSize: 18, fontWeight: 700, color: "#6E6E73" }}
-              >
-                −
-              </button>
-              <span
-                style={{
-                  minWidth: 14,
-                  textAlign: "center",
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: "#1D1D1F",
-                }}
-              >
-                {qty}
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                add
               </span>
-              <button
-                type="button"
-                onClick={() => onChange(qty + 1)}
-                aria-label="increase"
-                style={{ width: 28, height: 28, fontSize: 18, fontWeight: 700, color: "#2563EB" }}
-              >
-                +
-              </button>
-            </div>
-          )}
-        </div>
+            </button>
+          </div>
+        )}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Menu;
