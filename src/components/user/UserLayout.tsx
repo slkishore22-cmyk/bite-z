@@ -17,11 +17,14 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const active = pathToTab(pathname);
+  const hideNav = pathname.startsWith("/canteen/");
 
   return (
     <>
       {children}
-      <LiquidGlassNav activeId={active} onChange={(id) => navigate(tabToPath[id])} />
+      {!hideNav && (
+        <LiquidGlassNav activeId={active} onChange={(id) => navigate(tabToPath[id])} />
+      )}
     </>
   );
 };
