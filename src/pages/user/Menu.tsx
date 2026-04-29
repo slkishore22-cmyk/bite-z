@@ -270,6 +270,7 @@ const Menu = () => {
               </button>
               <button
                 type="button"
+                onClick={() => navigate("/payment")}
                 style={{
                   background: "linear-gradient(135deg, #2563eb, #3b82f6)",
                   color: "#FFFFFF",
