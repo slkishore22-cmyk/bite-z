@@ -17,7 +17,10 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const active = pathToTab(pathname);
-  const hideNav = pathname.startsWith("/canteen/") || pathname.startsWith("/payment");
+  const hideNav =
+    pathname.startsWith("/canteen/") ||
+    pathname.startsWith("/payment") ||
+    pathname.startsWith("/order-status");
 
   return (
     <>
