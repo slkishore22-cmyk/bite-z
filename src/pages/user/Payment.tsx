@@ -120,28 +120,28 @@ const Payment = () => {
         </div>
 
         {/* Payment Options Stack */}
-        <section className="flex flex-col" style={{ gap: 24 }}>
+        <section className="flex flex-col" style={{ gap: 14 }}>
           {/* UPI Card */}
           <button
             type="button"
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
-            style={{ ...liquidGlass, padding: 32 }}
+            style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
           >
             <span style={glassHighlight} aria-hidden />
-            <div className="flex items-center relative z-10" style={{ gap: 24 }}>
+            <div className="flex items-center relative z-10" style={{ gap: 14 }}>
               <div
                 className="flex items-center justify-center group-hover:scale-105 transition-transform duration-[400ms]"
                 style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 16,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
                   background: "rgba(0,102,204,0.10)",
                   color: "#0066CC",
                 }}
               >
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: 36, fontVariationSettings: "'FILL' 1" }}
+                  style={{ fontSize: 22, fontVariationSettings: "'FILL' 1" }}
                 >
                   account_balance_wallet
                 </span>
@@ -149,11 +149,11 @@ const Payment = () => {
               <div>
                 <h3
                   className="font-bold tracking-tight"
-                  style={{ color: "#1D1D1F", fontSize: 20 }}
+                  style={{ color: "#1D1D1F", fontSize: 15 }}
                 >
                   UPI Payment
                 </h3>
-                <p style={{ color: "#6E6E73", fontSize: 14, marginTop: 4 }}>
+                <p style={{ color: "#6E6E73", fontSize: 12, marginTop: 2 }}>
                   Pay via UPI
                 </p>
               </div>
@@ -161,15 +161,15 @@ const Payment = () => {
             <div
               className="flex items-center justify-center transition-colors duration-[400ms] relative z-10 group-hover:bg-[#1D1D1F]"
               style={{
-                width: 40,
-                height: 40,
+                width: 28,
+                height: 28,
                 borderRadius: 9999,
                 background: "rgba(0,0,0,0.05)",
               }}
             >
               <span
                 className="material-symbols-outlined group-hover:text-white"
-                style={{ color: "#1D1D1F" }}
+                style={{ color: "#1D1D1F", fontSize: 18 }}
               >
                 chevron_right
               </span>
@@ -180,23 +180,23 @@ const Payment = () => {
           <button
             type="button"
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
-            style={{ ...liquidGlass, padding: 32 }}
+            style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
           >
             <span style={glassHighlight} aria-hidden />
-            <div className="flex items-center relative z-10" style={{ gap: 24 }}>
+            <div className="flex items-center relative z-10" style={{ gap: 14 }}>
               <div
                 className="flex items-center justify-center group-hover:scale-105 transition-transform duration-[400ms]"
                 style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 16,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
                   background: "rgba(52,199,89,0.10)",
                   color: "#34C759",
                 }}
               >
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: 36, fontVariationSettings: "'FILL' 1" }}
+                  style={{ fontSize: 22, fontVariationSettings: "'FILL' 1" }}
                 >
                   payments
                 </span>
@@ -204,11 +204,11 @@ const Payment = () => {
               <div>
                 <h3
                   className="font-bold tracking-tight"
-                  style={{ color: "#1D1D1F", fontSize: 20 }}
+                  style={{ color: "#1D1D1F", fontSize: 15 }}
                 >
                   Cash on Delivery
                 </h3>
-                <p style={{ color: "#6E6E73", fontSize: 14, marginTop: 4 }}>
+                <p style={{ color: "#6E6E73", fontSize: 12, marginTop: 2 }}>
                   Pay with Cash
                 </p>
               </div>
@@ -216,15 +216,15 @@ const Payment = () => {
             <div
               className="flex items-center justify-center transition-colors duration-[400ms] relative z-10 group-hover:bg-[#1D1D1F]"
               style={{
-                width: 40,
-                height: 40,
+                width: 28,
+                height: 28,
                 borderRadius: 9999,
                 background: "rgba(0,0,0,0.05)",
               }}
             >
               <span
                 className="material-symbols-outlined group-hover:text-white"
-                style={{ color: "#1D1D1F" }}
+                style={{ color: "#1D1D1F", fontSize: 18 }}
               >
                 chevron_right
               </span>
