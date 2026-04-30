@@ -1,9 +1,20 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useMemo } from "react";
 
 const OrderStatus = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const method = (params.get("method") || "cod").toLowerCase();
+
+  const [revealed, setRevealed] = useState(false);
+  const orderId = useMemo(() => {
+    // Generate a 4-digit ID made of two repeating pairs (e.g. 1122, 3399, 0088)
+    const d = () => Math.floor(Math.random() * 10);
+    const a = d();
+    let b = d();
+    while (b === a) b = d();
+    return `${a}${a}${b}${b}`;
+  }, []);
 
   const paymentLabel = method === "upi" ? "Paid via UPI" : "Cash on Delivery";
   const paymentSub = method === "upi" ? "Transaction Successful" : "Pay at pickup";
@@ -105,9 +116,11 @@ const OrderStatus = () => {
                 letterSpacing: "0.1em",
               }}
             >
-              XXXX
+              {revealed ? orderId : "XXXX"}
             </div>
             <button
+              onClick={() => setRevealed(true)}
+              disabled={revealed}
               className="font-bold transition-all"
               style={{
                 color: "#2563EB",
@@ -116,9 +129,11 @@ const OrderStatus = () => {
                 borderRadius: 9999,
                 border: "1px solid rgba(37,99,235,0.2)",
                 background: "transparent",
+                opacity: revealed ? 0.5 : 1,
+                cursor: revealed ? "default" : "pointer",
               }}
             >
-              Tap to reveal
+              {revealed ? "Revealed" : "Tap to reveal"}
             </button>
           </div>
 
