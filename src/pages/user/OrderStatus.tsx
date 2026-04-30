@@ -30,13 +30,13 @@ const OrderStatus = () => {
       }}
     >
       {/* Top AppBar */}
-      <header className="fixed top-0 w-full z-50 px-4 h-16 flex items-center justify-center">
+      <header className="w-full max-w-md px-6 h-16 flex items-center justify-start">
         <h1 className="font-bold text-lg" style={{ color: "#0F172A" }}>
           Order Status
         </h1>
       </header>
 
-      <main className="flex-1 w-full max-w-md px-6 pt-32 flex flex-col items-center pb-12">
+      <main className="flex-1 w-full max-w-md px-6 pt-6 flex flex-col items-center pb-12">
         {/* Success Indicator */}
         <div className="flex flex-col items-center mb-12 relative">
           <div
