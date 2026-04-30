@@ -30,16 +30,7 @@ const OrderStatus = () => {
       }}
     >
       {/* Top AppBar */}
-      <header className="fixed top-0 w-full z-50 px-4 h-16 flex items-center justify-start">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center justify-center w-10 h-10"
-          aria-label="Back"
-        >
-          <span className="material-symbols-outlined" style={{ color: "#0F172A" }}>
-            arrow_back
-          </span>
-        </button>
+      <header className="fixed top-0 w-full z-50 px-4 h-16 flex items-center justify-center">
         <h1 className="font-bold text-lg" style={{ color: "#0F172A" }}>
           Order Status
         </h1>
