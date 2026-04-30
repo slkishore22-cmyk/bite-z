@@ -34,6 +34,7 @@ const Cart = () => {
     { id: "i1", name: "Midnight Miso Ramen", price: 14.5, emoji: "🍜", qty: 1 },
     { id: "i2", name: "Artisan Bento Box", price: 18.0, emoji: "🍱", qty: 1 },
   ]);
+  const [expanded, setExpanded] = useState(false);
 
   const update = (id: string, delta: number) =>
     setItems((p) =>
@@ -107,8 +108,9 @@ const Cart = () => {
               <section style={{ ...liquidGlass }}>
                 <span style={glassHighlight} aria-hidden />
                 {/* Header */}
-                <div
-                  className="flex items-center justify-between relative z-10"
+                <button
+                  onClick={() => setExpanded((v) => !v)}
+                  className="w-full flex items-center justify-between relative z-10 active:scale-[0.99] transition-transform"
                   style={{ padding: "16px 20px" }}
                 >
                   <div className="flex items-center gap-3">
@@ -132,7 +134,7 @@ const Cart = () => {
                         restaurant
                       </span>
                     </div>
-                    <div>
+                    <div className="text-left">
                       <h2 className="font-bold" style={{ fontSize: 15, color: "#1D1D1F" }}>
                         Main Block Canteen
                       </h2>
@@ -146,13 +148,19 @@ const Cart = () => {
                   </div>
                   <span
                     className="material-symbols-outlined"
-                    style={{ color: "#6E6E73", fontSize: 22 }}
+                    style={{
+                      color: "#6E6E73",
+                      fontSize: 22,
+                      transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 300ms ease",
+                    }}
                   >
                     expand_more
                   </span>
-                </div>
+                </button>
 
                 {/* Items */}
+                {expanded && (
                 <div
                   className="relative z-10 space-y-3"
                   style={{ padding: 12, paddingTop: 4 }}
@@ -246,9 +254,11 @@ const Cart = () => {
                     </div>
                   ))}
                 </div>
+                )}
               </section>
 
               {/* Price Summary */}
+              {expanded && (
               <section className="space-y-3" style={{ paddingTop: 8, paddingLeft: 4, paddingRight: 4 }}>
                 <Row label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
                 <Row label="Platform Fee" value={`$${platformFee.toFixed(2)}`} />
@@ -270,12 +280,13 @@ const Cart = () => {
                   </span>
                 </div>
               </section>
+              )}
             </>
           )}
         </main>
 
         {/* Sticky Pay Now */}
-        {items.length > 0 && (
+        {items.length > 0 && expanded && (
           <div
             className="fixed left-1/2 -translate-x-1/2 z-30 px-6 w-full max-w-md"
             style={{ bottom: 96 }}
