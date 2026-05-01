@@ -626,6 +626,103 @@ const SellerInventory = () => {
               </span>
             </div>
 
+            {/* Smart suggestion banner — appears as the seller types the food name */}
+            <style>{`
+              @keyframes smart-banner-in {
+                0% { opacity: 0; transform: translateY(-6px); }
+                100% { opacity: 1; transform: translateY(0); }
+              }
+              @keyframes smart-chip-pop {
+                0% { opacity: 0; transform: scale(0.85); }
+                100% { opacity: 1; transform: scale(1); }
+              }
+              .smart-chip:hover {
+                background: rgba(37,99,235,0.18) !important;
+                border-color: #2563EB !important;
+                transform: scale(1.04);
+              }
+            `}</style>
+            {suggestions.length > 0 && (
+              <div
+                key={name.trim().toLowerCase()}
+                style={{
+                  background: "#1A1A2E",
+                  border: "1.5px solid #2563EB",
+                  borderRadius: 14,
+                  padding: "12px 14px",
+                  marginTop: 12,
+                  marginBottom: 16,
+                  animation: "smart-banner-in 250ms ease both",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    color: "#2563EB",
+                    letterSpacing: "0.12em",
+                    margin: 0,
+                  }}
+                >
+                  ⚡ Suggested Icons for "{name.trim()}"
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 8,
+                    marginTop: 10,
+                  }}
+                >
+                  {suggestions.map((s, i) => {
+                    const isSelected =
+                      selectedIcon?.emoji === s.emoji && selectedIcon?.label === s.label;
+                    return (
+                      <button
+                        type="button"
+                        key={`sugg-${s.emoji}-${s.label}-${i}`}
+                        onClick={() =>
+                          setSelectedIcon({ emoji: s.emoji, label: s.label })
+                        }
+                        className="smart-chip"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 7,
+                          background: isSelected
+                            ? "rgba(37,99,235,0.25)"
+                            : "#111827",
+                          border: `1.5px solid ${isSelected ? "#2563EB" : "#1E3A5F"}`,
+                          borderRadius: 10,
+                          padding: "8px 12px",
+                          boxShadow: isSelected
+                            ? "0 0 0 2px rgba(37,99,235,0.3)"
+                            : "none",
+                          cursor: "pointer",
+                          transition:
+                            "background 150ms ease, border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease",
+                          animation: `smart-chip-pop 300ms cubic-bezier(0.34,1.56,0.64,1) both`,
+                          animationDelay: `${i * 45}ms`,
+                        }}
+                      >
+                        <span style={{ fontSize: 22, lineHeight: 1 }}>{s.emoji}</span>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: "#CBD5E1",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {s.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Horizontal scrollable category tabs */}
             <div
               className="mt-3 flex gap-2 overflow-x-auto pb-1"
