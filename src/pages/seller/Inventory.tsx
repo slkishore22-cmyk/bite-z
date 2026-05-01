@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 type Category = "Food" | "Snacks" | "Drinks";
-type InvType = "Active" | "Inactive" | "Quantity Based";
+type InvType = "Active" | "Inactive";
 
 type Item = {
   id: string;
@@ -371,7 +371,7 @@ const SellerInventory = () => {
               INVENTORY TYPE
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
-              {(["Active", "Inactive", "Quantity Based"] as InvType[]).map((t) => (
+              {(["Active", "Inactive"] as InvType[]).map((t) => (
                 <Chip key={t} active={invType === t} onClick={() => setInvType(t)}>
                   {t}
                 </Chip>
