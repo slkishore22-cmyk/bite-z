@@ -346,9 +346,9 @@ const SellerInventory = () => {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState<Category>("Food");
   const [invType, setInvType] = useState<InvType>("Active");
-  const [icon, setIcon] = useState<string>(ICON_LIBRARY.Food[0].icon);
-  const [iconTouched, setIconTouched] = useState(false);
   const [items, setItems] = useState<Item[]>(initialItems);
+  const [activeIconTab, setActiveIconTab] = useState<IconTabKey>("all");
+  const [selectedIcon, setSelectedIcon] = useState<{ emoji: string; label: string } | null>(null);
 
   /**
    * Smart icon list:
@@ -356,35 +356,11 @@ const SellerInventory = () => {
    * - When a name is typed, only show icons whose keywords match any token of the name.
    * - If nothing matches, fall back to all category icons so the picker is never empty.
    */
+  // Filter icons by the selected tab. "All" shows the entire library.
   const visibleIcons = useMemo(() => {
-    const pool = ICON_LIBRARY[category];
-    const q = name.trim().toLowerCase();
-    if (!q) return pool;
-
-    const tokens = q.split(/[\s,/-]+/).filter(Boolean);
-    const scored = pool
-      .map((entry) => {
-        let score = 0;
-        for (const kw of entry.keywords) {
-          for (const t of tokens) {
-            if (kw.includes(t) || t.includes(kw)) score += kw === t ? 3 : 1;
-          }
-        }
-        return { entry, score };
-      })
-      .filter((s) => s.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map((s) => s.entry);
-
-    return scored.length > 0 ? scored : pool;
-  }, [name, category]);
-
-  // Auto-pick the top suggestion when user is typing and hasn't manually chosen one.
-  const topSuggested = visibleIcons[0]?.icon;
-  if (topSuggested && !iconTouched && icon !== topSuggested) {
-    // Defer to render-cycle safe state update via microtask
-    queueMicrotask(() => setIcon(topSuggested));
-  }
+    if (activeIconTab === "all") return LABELED_ICONS;
+    return LABELED_ICONS.filter((i) => i.tab === activeIconTab);
+  }, [activeIconTab]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -398,20 +374,25 @@ const SellerInventory = () => {
       toast.error("Please enter a valid price");
       return;
     }
+    if (!selectedIcon) {
+      toast.error("Please choose an icon");
+      return;
+    }
     const newItem: Item = {
       id: crypto.randomUUID(),
       name: trimmed,
       price: priceNum,
       category,
       subcategory: invType,
-      icon,
+      icon: selectedIcon.emoji,
       status: invType,
     };
     setItems((prev) => [newItem, ...prev]);
     toast.success(`${trimmed} added to inventory`);
     setName("");
     setPrice("");
-    setIconTouched(false);
+    setSelectedIcon(null);
+    setActiveIconTab("all");
   };
 
   return (
