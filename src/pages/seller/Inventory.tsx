@@ -23,7 +23,12 @@ type IconEntry = { icon: string; keywords: string[] };
 
 /** Tabbed icon picker dataset — emoji + readable label, grouped by cuisine/category. */
 type IconTabKey = "all" | "south" | "north" | "snacks" | "drinks" | "fastfood" | "desserts";
-type LabeledIcon = { emoji: string; label: string; tab: Exclude<IconTabKey, "all"> };
+type LabeledIcon = {
+  emoji: string;
+  label: string;
+  tab: Exclude<IconTabKey, "all">;
+  keywords?: string[];
+};
 
 const ICON_TABS: { key: IconTabKey; label: string }[] = [
   { key: "all", label: "All" },
@@ -145,6 +150,104 @@ const LABELED_ICONS: LabeledIcon[] = [
   { emoji: "🍮", label: "Pudding", tab: "desserts" },
   { emoji: "🥧", label: "Pie", tab: "desserts" },
 ];
+
+/**
+ * Keyword index for the smart suggestion feature.
+ * Key format: `${emoji}|${label}` to match a unique LabeledIcon entry.
+ * Words are lowercase. Only the icons listed in the spec need rich keywords;
+ * for the rest we fall back to splitting the label.
+ */
+const ICON_KEYWORDS: Record<string, string[]> = {
+  // South Indian
+  "🫓|Idli": ["idli", "idly", "steamed", "soft"],
+  "🥞|Dosa": ["dosa", "crispy", "crepe", "plain dosa", "masala dosa", "rava dosa", "set dosa"],
+  "🫔|Uttapam": ["uttapam", "uthappam", "thick dosa", "onion uttapam"],
+  "🍛|Sambar": ["sambar", "sambhar", "dal", "lentil", "curry", "vegetable curry"],
+  "🥣|Rasam": ["rasam", "pepper water", "tomato rasam", "tamarind"],
+  "🍚|Rice": ["rice", "steamed rice", "white rice", "boiled rice"],
+  "🥘|Curd Rice": ["curd rice", "thayir sadam", "yogurt rice", "curd", "thayir"],
+  "🍲|Avial": ["avial", "aviyal", "mixed veg", "coconut curry"],
+  "🍱|Meals": ["meals", "thali", "full meals", "lunch", "dinner", "plate"],
+  "🥟|Vada": ["vada", "vadai", "wada", "fritter"],
+  "🍩|Medu Vada": ["medu vada", "medu", "medhu", "medu vadai", "donut vada"],
+  "🧆|Bonda": ["bonda", "aloo bonda", "potato bonda", "bajji", "pakora"],
+  "🌯|Parotta": ["parotta", "parota", "porotta", "layered", "kothu parotta", "kothu"],
+  "🫙|Chutney": ["chutney", "coconut chutney", "tomato chutney", "green chutney", "dip"],
+  "🍵|Filter Kaapi": ["filter kaapi", "filter coffee", "south coffee", "decoction", "kaapi"],
+  "🍜|Sevai": ["sevai", "idiyappam", "string hoppers", "lemon sevai"],
+  "🍢|Pongal": ["pongal", "ven pongal", "sweet pongal", "khichdi", "rice dish"],
+  "🫘|Sundal": ["sundal", "chana sundal", "boiled legumes", "chickpea"],
+  // North Indian
+  "🫓|Roti": ["roti", "chapati", "chapatti", "phulka", "wheat bread", "flatbread"],
+  "🫔|Paratha": ["paratha", "aloo paratha", "gobi paratha", "stuffed paratha"],
+  "🫙|Dal": ["dal", "daal", "lentil", "dal makhani", "dal tadka", "dal fry"],
+  "🍢|Paneer": ["paneer", "cottage cheese", "paneer butter masala", "shahi paneer", "palak paneer", "paneer tikka"],
+  "🍲|Rajma": ["rajma", "kidney beans", "rajma chawal"],
+  "🥘|Chole": ["chole", "chana", "chickpea", "pindi chole", "chole bhature"],
+  "🍗|Tandoori": ["tandoori", "tandoor", "grilled", "clay oven", "tandoori roti", "tandoori chicken"],
+  "🥩|Kebab": ["kebab", "seekh kebab", "shami kebab", "grilled meat", "mutton kebab"],
+  "🍚|Biryani": ["biryani", "biriyani", "dum biryani", "chicken biryani", "mutton biryani", "veg biryani"],
+  "🥙|Wrap": ["wrap", "roll", "frankie", "kathi roll", "egg roll", "chicken roll"],
+  "🍵|Chai": ["chai", "tea", "masala chai", "ginger tea", "cutting chai", "milk tea"],
+  // Snacks
+  "🌊|Pani Puri": ["pani puri", "panipuri", "golgappa", "puchka", "water puri", "street food"],
+  "🥙|Pav Bhaji": ["pav bhaji", "pav", "bhaji", "mumbai street"],
+  "🌯|Bhel Puri": ["bhel puri", "bhelpuri", "bhel", "puffed rice"],
+  "🧆|Pakora": ["pakora", "pakoda", "fritter", "onion pakora", "chilli pakora", "bajji"],
+  "🍟|Fries": ["fries", "french fries", "potato fries", "chips", "masala fries"],
+  "🥟|Momos": ["momos", "momo", "dumpling", "steamed momos", "fried momos", "dim sum"],
+  "🥪|Sandwich": ["sandwich", "club sandwich", "grilled sandwich", "veg sandwich", "cheese sandwich"],
+  "🍕|Pizza": ["pizza", "cheese pizza", "veg pizza", "slice"],
+  "🌽|Corn": ["corn", "sweet corn", "maize", "masala corn", "butter corn"],
+  "🍳|Omelette": ["omelette", "omelet", "anda omelette", "masala omelette"],
+  "🥚|Egg": ["egg", "boiled egg", "egg snack", "anda"],
+  // Drinks
+  "🥤|Cold Drink": ["cold drink", "soda", "fizzy", "cola", "pepsi", "coke", "soft drink"],
+  "🧃|Juice": ["juice", "fresh juice", "orange juice", "fruit juice", "mango juice"],
+  "☕|Coffee": ["coffee", "espresso", "latte", "cappuccino", "cold coffee", "iced coffee"],
+  "🍵|Tea": ["tea", "hot tea", "green tea", "black tea", "ginger tea", "chai"],
+  "🥛|Milk": ["milk", "hot milk", "cold milk", "flavoured milk", "badam milk"],
+  "🍹|Mocktail": ["mocktail", "fruit punch", "virgin mojito", "tropical"],
+  "🧋|Bubble Tea": ["bubble tea", "boba", "tapioca", "milk tea"],
+  "🍶|Lassi": ["lassi", "sweet lassi", "salt lassi", "mango lassi", "buttermilk", "chaas"],
+  // Fast Food
+  "🍔|Burger": ["burger", "veg burger", "cheese burger", "chicken burger", "patty"],
+  "🌮|Tacos": ["tacos", "taco", "mexican"],
+  "🍗|Fried Chicken": ["fried chicken", "kfc", "crispy chicken", "chicken wings", "wings"],
+  "🍜|Noodles": ["noodles", "hakka noodles", "chowmein", "schezwan", "ramen", "maggi"],
+  // Desserts
+  "🍮|Halwa": ["halwa", "gajar halwa", "moong halwa", "sooji halwa", "kesari"],
+  "🍰|Cake": ["cake", "pastry", "chocolate cake", "vanilla cake", "birthday cake"],
+  "🧁|Cupcake": ["cupcake", "muffin", "mini cake"],
+  "🍩|Donut": ["donut", "doughnut", "glazed donut"],
+  "🍪|Cookie": ["cookie", "biscuit", "choco chip"],
+  "🍫|Chocolate": ["chocolate", "choco", "cocoa", "dark chocolate"],
+  "🍦|Ice Cream": ["ice cream", "softy", "vanilla ice cream", "chocolate ice cream"],
+  "🍧|Kulfi": ["kulfi", "malai kulfi", "pista kulfi", "indian ice cream"],
+};
+
+/** Score a single icon against the typed query and return total points (0 = no match). */
+function scoreIconForQuery(icon: LabeledIcon, query: string): number {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return 0;
+  const key = `${icon.emoji}|${icon.label}`;
+  const keywords = ICON_KEYWORDS[key] ?? [icon.label.toLowerCase()];
+  const labelLower = icon.label.toLowerCase();
+  const queryWords = q.split(/\s+/).filter((w) => w.length > 0);
+  let score = 0;
+  for (const kwRaw of keywords) {
+    const kw = kwRaw.toLowerCase();
+    if (kw === q) score += 100;
+    else if (kw.startsWith(q)) score += 60;
+    else if (kw.includes(q)) score += 40;
+    else if (q.length > 3 && q.includes(kw)) score += 30;
+    for (const w of queryWords) {
+      if (w.length > 2 && kw.includes(w)) score += 20;
+    }
+  }
+  if (labelLower.includes(q)) score += 50;
+  return score;
+}
 
 const ICON_LIBRARY: Record<Category, IconEntry[]> = {
   Food: [
@@ -362,6 +465,30 @@ const SellerInventory = () => {
     return LABELED_ICONS.filter((i) => i.tab === activeIconTab);
   }, [activeIconTab]);
 
+  /**
+   * Smart suggestions: score every icon against the typed name and return
+   * the top 6 matches. Hidden when the query is too short or has 0 matches.
+   */
+  const suggestions = useMemo(() => {
+    const q = name.trim();
+    if (q.length < 2) return [];
+    // Deduplicate by emoji+label so the same icon doesn't appear twice
+    // (e.g. 🍵 appears in multiple tabs).
+    const seen = new Set<string>();
+    const scored: { icon: LabeledIcon; score: number }[] = [];
+    for (const icon of LABELED_ICONS) {
+      const key = `${icon.emoji}|${icon.label}`;
+      if (seen.has(key)) continue;
+      const s = scoreIconForQuery(icon, q);
+      if (s > 0) {
+        seen.add(key);
+        scored.push({ icon, score: s });
+      }
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 6).map((x) => x.icon);
+  }, [name]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
@@ -498,6 +625,103 @@ const SellerInventory = () => {
                 {visibleIcons.length} icons
               </span>
             </div>
+
+            {/* Smart suggestion banner — appears as the seller types the food name */}
+            <style>{`
+              @keyframes smart-banner-in {
+                0% { opacity: 0; transform: translateY(-6px); }
+                100% { opacity: 1; transform: translateY(0); }
+              }
+              @keyframes smart-chip-pop {
+                0% { opacity: 0; transform: scale(0.85); }
+                100% { opacity: 1; transform: scale(1); }
+              }
+              .smart-chip:hover {
+                background: rgba(37,99,235,0.18) !important;
+                border-color: #2563EB !important;
+                transform: scale(1.04);
+              }
+            `}</style>
+            {suggestions.length > 0 && (
+              <div
+                key={name.trim().toLowerCase()}
+                style={{
+                  background: "#1A1A2E",
+                  border: "1.5px solid #2563EB",
+                  borderRadius: 14,
+                  padding: "12px 14px",
+                  marginTop: 12,
+                  marginBottom: 16,
+                  animation: "smart-banner-in 250ms ease both",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    color: "#2563EB",
+                    letterSpacing: "0.12em",
+                    margin: 0,
+                  }}
+                >
+                  ⚡ Suggested Icons for "{name.trim()}"
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 8,
+                    marginTop: 10,
+                  }}
+                >
+                  {suggestions.map((s, i) => {
+                    const isSelected =
+                      selectedIcon?.emoji === s.emoji && selectedIcon?.label === s.label;
+                    return (
+                      <button
+                        type="button"
+                        key={`sugg-${s.emoji}-${s.label}-${i}`}
+                        onClick={() =>
+                          setSelectedIcon({ emoji: s.emoji, label: s.label })
+                        }
+                        className="smart-chip"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 7,
+                          background: isSelected
+                            ? "rgba(37,99,235,0.25)"
+                            : "#111827",
+                          border: `1.5px solid ${isSelected ? "#2563EB" : "#1E3A5F"}`,
+                          borderRadius: 10,
+                          padding: "8px 12px",
+                          boxShadow: isSelected
+                            ? "0 0 0 2px rgba(37,99,235,0.3)"
+                            : "none",
+                          cursor: "pointer",
+                          transition:
+                            "background 150ms ease, border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease",
+                          animation: `smart-chip-pop 300ms cubic-bezier(0.34,1.56,0.64,1) both`,
+                          animationDelay: `${i * 45}ms`,
+                        }}
+                      >
+                        <span style={{ fontSize: 22, lineHeight: 1 }}>{s.emoji}</span>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: "#CBD5E1",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {s.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Horizontal scrollable category tabs */}
             <div
