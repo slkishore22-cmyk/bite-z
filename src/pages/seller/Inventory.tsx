@@ -328,7 +328,10 @@ const SellerInventory = () => {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setName(v.length > 0 ? v.charAt(0).toUpperCase() + v.slice(1) : v);
+              }}
               maxLength={80}
               placeholder="Enter food name"
               className="mt-2 w-full rounded-full bg-secondary/70 px-5 py-3.5 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
