@@ -151,6 +151,104 @@ const LABELED_ICONS: LabeledIcon[] = [
   { emoji: "🥧", label: "Pie", tab: "desserts" },
 ];
 
+/**
+ * Keyword index for the smart suggestion feature.
+ * Key format: `${emoji}|${label}` to match a unique LabeledIcon entry.
+ * Words are lowercase. Only the icons listed in the spec need rich keywords;
+ * for the rest we fall back to splitting the label.
+ */
+const ICON_KEYWORDS: Record<string, string[]> = {
+  // South Indian
+  "🫓|Idli": ["idli", "idly", "steamed", "soft"],
+  "🥞|Dosa": ["dosa", "crispy", "crepe", "plain dosa", "masala dosa", "rava dosa", "set dosa"],
+  "🫔|Uttapam": ["uttapam", "uthappam", "thick dosa", "onion uttapam"],
+  "🍛|Sambar": ["sambar", "sambhar", "dal", "lentil", "curry", "vegetable curry"],
+  "🥣|Rasam": ["rasam", "pepper water", "tomato rasam", "tamarind"],
+  "🍚|Rice": ["rice", "steamed rice", "white rice", "boiled rice"],
+  "🥘|Curd Rice": ["curd rice", "thayir sadam", "yogurt rice", "curd", "thayir"],
+  "🍲|Avial": ["avial", "aviyal", "mixed veg", "coconut curry"],
+  "🍱|Meals": ["meals", "thali", "full meals", "lunch", "dinner", "plate"],
+  "🥟|Vada": ["vada", "vadai", "wada", "fritter"],
+  "🍩|Medu Vada": ["medu vada", "medu", "medhu", "medu vadai", "donut vada"],
+  "🧆|Bonda": ["bonda", "aloo bonda", "potato bonda", "bajji", "pakora"],
+  "🌯|Parotta": ["parotta", "parota", "porotta", "layered", "kothu parotta", "kothu"],
+  "🫙|Chutney": ["chutney", "coconut chutney", "tomato chutney", "green chutney", "dip"],
+  "🍵|Filter Kaapi": ["filter kaapi", "filter coffee", "south coffee", "decoction", "kaapi"],
+  "🍜|Sevai": ["sevai", "idiyappam", "string hoppers", "lemon sevai"],
+  "🍢|Pongal": ["pongal", "ven pongal", "sweet pongal", "khichdi", "rice dish"],
+  "🫘|Sundal": ["sundal", "chana sundal", "boiled legumes", "chickpea"],
+  // North Indian
+  "🫓|Roti": ["roti", "chapati", "chapatti", "phulka", "wheat bread", "flatbread"],
+  "🫔|Paratha": ["paratha", "aloo paratha", "gobi paratha", "stuffed paratha"],
+  "🫙|Dal": ["dal", "daal", "lentil", "dal makhani", "dal tadka", "dal fry"],
+  "🍢|Paneer": ["paneer", "cottage cheese", "paneer butter masala", "shahi paneer", "palak paneer", "paneer tikka"],
+  "🍲|Rajma": ["rajma", "kidney beans", "rajma chawal"],
+  "🥘|Chole": ["chole", "chana", "chickpea", "pindi chole", "chole bhature"],
+  "🍗|Tandoori": ["tandoori", "tandoor", "grilled", "clay oven", "tandoori roti", "tandoori chicken"],
+  "🥩|Kebab": ["kebab", "seekh kebab", "shami kebab", "grilled meat", "mutton kebab"],
+  "🍚|Biryani": ["biryani", "biriyani", "dum biryani", "chicken biryani", "mutton biryani", "veg biryani"],
+  "🥙|Wrap": ["wrap", "roll", "frankie", "kathi roll", "egg roll", "chicken roll"],
+  "🍵|Chai": ["chai", "tea", "masala chai", "ginger tea", "cutting chai", "milk tea"],
+  // Snacks
+  "🌊|Pani Puri": ["pani puri", "panipuri", "golgappa", "puchka", "water puri", "street food"],
+  "🥙|Pav Bhaji": ["pav bhaji", "pav", "bhaji", "mumbai street"],
+  "🌯|Bhel Puri": ["bhel puri", "bhelpuri", "bhel", "puffed rice"],
+  "🧆|Pakora": ["pakora", "pakoda", "fritter", "onion pakora", "chilli pakora", "bajji"],
+  "🍟|Fries": ["fries", "french fries", "potato fries", "chips", "masala fries"],
+  "🥟|Momos": ["momos", "momo", "dumpling", "steamed momos", "fried momos", "dim sum"],
+  "🥪|Sandwich": ["sandwich", "club sandwich", "grilled sandwich", "veg sandwich", "cheese sandwich"],
+  "🍕|Pizza": ["pizza", "cheese pizza", "veg pizza", "slice"],
+  "🌽|Corn": ["corn", "sweet corn", "maize", "masala corn", "butter corn"],
+  "🍳|Omelette": ["omelette", "omelet", "anda omelette", "masala omelette"],
+  "🥚|Egg": ["egg", "boiled egg", "egg snack", "anda"],
+  // Drinks
+  "🥤|Cold Drink": ["cold drink", "soda", "fizzy", "cola", "pepsi", "coke", "soft drink"],
+  "🧃|Juice": ["juice", "fresh juice", "orange juice", "fruit juice", "mango juice"],
+  "☕|Coffee": ["coffee", "espresso", "latte", "cappuccino", "cold coffee", "iced coffee"],
+  "🍵|Tea": ["tea", "hot tea", "green tea", "black tea", "ginger tea", "chai"],
+  "🥛|Milk": ["milk", "hot milk", "cold milk", "flavoured milk", "badam milk"],
+  "🍹|Mocktail": ["mocktail", "fruit punch", "virgin mojito", "tropical"],
+  "🧋|Bubble Tea": ["bubble tea", "boba", "tapioca", "milk tea"],
+  "🍶|Lassi": ["lassi", "sweet lassi", "salt lassi", "mango lassi", "buttermilk", "chaas"],
+  // Fast Food
+  "🍔|Burger": ["burger", "veg burger", "cheese burger", "chicken burger", "patty"],
+  "🌮|Tacos": ["tacos", "taco", "mexican"],
+  "🍗|Fried Chicken": ["fried chicken", "kfc", "crispy chicken", "chicken wings", "wings"],
+  "🍜|Noodles": ["noodles", "hakka noodles", "chowmein", "schezwan", "ramen", "maggi"],
+  // Desserts
+  "🍮|Halwa": ["halwa", "gajar halwa", "moong halwa", "sooji halwa", "kesari"],
+  "🍰|Cake": ["cake", "pastry", "chocolate cake", "vanilla cake", "birthday cake"],
+  "🧁|Cupcake": ["cupcake", "muffin", "mini cake"],
+  "🍩|Donut": ["donut", "doughnut", "glazed donut"],
+  "🍪|Cookie": ["cookie", "biscuit", "choco chip"],
+  "🍫|Chocolate": ["chocolate", "choco", "cocoa", "dark chocolate"],
+  "🍦|Ice Cream": ["ice cream", "softy", "vanilla ice cream", "chocolate ice cream"],
+  "🍧|Kulfi": ["kulfi", "malai kulfi", "pista kulfi", "indian ice cream"],
+};
+
+/** Score a single icon against the typed query and return total points (0 = no match). */
+function scoreIconForQuery(icon: LabeledIcon, query: string): number {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return 0;
+  const key = `${icon.emoji}|${icon.label}`;
+  const keywords = ICON_KEYWORDS[key] ?? [icon.label.toLowerCase()];
+  const labelLower = icon.label.toLowerCase();
+  const queryWords = q.split(/\s+/).filter((w) => w.length > 0);
+  let score = 0;
+  for (const kwRaw of keywords) {
+    const kw = kwRaw.toLowerCase();
+    if (kw === q) score += 100;
+    else if (kw.startsWith(q)) score += 60;
+    else if (kw.includes(q)) score += 40;
+    else if (q.length > 3 && q.includes(kw)) score += 30;
+    for (const w of queryWords) {
+      if (w.length > 2 && kw.includes(w)) score += 20;
+    }
+  }
+  if (labelLower.includes(q)) score += 50;
+  return score;
+}
+
 const ICON_LIBRARY: Record<Category, IconEntry[]> = {
   Food: [
     { icon: "🍛", keywords: ["curry", "rice", "biryani", "dal", "sambar", "rajma", "chole", "korma", "masala", "gravy", "indian", "thali", "meals"] },
