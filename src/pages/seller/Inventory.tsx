@@ -495,39 +495,78 @@ const SellerInventory = () => {
                 CHOOSE ICON
               </p>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {name.trim()
-                  ? `${visibleIcons.length} suggested`
-                  : `${visibleIcons.length} icons`}
+                {visibleIcons.length} icons
               </span>
             </div>
-            {name.trim() && (
-              <p className="mt-1 text-[11px] text-muted-foreground/80">
-                Showing icons related to “{name.trim()}”. Clear the name to see all {category} icons.
-              </p>
-            )}
-            <div className="mt-3 grid max-h-56 grid-cols-5 gap-3 overflow-y-auto overflow-x-hidden pr-1">
-              {visibleIcons.map(({ icon: emoji }) => {
-                const active = icon === emoji;
+
+            {/* Horizontal scrollable category tabs */}
+            <div
+              className="mt-3 flex gap-2 overflow-x-auto pb-1"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              <style>{`.icon-tabs-scroll::-webkit-scrollbar{display:none}`}</style>
+              <div className="icon-tabs-scroll flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+                {ICON_TABS.map((t) => {
+                  const active = activeIconTab === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setActiveIconTab(t.key)}
+                      className="whitespace-nowrap rounded-full font-bold uppercase transition"
+                      style={{
+                        padding: "5px 12px",
+                        fontSize: 11,
+                        background: active ? "#2563EB" : "#1C1C1E",
+                        color: active ? "#FFFFFF" : "#6B7280",
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Icon grid */}
+            <div
+              className="mt-3 grid grid-cols-5 overflow-y-auto overflow-x-hidden pr-1"
+              style={{ gap: 10, maxHeight: 260 }}
+            >
+              {visibleIcons.map((it, idx) => {
+                const active =
+                  selectedIcon?.emoji === it.emoji && selectedIcon?.label === it.label;
                 return (
                   <button
                     type="button"
-                    key={emoji}
-                    onClick={() => {
-                      setIcon(emoji);
-                      setIconTouched(true);
+                    key={`${it.tab}-${it.emoji}-${it.label}-${idx}`}
+                    onClick={() => setSelectedIcon({ emoji: it.emoji, label: it.label })}
+                    aria-label={`Select ${it.label}`}
+                    className="group relative flex aspect-square w-full flex-col items-center justify-center rounded-xl transition hover:scale-105"
+                    style={{
+                      background: active ? "rgba(37,99,235,0.15)" : "#1C1C1E",
+                      border: `2px solid ${active ? "#2563EB" : "transparent"}`,
                     }}
-                    aria-label={`Select icon ${emoji}`}
-                    className={`grid aspect-square w-full place-items-center rounded-2xl bg-secondary/70 text-2xl transition ${
-                      active
-                        ? "ring-2 ring-primary shadow-glow"
-                        : "hover:bg-secondary"
-                    }`}
                   >
-                    {emoji}
+                    <span style={{ fontSize: 26, lineHeight: 1 }}>{it.emoji}</span>
+                    <span
+                      className="mt-1 truncate px-1 text-center uppercase"
+                      style={{ fontSize: 7, color: "#6B7280", letterSpacing: "0.05em", maxWidth: "100%" }}
+                    >
+                      {it.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
+
+            {/* Selected preview */}
+            {selectedIcon && (
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                Selected: <span className="text-base align-middle">{selectedIcon.emoji}</span>{" "}
+                <span className="font-semibold text-foreground">{selectedIcon.label}</span>
+              </p>
+            )}
           </div>
 
           {/* Submit */}
