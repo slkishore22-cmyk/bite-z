@@ -465,6 +465,30 @@ const SellerInventory = () => {
     return LABELED_ICONS.filter((i) => i.tab === activeIconTab);
   }, [activeIconTab]);
 
+  /**
+   * Smart suggestions: score every icon against the typed name and return
+   * the top 6 matches. Hidden when the query is too short or has 0 matches.
+   */
+  const suggestions = useMemo(() => {
+    const q = name.trim();
+    if (q.length < 2) return [];
+    // Deduplicate by emoji+label so the same icon doesn't appear twice
+    // (e.g. 🍵 appears in multiple tabs).
+    const seen = new Set<string>();
+    const scored: { icon: LabeledIcon; score: number }[] = [];
+    for (const icon of LABELED_ICONS) {
+      const key = `${icon.emoji}|${icon.label}`;
+      if (seen.has(key)) continue;
+      const s = scoreIconForQuery(icon, q);
+      if (s > 0) {
+        seen.add(key);
+        scored.push({ icon, score: s });
+      }
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 6).map((x) => x.icon);
+  }, [name]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
