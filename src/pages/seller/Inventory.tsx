@@ -21,6 +21,131 @@ type Item = {
  */
 type IconEntry = { icon: string; keywords: string[] };
 
+/** Tabbed icon picker dataset — emoji + readable label, grouped by cuisine/category. */
+type IconTabKey = "all" | "south" | "north" | "snacks" | "drinks" | "fastfood" | "desserts";
+type LabeledIcon = { emoji: string; label: string; tab: Exclude<IconTabKey, "all"> };
+
+const ICON_TABS: { key: IconTabKey; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "south", label: "South Indian" },
+  { key: "north", label: "North Indian" },
+  { key: "snacks", label: "Snacks" },
+  { key: "drinks", label: "Drinks" },
+  { key: "fastfood", label: "Fast Food" },
+  { key: "desserts", label: "Desserts" },
+];
+
+const LABELED_ICONS: LabeledIcon[] = [
+  // South Indian
+  { emoji: "🫓", label: "Idli", tab: "south" },
+  { emoji: "🥞", label: "Dosa", tab: "south" },
+  { emoji: "🫔", label: "Uttapam", tab: "south" },
+  { emoji: "🍛", label: "Sambar", tab: "south" },
+  { emoji: "🥣", label: "Rasam", tab: "south" },
+  { emoji: "🍚", label: "Rice", tab: "south" },
+  { emoji: "🥘", label: "Curd Rice", tab: "south" },
+  { emoji: "🫕", label: "Kootu", tab: "south" },
+  { emoji: "🍲", label: "Avial", tab: "south" },
+  { emoji: "🍱", label: "Meals", tab: "south" },
+  { emoji: "🥟", label: "Vada", tab: "south" },
+  { emoji: "🍩", label: "Medu Vada", tab: "south" },
+  { emoji: "🧆", label: "Bonda", tab: "south" },
+  { emoji: "🌯", label: "Parotta", tab: "south" },
+  { emoji: "🫙", label: "Chutney", tab: "south" },
+  { emoji: "🍵", label: "Filter Kaapi", tab: "south" },
+  { emoji: "☕", label: "Kaapi", tab: "south" },
+  { emoji: "🍜", label: "Sevai", tab: "south" },
+  { emoji: "🍢", label: "Pongal", tab: "south" },
+  { emoji: "🫘", label: "Sundal", tab: "south" },
+  // North Indian
+  { emoji: "🫓", label: "Roti", tab: "north" },
+  { emoji: "🫙", label: "Dal", tab: "north" },
+  { emoji: "🧈", label: "Butter", tab: "north" },
+  { emoji: "🍛", label: "Curry", tab: "north" },
+  { emoji: "🍖", label: "Chicken", tab: "north" },
+  { emoji: "🥙", label: "Wrap", tab: "north" },
+  { emoji: "🫔", label: "Paratha", tab: "north" },
+  { emoji: "🍢", label: "Paneer", tab: "north" },
+  { emoji: "🍲", label: "Rajma", tab: "north" },
+  { emoji: "🥘", label: "Chole", tab: "north" },
+  { emoji: "🌮", label: "Tacos/Roti", tab: "north" },
+  { emoji: "🍱", label: "Thali", tab: "north" },
+  { emoji: "🍗", label: "Tandoori", tab: "north" },
+  { emoji: "🥩", label: "Kebab", tab: "north" },
+  { emoji: "🍚", label: "Biryani", tab: "north" },
+  { emoji: "🫕", label: "Korma", tab: "north" },
+  { emoji: "🧅", label: "Lassi", tab: "north" },
+  { emoji: "🥛", label: "Milk", tab: "north" },
+  { emoji: "🍵", label: "Chai", tab: "north" },
+  { emoji: "🥗", label: "Salad", tab: "north" },
+  // Snacks
+  { emoji: "🌊", label: "Pani Puri", tab: "snacks" },
+  { emoji: "🥙", label: "Pav Bhaji", tab: "snacks" },
+  { emoji: "🌯", label: "Bhel Puri", tab: "snacks" },
+  { emoji: "🧆", label: "Pakora", tab: "snacks" },
+  { emoji: "🍟", label: "Fries", tab: "snacks" },
+  { emoji: "🥨", label: "Breadstick", tab: "snacks" },
+  { emoji: "🍪", label: "Biscuit", tab: "snacks" },
+  { emoji: "🥜", label: "Peanuts", tab: "snacks" },
+  { emoji: "🫘", label: "Chana", tab: "snacks" },
+  { emoji: "🌽", label: "Corn", tab: "snacks" },
+  { emoji: "🥪", label: "Sandwich", tab: "snacks" },
+  { emoji: "🍕", label: "Pizza", tab: "snacks" },
+  { emoji: "🌭", label: "Hot Dog", tab: "snacks" },
+  { emoji: "🧀", label: "Cheese", tab: "snacks" },
+  { emoji: "🥚", label: "Egg", tab: "snacks" },
+  { emoji: "🍳", label: "Omelette", tab: "snacks" },
+  { emoji: "🥐", label: "Croissant", tab: "snacks" },
+  { emoji: "🥯", label: "Bagel", tab: "snacks" },
+  { emoji: "🫓", label: "Bread", tab: "snacks" },
+  { emoji: "🧇", label: "Waffle", tab: "snacks" },
+  // Drinks
+  { emoji: "🥤", label: "Cold Drink", tab: "drinks" },
+  { emoji: "🧃", label: "Juice", tab: "drinks" },
+  { emoji: "☕", label: "Coffee", tab: "drinks" },
+  { emoji: "🍵", label: "Tea", tab: "drinks" },
+  { emoji: "🥛", label: "Milk", tab: "drinks" },
+  { emoji: "🍹", label: "Mocktail", tab: "drinks" },
+  { emoji: "🧋", label: "Bubble Tea", tab: "drinks" },
+  { emoji: "🍶", label: "Lassi", tab: "drinks" },
+  { emoji: "🥂", label: "Sherbet", tab: "drinks" },
+  { emoji: "🍺", label: "Soda", tab: "drinks" },
+  { emoji: "🌊", label: "Water", tab: "drinks" },
+  { emoji: "🫖", label: "Herbal Tea", tab: "drinks" },
+  // Fast Food
+  { emoji: "🍔", label: "Burger", tab: "fastfood" },
+  { emoji: "🍕", label: "Pizza", tab: "fastfood" },
+  { emoji: "🌮", label: "Tacos", tab: "fastfood" },
+  { emoji: "🌯", label: "Wrap", tab: "fastfood" },
+  { emoji: "🍟", label: "Fries", tab: "fastfood" },
+  { emoji: "🍗", label: "Fried Chicken", tab: "fastfood" },
+  { emoji: "🍖", label: "Ribs", tab: "fastfood" },
+  { emoji: "🥙", label: "Shawarma", tab: "fastfood" },
+  { emoji: "🌭", label: "Hot Dog", tab: "fastfood" },
+  { emoji: "🥪", label: "Sub", tab: "fastfood" },
+  { emoji: "🍜", label: "Noodles", tab: "fastfood" },
+  { emoji: "🍱", label: "Bento", tab: "fastfood" },
+  { emoji: "🍛", label: "Rice Bowl", tab: "fastfood" },
+  { emoji: "🍤", label: "Shrimp", tab: "fastfood" },
+  { emoji: "🥚", label: "Egg", tab: "fastfood" },
+  // Desserts
+  { emoji: "🍮", label: "Halwa", tab: "desserts" },
+  { emoji: "🍯", label: "Honey", tab: "desserts" },
+  { emoji: "🍰", label: "Cake", tab: "desserts" },
+  { emoji: "🧁", label: "Cupcake", tab: "desserts" },
+  { emoji: "🍩", label: "Donut", tab: "desserts" },
+  { emoji: "🍪", label: "Cookie", tab: "desserts" },
+  { emoji: "🍫", label: "Chocolate", tab: "desserts" },
+  { emoji: "🍦", label: "Ice Cream", tab: "desserts" },
+  { emoji: "🍧", label: "Kulfi", tab: "desserts" },
+  { emoji: "🍨", label: "Ice Cream", tab: "desserts" },
+  { emoji: "🎂", label: "Birthday", tab: "desserts" },
+  { emoji: "🍬", label: "Candy", tab: "desserts" },
+  { emoji: "🍭", label: "Lollipop", tab: "desserts" },
+  { emoji: "🍮", label: "Pudding", tab: "desserts" },
+  { emoji: "🥧", label: "Pie", tab: "desserts" },
+];
+
 const ICON_LIBRARY: Record<Category, IconEntry[]> = {
   Food: [
     { icon: "🍛", keywords: ["curry", "rice", "biryani", "dal", "sambar", "rajma", "chole", "korma", "masala", "gravy", "indian", "thali", "meals"] },
@@ -221,9 +346,9 @@ const SellerInventory = () => {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState<Category>("Food");
   const [invType, setInvType] = useState<InvType>("Active");
-  const [icon, setIcon] = useState<string>(ICON_LIBRARY.Food[0].icon);
-  const [iconTouched, setIconTouched] = useState(false);
   const [items, setItems] = useState<Item[]>(initialItems);
+  const [activeIconTab, setActiveIconTab] = useState<IconTabKey>("all");
+  const [selectedIcon, setSelectedIcon] = useState<{ emoji: string; label: string } | null>(null);
 
   /**
    * Smart icon list:
@@ -231,35 +356,11 @@ const SellerInventory = () => {
    * - When a name is typed, only show icons whose keywords match any token of the name.
    * - If nothing matches, fall back to all category icons so the picker is never empty.
    */
+  // Filter icons by the selected tab. "All" shows the entire library.
   const visibleIcons = useMemo(() => {
-    const pool = ICON_LIBRARY[category];
-    const q = name.trim().toLowerCase();
-    if (!q) return pool;
-
-    const tokens = q.split(/[\s,/-]+/).filter(Boolean);
-    const scored = pool
-      .map((entry) => {
-        let score = 0;
-        for (const kw of entry.keywords) {
-          for (const t of tokens) {
-            if (kw.includes(t) || t.includes(kw)) score += kw === t ? 3 : 1;
-          }
-        }
-        return { entry, score };
-      })
-      .filter((s) => s.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map((s) => s.entry);
-
-    return scored.length > 0 ? scored : pool;
-  }, [name, category]);
-
-  // Auto-pick the top suggestion when user is typing and hasn't manually chosen one.
-  const topSuggested = visibleIcons[0]?.icon;
-  if (topSuggested && !iconTouched && icon !== topSuggested) {
-    // Defer to render-cycle safe state update via microtask
-    queueMicrotask(() => setIcon(topSuggested));
-  }
+    if (activeIconTab === "all") return LABELED_ICONS;
+    return LABELED_ICONS.filter((i) => i.tab === activeIconTab);
+  }, [activeIconTab]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -273,20 +374,25 @@ const SellerInventory = () => {
       toast.error("Please enter a valid price");
       return;
     }
+    if (!selectedIcon) {
+      toast.error("Please choose an icon");
+      return;
+    }
     const newItem: Item = {
       id: crypto.randomUUID(),
       name: trimmed,
       price: priceNum,
       category,
       subcategory: invType,
-      icon,
+      icon: selectedIcon.emoji,
       status: invType,
     };
     setItems((prev) => [newItem, ...prev]);
     toast.success(`${trimmed} added to inventory`);
     setName("");
     setPrice("");
-    setIconTouched(false);
+    setSelectedIcon(null);
+    setActiveIconTab("all");
   };
 
   return (
@@ -389,39 +495,78 @@ const SellerInventory = () => {
                 CHOOSE ICON
               </p>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {name.trim()
-                  ? `${visibleIcons.length} suggested`
-                  : `${visibleIcons.length} icons`}
+                {visibleIcons.length} icons
               </span>
             </div>
-            {name.trim() && (
-              <p className="mt-1 text-[11px] text-muted-foreground/80">
-                Showing icons related to “{name.trim()}”. Clear the name to see all {category} icons.
-              </p>
-            )}
-            <div className="mt-3 grid max-h-56 grid-cols-5 gap-3 overflow-y-auto overflow-x-hidden pr-1">
-              {visibleIcons.map(({ icon: emoji }) => {
-                const active = icon === emoji;
+
+            {/* Horizontal scrollable category tabs */}
+            <div
+              className="mt-3 flex gap-2 overflow-x-auto pb-1"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              <style>{`.icon-tabs-scroll::-webkit-scrollbar{display:none}`}</style>
+              <div className="icon-tabs-scroll flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+                {ICON_TABS.map((t) => {
+                  const active = activeIconTab === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setActiveIconTab(t.key)}
+                      className="whitespace-nowrap rounded-full font-bold uppercase transition"
+                      style={{
+                        padding: "5px 12px",
+                        fontSize: 11,
+                        background: active ? "#2563EB" : "#1C1C1E",
+                        color: active ? "#FFFFFF" : "#6B7280",
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Icon grid */}
+            <div
+              className="mt-3 grid grid-cols-5 overflow-y-auto overflow-x-hidden pr-1"
+              style={{ gap: 10, maxHeight: 260 }}
+            >
+              {visibleIcons.map((it, idx) => {
+                const active =
+                  selectedIcon?.emoji === it.emoji && selectedIcon?.label === it.label;
                 return (
                   <button
                     type="button"
-                    key={emoji}
-                    onClick={() => {
-                      setIcon(emoji);
-                      setIconTouched(true);
+                    key={`${it.tab}-${it.emoji}-${it.label}-${idx}`}
+                    onClick={() => setSelectedIcon({ emoji: it.emoji, label: it.label })}
+                    aria-label={`Select ${it.label}`}
+                    className="group relative flex aspect-square w-full flex-col items-center justify-center rounded-xl transition hover:scale-105"
+                    style={{
+                      background: active ? "rgba(37,99,235,0.15)" : "#1C1C1E",
+                      border: `2px solid ${active ? "#2563EB" : "transparent"}`,
                     }}
-                    aria-label={`Select icon ${emoji}`}
-                    className={`grid aspect-square w-full place-items-center rounded-2xl bg-secondary/70 text-2xl transition ${
-                      active
-                        ? "ring-2 ring-primary shadow-glow"
-                        : "hover:bg-secondary"
-                    }`}
                   >
-                    {emoji}
+                    <span style={{ fontSize: 26, lineHeight: 1 }}>{it.emoji}</span>
+                    <span
+                      className="mt-1 truncate px-1 text-center uppercase"
+                      style={{ fontSize: 7, color: "#6B7280", letterSpacing: "0.05em", maxWidth: "100%" }}
+                    >
+                      {it.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
+
+            {/* Selected preview */}
+            {selectedIcon && (
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                Selected: <span className="text-base align-middle">{selectedIcon.emoji}</span>{" "}
+                <span className="font-semibold text-foreground">{selectedIcon.label}</span>
+              </p>
+            )}
           </div>
 
           {/* Submit */}
