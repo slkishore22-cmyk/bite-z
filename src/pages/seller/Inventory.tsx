@@ -23,7 +23,12 @@ type IconEntry = { icon: string; keywords: string[] };
 
 /** Tabbed icon picker dataset — emoji + readable label, grouped by cuisine/category. */
 type IconTabKey = "all" | "south" | "north" | "snacks" | "drinks" | "fastfood" | "desserts";
-type LabeledIcon = { emoji: string; label: string; tab: Exclude<IconTabKey, "all"> };
+type LabeledIcon = {
+  emoji: string;
+  label: string;
+  tab: Exclude<IconTabKey, "all">;
+  keywords?: string[];
+};
 
 const ICON_TABS: { key: IconTabKey; label: string }[] = [
   { key: "all", label: "All" },
