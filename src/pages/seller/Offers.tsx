@@ -1,6 +1,8 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { getInventory, subscribeInventory, type SellerInventoryItem } from "@/lib/sellerInventory";
+import { addOffer } from "@/lib/sellerOffers";
 
 type OfferType = "general" | "inventory";
 
@@ -11,30 +13,72 @@ type InventoryItem = {
   group: string;
 };
 
-const inventoryItems: InventoryItem[] = [
-  { id: "burger", icon: "🍔", name: "Signature Cheeseburger", group: "Premium Selection" },
-  { id: "fries", icon: "🍟", name: "Truffle Parmesan Fries", group: "Popular Sides" },
-  { id: "cola", icon: "🥤", name: "Craft Vanilla Cola", group: "Cold Beverages" },
-];
+const toInventoryItem = (it: SellerInventoryItem): InventoryItem => ({
+  id: it.id,
+  icon: it.icon,
+  name: it.name,
+  group: it.category,
+});
 
 const SellerOffers = () => {
   const [step, setStep] = useState<"select" | "details">("select");
   const [offerType, setOfferType] = useState<OfferType>("general");
-  const [selectedItems, setSelectedItems] = useState<string[]>(["burger", "cola"]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [query, setQuery] = useState("");
+  const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory());
+  // Form fields (lifted to parent so submit can persist)
+  const [name, setName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [condition, setCondition] = useState("");
+
+  useEffect(() => subscribeInventory(() => setInventory(getInventory())), []);
 
   const filteredItems = useMemo(() => {
+    const all = inventory.map(toInventoryItem);
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return inventoryItems;
-    return inventoryItems.filter(
+    if (!normalized) return all;
+    return all.filter(
       (item) =>
         item.name.toLowerCase().includes(normalized) ||
         item.group.toLowerCase().includes(normalized)
     );
-  }, [query]);
+  }, [query, inventory]);
 
   const createOffer = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const trimmedName = name.trim();
+    const pct = Number(discount);
+    if (!trimmedName) {
+      toast.error("Add an offer name");
+      return;
+    }
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) {
+      toast.error("Enter a valid discount %");
+      return;
+    }
+    if (offerType === "inventory" && selectedItems.length === 0) {
+      toast.error("Pick at least one item");
+      return;
+    }
+    addOffer({
+      kind: offerType,
+      name: trimmedName,
+      discountPct: pct,
+      startDate,
+      endDate,
+      condition: condition.trim(),
+      itemIds: offerType === "inventory" ? selectedItems : [],
+    });
+    // Reset form & return to step 1
+    setName("");
+    setStartDate("");
+    setEndDate("");
+    setDiscount("");
+    setCondition("");
+    setSelectedItems([]);
+    setStep("select");
     toast.success(offerType === "general" ? "General offer created" : "Inventory offer created");
   };
 
@@ -52,7 +96,22 @@ const SellerOffers = () => {
   };
 
   if (step === "details" && offerType === "general") {
-    return <GeneralOfferForm onBack={goBack} onSubmit={createOffer} />;
+    return (
+      <GeneralOfferForm
+        onBack={goBack}
+        onSubmit={createOffer}
+        name={name}
+        setName={setName}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        discount={discount}
+        setDiscount={setDiscount}
+        condition={condition}
+        setCondition={setCondition}
+      />
+    );
   }
 
   if (step === "details" && offerType === "inventory") {
@@ -65,6 +124,16 @@ const SellerOffers = () => {
         items={filteredItems}
         selectedItems={selectedItems}
         toggleItem={toggleItem}
+        name={name}
+        setName={setName}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        discount={discount}
+        setDiscount={setDiscount}
+        condition={condition}
+        setCondition={setCondition}
       />
     );
   }
