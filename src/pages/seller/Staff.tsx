@@ -1,26 +1,27 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-
-type StaffMember = {
-  id: string;
-  name: string;
-  staffId: string;
-};
-
-const initialStaff: StaffMember[] = [
-  { id: "1", name: "Alex Johnson", staffId: "token_01" },
-  { id: "2", name: "Sarah Miller", staffId: "token_02" },
-  { id: "3", name: "Marcus Chen", staffId: "token_03" },
-  { id: "4", name: "Priya Nair", staffId: "token_04" },
-];
+import {
+  addStaff,
+  getStaff,
+  nextStaffToken,
+  removeStaff as removeStaffMember,
+  subscribeStaff,
+  type StaffMember,
+} from "@/lib/sellerStaff";
 
 const SellerStaff = () => {
-  const [staff, setStaff] = useState<StaffMember[]>(initialStaff);
+  const [staff, setStaff] = useState<StaffMember[]>(() => getStaff());
   const [name, setName] = useState("");
-  const [staffId, setStaffId] = useState("token_01");
+  const [staffId, setStaffId] = useState(() => nextStaffToken());
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => subscribeStaff(() => setStaff(getStaff())), []);
+  useEffect(() => {
+    // Keep the suggested token id in sync with the live list when not edited.
+    setStaffId((current) => (current.startsWith("token_") ? nextStaffToken() : current));
+  }, [staff.length]);
 
   const activeCount = useMemo(() => staff.length, [staff.length]);
 
@@ -39,18 +40,15 @@ const SellerStaff = () => {
       return;
     }
 
-    setStaff((prev) => [
-      { id: crypto.randomUUID(), name: trimmedName, staffId: trimmedStaffId },
-      ...prev,
-    ]);
+    addStaff({ name: trimmedName, staffId: trimmedStaffId, password });
     setName("");
     setPassword("");
-    setStaffId(`token_${String(staff.length + 2).padStart(2, "0")}`);
+    setStaffId(nextStaffToken());
     toast.success("Staff created");
   };
 
   const removeStaff = (id: string) => {
-    setStaff((prev) => prev.filter((member) => member.id !== id));
+    removeStaffMember(id);
   };
 
   return (
