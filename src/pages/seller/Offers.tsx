@@ -473,18 +473,28 @@ const IconInput = ({ placeholder, icon, compact = false, value, onChange, type =
   </div>
 );
 
-const DateInput = () => (
+const DateInput = ({ value, onChange }: { value?: string; onChange?: (v: string) => void }) => (
   <div className="mt-2 flex rounded-full border border-border bg-secondary/70 px-4 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
-    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]" />
+    <input
+      type="date"
+      value={value ?? ""}
+      onChange={(e) => onChange?.(e.target.value)}
+      className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]"
+    />
   </div>
 );
 
-const CompactDateInput = () => (
+const CompactDateInput = ({ value, onChange }: { value?: string; onChange?: (v: string) => void }) => (
   <div className="mt-2 flex items-center rounded-full bg-secondary/70 px-4 py-3.5 focus-within:ring-2 focus-within:ring-primary/60">
     <span className="material-symbols-outlined mr-3 shrink-0 text-primary" style={{ fontSize: 20 }}>
       calendar_today
     </span>
-    <input type="date" className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]" />
+    <input
+      type="date"
+      value={value ?? ""}
+      onChange={(e) => onChange?.(e.target.value)}
+      className="min-w-0 flex-1 border-0 bg-transparent text-xs font-medium text-foreground outline-none [color-scheme:dark]"
+    />
   </div>
 );
 
