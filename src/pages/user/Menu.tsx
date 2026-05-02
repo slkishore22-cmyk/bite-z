@@ -7,7 +7,7 @@ import {
   subscribeInventory,
   type SellerInventoryItem,
 } from "@/lib/sellerInventory";
-import { addToCart, getCart, subscribeCart } from "@/lib/userCart";
+import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 
 type CategoryKey = "Food" | "Snacks" | "Drinks";
 
@@ -47,25 +47,15 @@ const Menu = () => {
   const qtyOf = (itemId: string) => cart.find((c) => c.itemId === itemId)?.qty ?? 0;
 
   const handleAdd = (it: SellerInventoryItem, n: number) => {
-    if (n <= 0) {
-      // remove or decrement
-      const current = qtyOf(it.id);
-      if (current <= 1) {
-        // remove handled by setCartQty(0)
-      }
+    const current = qtyOf(it.id);
+    if (current === 0 && n > 0) {
+      addToCart(
+        { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category },
+        n,
+      );
+    } else {
+      setCartQty(it.id, n);
     }
-    // Use addToCart for incremental, setQty for absolute
-    import("@/lib/userCart").then(({ setCartQty, addToCart }) => {
-      const current = qtyOf(it.id);
-      if (current === 0 && n > 0) {
-        addToCart(
-          { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category },
-          n,
-        );
-      } else {
-        setCartQty(it.id, n);
-      }
-    });
   };
 
   const visible = useMemo(() => {
