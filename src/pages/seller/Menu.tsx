@@ -1,41 +1,33 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  getInventory,
+  removeInventoryItem,
+  setInventoryStatus,
+  subscribeInventory,
+  type SellerCategory,
+  type SellerInventoryItem,
+} from "@/lib/sellerInventory";
 
-type Category = "Food" | "Snacks" | "Drinks";
-
-type MenuItem = {
-  id: string;
-  name: string;
-  price: number;
-  icon: string;
-  category: Category;
-  group: string;
-  active: boolean;
-  stock: number;
-  isNew?: boolean;
-};
-
-const initialItems: MenuItem[] = [
-  { id: "1", name: "Signature Bento Box", price: 24, icon: "🍱", category: "Food", group: "Main Dishes", active: true, stock: 10 },
-  { id: "2", name: "Spicy Tuna Roll", price: 18.5, icon: "🍣", category: "Food", group: "Main Dishes", active: false, stock: 0 },
-  { id: "3", name: "Shoyu Ramen", price: 16, icon: "🍜", category: "Food", group: "Main Dishes", active: true, stock: 45, isNew: true },
-  { id: "4", name: "French Fries", price: 6, icon: "🍟", category: "Snacks", group: "Sides", active: true, stock: 30 },
-  { id: "5", name: "Crispy Spring Rolls", price: 8, icon: "🥟", category: "Snacks", group: "Sides", active: true, stock: 12 },
-  { id: "6", name: "Iced Matcha Latte", price: 5.5, icon: "🍵", category: "Drinks", group: "Beverages", active: true, stock: 20 },
-  { id: "7", name: "Cold Brew Coffee", price: 4.5, icon: "🥤", category: "Drinks", group: "Beverages", active: false, stock: 0 },
-];
-
-const CATEGORIES: { key: Category; label: string; emoji: string }[] = [
+const CATEGORIES: { key: SellerCategory; label: string; emoji: string }[] = [
   { key: "Food", label: "Food", emoji: "🍛" },
   { key: "Snacks", label: "Snacks", emoji: "🍟" },
   { key: "Drinks", label: "Drinks", emoji: "🥤" },
 ];
 
+// Items added within the last 24h get a "New" badge.
+const NEW_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 const SellerMenu = () => {
-  const [items, setItems] = useState<MenuItem[]>(initialItems);
-  const [activeCat, setActiveCat] = useState<Category>("Food");
+  const [items, setItems] = useState<SellerInventoryItem[]>(() => getInventory());
+  const [activeCat, setActiveCat] = useState<SellerCategory>("Food");
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const unsub = subscribeInventory(() => setItems(getInventory()));
+    return unsub;
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -46,33 +38,19 @@ const SellerMenu = () => {
     );
   }, [items, activeCat, query]);
 
-  const groups = useMemo(() => {
-    const map = new Map<string, MenuItem[]>();
-    for (const it of filtered) {
-      if (!map.has(it.group)) map.set(it.group, []);
-      map.get(it.group)!.push(it);
-    }
-    return Array.from(map.entries());
-  }, [filtered]);
+  // One implicit group per category — keeps the original visual structure.
+  const groups = useMemo<[string, SellerInventoryItem[]][]>(
+    () => (filtered.length === 0 ? [] : [[`${activeCat} Items`, filtered]]),
+    [filtered, activeCat],
+  );
 
   const setActive = (id: string, active: boolean) => {
-    setItems((prev) =>
-      prev.map((i) =>
-        i.id === id
-          ? { ...i, active, stock: active && i.stock === 0 ? 1 : i.stock }
-          : i
-      )
-    );
+    setInventoryStatus(id, active ? "Active" : "Inactive");
   };
 
-  const adjustStock = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((i) => {
-        if (i.id !== id) return i;
-        const next = Math.max(0, i.stock + delta);
-        return { ...i, stock: next, active: next === 0 ? false : i.active };
-      })
-    );
+  const handleRemove = (item: SellerInventoryItem) => {
+    removeInventoryItem(item.id);
+    toast.success(`${item.name} removed`);
   };
 
   return (
@@ -132,7 +110,9 @@ const SellerMenu = () => {
         {/* Groups */}
         {groups.length === 0 && (
           <p className="mt-10 text-center text-sm text-muted-foreground">
-            No menu items found.
+            {items.length === 0
+              ? "No items yet. Add items from the Add Inventory page."
+              : "No menu items found."}
           </p>
         )}
 
@@ -142,7 +122,10 @@ const SellerMenu = () => {
               {group.toUpperCase()}
             </h2>
             <div className="space-y-4">
-              {list.map((item) => (
+              {list.map((item) => {
+                const isNew = Date.now() - item.createdAt < NEW_WINDOW_MS;
+                const isActive = item.status === "Active";
+                return (
                 <article
                   key={item.id}
                   className="rounded-2xl border border-border bg-gradient-card p-4 shadow-card"
@@ -154,24 +137,24 @@ const SellerMenu = () => {
                     <div className="min-w-0 flex-1">
                       <p className="text-base font-bold leading-tight">
                         {item.name}
-                        {item.isNew && (
+                        {isNew && (
                           <span className="ml-2 rounded-md bg-destructive/20 px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wider text-destructive">
                             New
                           </span>
                         )}
                       </p>
                       <p className="mt-1 text-sm font-semibold text-primary">
-                        ${item.price.toFixed(2)}
+                        ₹{item.price}
                       </p>
                     </div>
                     <span
                       className={`rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
-                        item.stock > 0
+                        isActive
                           ? "border-primary/40 bg-primary/10 text-primary"
                           : "border-destructive/40 bg-destructive/10 text-destructive"
                       }`}
                     >
-                      {item.stock > 0 ? "Available" : "Out of stock"}
+                      {isActive ? "Available" : "Unavailable"}
                     </span>
                   </div>
 
@@ -181,7 +164,7 @@ const SellerMenu = () => {
                       type="button"
                       onClick={() => setActive(item.id, true)}
                       className={`rounded-full py-2 text-xs font-bold uppercase tracking-wider transition ${
-                        item.active
+                        isActive
                           ? "bg-success/20 text-success"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -192,7 +175,7 @@ const SellerMenu = () => {
                       type="button"
                       onClick={() => setActive(item.id, false)}
                       className={`rounded-full py-2 text-xs font-bold uppercase tracking-wider transition ${
-                        !item.active
+                        !isActive
                           ? "bg-destructive/20 text-destructive"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -201,42 +184,25 @@ const SellerMenu = () => {
                     </button>
                   </div>
 
-                  {/* Stock control */}
+                  {/* Footer: category label + delete */}
                   <div className="mt-4 flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Stock Level
+                      {item.iconLabel}
                     </span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => adjustStock(item.id, -1)}
-                        aria-label="Decrease stock"
-                        className="grid h-9 w-9 place-items-center rounded-full bg-secondary text-foreground transition hover:bg-secondary/80"
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                          remove
-                        </span>
-                      </button>
-                      <span className="w-8 text-center text-base font-bold tabular-nums">
-                        {item.stock}
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(item)}
+                      aria-label={`Delete ${item.name}`}
+                      className="grid h-9 w-9 place-items-center rounded-full bg-secondary text-destructive transition hover:bg-destructive/15"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                        delete
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          adjustStock(item.id, 1);
-                          if (item.stock === 0) toast.success(`${item.name} back in stock`);
-                        }}
-                        aria-label="Increase stock"
-                        className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition hover:opacity-90"
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                          add
-                        </span>
-                      </button>
-                    </div>
+                    </button>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </section>
         ))}
