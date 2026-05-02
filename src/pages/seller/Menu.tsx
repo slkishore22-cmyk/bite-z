@@ -31,18 +31,23 @@ const SellerMenu = () => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return items.filter(
-      (i) =>
-        i.category === activeCat &&
-        (q === "" || i.name.toLowerCase().includes(q))
-    );
+    if (q !== "") {
+      // Universal search — ignore active category, search across all items.
+      return items.filter((i) => i.name.toLowerCase().includes(q));
+    }
+    return items.filter((i) => i.category === activeCat);
   }, [items, activeCat, query]);
 
-  // One implicit group per category — keeps the original visual structure.
-  const groups = useMemo<[string, SellerInventoryItem[]][]>(
-    () => (filtered.length === 0 ? [] : [[`${activeCat} Items`, filtered]]),
-    [filtered, activeCat],
-  );
+  // When searching, group results by their actual category so users see
+  // matches from every section. Otherwise keep the single active-category group.
+  const groups = useMemo<[string, SellerInventoryItem[]][]>(() => {
+    if (filtered.length === 0) return [];
+    if (query.trim() === "") return [[`${activeCat} Items`, filtered]];
+    const order: SellerCategory[] = ["Food", "Snacks", "Drinks"];
+    return order
+      .map((cat) => [`${cat} Items`, filtered.filter((i) => i.category === cat)] as [string, SellerInventoryItem[]])
+      .filter(([, list]) => list.length > 0);
+  }, [filtered, activeCat, query]);
 
   const setActive = (id: string, active: boolean) => {
     setInventoryStatus(id, active ? "Active" : "Inactive");
