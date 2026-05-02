@@ -227,6 +227,26 @@ const Section = ({
   </div>
 );
 
+const EmptyHint = ({ text }: { text: string }) => (
+  <div
+    style={{
+      borderRadius: 22,
+      background: "rgba(255,255,255,0.7)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      border: "1px solid rgba(255,255,255,0.6)",
+      boxShadow:
+        "0 4px 24px -1px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,1)",
+      padding: 18,
+      color: "#6E6E73",
+      fontSize: 13,
+      textAlign: "center",
+    }}
+  >
+    {text}
+  </div>
+);
+
 const GroupCard = ({
   group,
   open,
