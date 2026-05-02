@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
 
 const PROFILE_STORAGE_KEY = "bitez.seller.profile";
 
@@ -17,6 +18,18 @@ const readCanteenIcon = (): string | null => {
 
 const SellerHeader = () => {
   const [canteenIcon, setCanteenIcon] = useState<string | null>(() => readCanteenIcon());
+  const [hasActiveOrders, setHasActiveOrders] = useState<boolean>(() =>
+    typeof window === "undefined"
+      ? false
+      : getOrders().some((o) => o.status === "Pending"),
+  );
+
+  useEffect(() => {
+    const refresh = () =>
+      setHasActiveOrders(getOrders().some((o) => o.status === "Pending"));
+    refresh();
+    return subscribeOrders(refresh);
+  }, []);
 
   useEffect(() => {
     const refresh = () => setCanteenIcon(readCanteenIcon());
@@ -46,7 +59,9 @@ const SellerHeader = () => {
           className="relative grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
           <span className="material-symbols-outlined">notifications</span>
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-destructive" />
+          {hasActiveOrders && (
+            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-destructive" />
+          )}
         </Link>
         <Link
           to="/seller/settings"
