@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
+import {
+  getCart,
+  removeCartItem,
+  setCartQty,
+  subscribeCart,
+  type CartItem,
+} from "@/lib/userCart";
 
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.55)",
@@ -26,23 +33,16 @@ const glassHighlight: React.CSSProperties = {
   zIndex: 1,
 };
 
-type Item = { id: string; name: string; price: number; emoji: string; qty: number };
-
 const Cart = () => {
   const navigate = useNavigate();
-  const [items, setItems] = useState<Item[]>([
-    { id: "i1", name: "Midnight Miso Ramen", price: 14.5, emoji: "🍜", qty: 1 },
-    { id: "i2", name: "Artisan Bento Box", price: 18.0, emoji: "🍱", qty: 1 },
-  ]);
+  const [items, setItems] = useState<CartItem[]>(() => getCart());
   const [expanded, setExpanded] = useState(false);
 
+  useEffect(() => subscribeCart(() => setItems(getCart())), []);
+
   const update = (id: string, delta: number) =>
-    setItems((p) =>
-      p
-        .map((i) => (i.id === id ? { ...i, qty: Math.max(0, i.qty + delta) } : i))
-        .filter((i) => i.qty > 0),
-    );
-  const remove = (id: string) => setItems((p) => p.filter((i) => i.id !== id));
+    setCartQty(id, (items.find((i) => i.itemId === id)?.qty ?? 0) + delta);
+  const remove = (id: string) => removeCartItem(id);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const platformFee = items.length ? 1.2 : 0;
@@ -167,7 +167,7 @@ const Cart = () => {
                 >
                   {items.map((it) => (
                     <div
-                      key={it.id}
+                      key={it.itemId}
                       className="flex gap-3 items-center transition-all duration-[400ms]"
                       style={{
                         ...liquidGlass,
@@ -187,7 +187,7 @@ const Cart = () => {
                           boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.4)",
                         }}
                       >
-                        {it.emoji}
+                        {it.icon}
                       </div>
                       <div className="flex-1 relative z-10">
                         <div className="flex justify-between items-start">
@@ -198,7 +198,7 @@ const Cart = () => {
                             {it.name}
                           </h3>
                           <button
-                            onClick={() => remove(it.id)}
+                            onClick={() => remove(it.itemId)}
                             className="active:scale-90 transition-transform"
                             style={{ color: "#9CA3AF" }}
                           >
@@ -215,7 +215,7 @@ const Cart = () => {
                             className="font-bold"
                             style={{ fontSize: 14, color: "#1D1D1F" }}
                           >
-                            ${(it.price * it.qty).toFixed(2)}
+                            ₹{(it.price * it.qty).toFixed(0)}
                           </span>
                           <div
                             className="flex items-center"
@@ -229,7 +229,7 @@ const Cart = () => {
                             }}
                           >
                             <button
-                              onClick={() => update(it.id, -1)}
+                              onClick={() => update(it.itemId, -1)}
                               className="active:scale-90 transition-transform font-bold"
                               style={{ color: "#6E6E73", fontSize: 14, width: 16 }}
                             >
@@ -242,7 +242,7 @@ const Cart = () => {
                               {it.qty}
                             </span>
                             <button
-                              onClick={() => update(it.id, 1)}
+                              onClick={() => update(it.itemId, 1)}
                               className="active:scale-90 transition-transform font-bold"
                               style={{ color: "#6E6E73", fontSize: 14, width: 16 }}
                             >
@@ -260,8 +260,8 @@ const Cart = () => {
               {/* Price Summary */}
               {expanded && (
               <section className="space-y-3" style={{ paddingTop: 8, paddingLeft: 4, paddingRight: 4 }}>
-                <Row label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
-                <Row label="Platform Fee" value={`$${platformFee.toFixed(2)}`} />
+                <Row label="Subtotal" value={`₹${subtotal.toFixed(0)}`} />
+                <Row label="Platform Fee" value={`₹${platformFee.toFixed(0)}`} />
                 <div className="flex justify-between items-center">
                   <span style={{ color: "#6E6E73", fontSize: 13, fontWeight: 500 }}>
                     Delivery
@@ -276,7 +276,7 @@ const Cart = () => {
                     Total Amount
                   </span>
                   <span className="font-extrabold" style={{ color: "#1D1D1F", fontSize: 18 }}>
-                    ${total.toFixed(2)}
+                    ₹{total.toFixed(0)}
                   </span>
                 </div>
               </section>
@@ -323,7 +323,7 @@ const Cart = () => {
               </span>
               <div className="flex items-center gap-2 relative z-20">
                 <span className="font-bold" style={{ fontSize: 16 }}>
-                  ${total.toFixed(2)}
+                  ₹{total.toFixed(0)}
                 </span>
                 <span
                   className="material-symbols-outlined"
