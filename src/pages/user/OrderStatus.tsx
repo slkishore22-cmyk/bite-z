@@ -1,20 +1,25 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useMemo } from "react";
+import { getOrderById, getOrders } from "@/lib/sellerOrders";
 
 const OrderStatus = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const method = (params.get("method") || "cod").toLowerCase();
+  const orderParamId = params.get("id");
 
   const [revealed, setRevealed] = useState(false);
-  const orderId = useMemo(() => {
-    // Generate a 4-digit ID made of two repeating pairs (e.g. 1122, 3399, 0088)
-    const d = () => Math.floor(Math.random() * 10);
-    const a = d();
-    let b = d();
-    while (b === a) b = d();
-    return `${a}${a}${b}${b}`;
-  }, []);
+
+  // Pull the most recent order (or the one referenced in the URL).
+  const order = useMemo(() => {
+    if (orderParamId) return getOrderById(orderParamId);
+    return getOrders()[0];
+  }, [orderParamId]);
+
+  const orderId = order?.id ?? "----";
+  const items = order?.items ?? [];
+  const itemCount = items.reduce((s, i) => s + i.qty, 0);
+  const total = order?.total ?? 0;
 
   const paymentLabel = method === "upi" ? "Paid via UPI" : "Cash on Delivery";
   const paymentSub = method === "upi" ? "Transaction Successful" : "Pay at pickup";
@@ -107,7 +112,7 @@ const OrderStatus = () => {
                 letterSpacing: "0.1em",
               }}
             >
-              {revealed ? orderId : "XXXX"}
+              {revealed ? `#${orderId}` : "XXXX"}
             </div>
             <button
               onClick={() => setRevealed(true)}
@@ -218,24 +223,29 @@ const OrderStatus = () => {
                   letterSpacing: "-0.02em",
                 }}
               >
-                3 Items
+                {itemCount} Item{itemCount === 1 ? "" : "s"}
               </div>
             </div>
             <div className="space-y-3 mb-6 relative z-10">
-              {[
-                ["Veg Manchurian", "x1"],
-                ["Schezwan Noodles", "x1"],
-                ["Coke Zero 250ml", "x1"],
-              ].map(([n, q]) => (
-                <div
-                  key={n}
-                  className="flex justify-between"
-                  style={{ fontSize: 14, color: "#64748B" }}
-                >
-                  <span>{n}</span>
-                  <span>{q}</span>
+              {items.length === 0 ? (
+                <div className="flex justify-between" style={{ fontSize: 14, color: "#64748B" }}>
+                  <span>No items</span>
                 </div>
-              ))}
+              ) : (
+                items.map((it) => (
+                  <div
+                    key={it.itemId}
+                    className="flex justify-between"
+                    style={{ fontSize: 14, color: "#64748B" }}
+                  >
+                    <span>
+                      <span style={{ marginRight: 6 }}>{it.icon}</span>
+                      {it.name}
+                    </span>
+                    <span>x{it.qty}</span>
+                  </div>
+                ))
+              )}
             </div>
             <div
               className="flex justify-between items-center relative z-10"
@@ -251,7 +261,7 @@ const OrderStatus = () => {
                 className="font-extrabold"
                 style={{ fontSize: 20, color: "#0F172A" }}
               >
-                ₹482.00
+                ₹{total.toFixed(2)}
               </span>
             </div>
           </div>

@@ -1,19 +1,16 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
+import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
+import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
-type Repeat = { emoji: string; name: string; tag: string | null };
+type Repeat = { itemId: string; emoji: string; name: string; price: number; category: "Food" | "Snacks" | "Drinks"; tag: string | null };
 type Spot = { id: string; icon: string; name: string; sub: string };
 
 const offers: Offer[] = [
   { canteen: "THE MAIN SQUARE", title: "Mega Midnight Deal", discount: "40% OFF", active: true },
   { canteen: "NORTH CANTEEN", title: "Burger Bonanza", discount: "FREE SIDES", active: true },
-];
-
-const repeats: Repeat[] = [
-  { emoji: "🍔", name: "Spicy Zinger", tag: "🔥" },
-  { emoji: "🍕", name: "Cheese Burst", tag: null },
 ];
 
 const spots: Spot[] = [
@@ -22,11 +19,51 @@ const spots: Spot[] = [
 ];
 
 const Home = () => {
-  const [qty, setQty] = useState<Record<number, number>>({ 0: 1, 1: 1 });
   const navigate = useNavigate();
 
-  const setCount = (i: number, n: number) =>
-    setQty((q) => ({ ...q, [i]: Math.max(0, n) }));
+  const [orders, setOrders] = useState(() => getOrders());
+  const [cart, setCart] = useState(() => getCart());
+  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+  useEffect(() => subscribeCart(() => setCart(getCart())), []);
+
+  // Derive "On Repeat" from the user's most-ordered items in the last 30 days.
+  const repeats: Repeat[] = useMemo(() => {
+    const counts = new Map<string, Repeat & { count: number }>();
+    for (const o of orders) {
+      for (const i of o.items) {
+        const cur = counts.get(i.itemId);
+        if (cur) {
+          cur.count += i.qty;
+        } else {
+          counts.set(i.itemId, {
+            itemId: i.itemId,
+            emoji: i.icon,
+            name: i.name,
+            price: i.price,
+            category: i.category,
+            tag: null,
+            count: i.qty,
+          });
+        }
+      }
+    }
+    const arr = Array.from(counts.values()).sort((a, b) => b.count - a.count);
+    if (arr[0]) arr[0].tag = "🔥";
+    return arr.slice(0, 6);
+  }, [orders]);
+
+  const qtyOf = (id: string) => cart.find((c) => c.itemId === id)?.qty ?? 0;
+  const setCount = (r: Repeat, n: number) => {
+    const cur = qtyOf(r.itemId);
+    if (cur === 0 && n > 0) {
+      addToCart(
+        { itemId: r.itemId, name: r.name, price: r.price, icon: r.emoji, category: r.category },
+        n,
+      );
+    } else {
+      setCartQty(r.itemId, Math.max(0, n));
+    }
+  };
 
   return (
     <UserLayout>
@@ -65,33 +102,37 @@ const Home = () => {
           ))}
         </div>
 
-        {/* On Repeat! */}
-        <h2
-          style={{
-            paddingLeft: 24,
-            paddingRight: 24,
-            fontSize: 22,
-            fontWeight: 800,
-            letterSpacing: "-0.02em",
-            color: "#1D1D1F",
-            marginBottom: 16,
-          }}
-        >
-          On Repeat!
-        </h2>
-        <div
-          className="no-scrollbar flex gap-4 overflow-x-auto"
-          style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
-        >
-          {repeats.map((r, i) => (
-            <RepeatCard
-              key={i}
-              item={r}
-              qty={qty[i] ?? 1}
-              onChange={(n) => setCount(i, n)}
-            />
-          ))}
-        </div>
+        {repeats.length > 0 && (
+          <>
+            <h2
+              style={{
+                paddingLeft: 24,
+                paddingRight: 24,
+                fontSize: 22,
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                color: "#1D1D1F",
+                marginBottom: 16,
+              }}
+            >
+              On Repeat!
+            </h2>
+            <div
+              className="no-scrollbar flex gap-4 overflow-x-auto"
+              style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
+            >
+              {repeats.map((r) => (
+                <RepeatCard
+                  key={r.itemId}
+                  item={r}
+                  qty={qtyOf(r.itemId) || 1}
+                  onChange={(n) => setCount(r, n)}
+                  onOrder={() => navigate("/cart")}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Pick a Spot? */}
         <h2
@@ -200,10 +241,12 @@ const RepeatCard = ({
   item,
   qty,
   onChange,
+  onOrder,
 }: {
   item: Repeat;
   qty: number;
   onChange: (n: number) => void;
+  onOrder?: () => void;
 }) => (
   <div
     className="cb-glass shrink-0 flex flex-col"
@@ -294,6 +337,7 @@ const RepeatCard = ({
       </div>
       <button
         type="button"
+        onClick={onOrder}
         style={{
           background: "#2563EB",
           color: "#FFFFFF",

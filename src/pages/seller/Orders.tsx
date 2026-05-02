@@ -1,10 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import {
+  getOrders,
+  setOrderStatus,
+  subscribeOrders,
+  type Order as StoreOrder,
+} from "@/lib/sellerOrders";
 
 type TabKey = "live" | "history";
 type ViewKey = "bulk" | "individual";
@@ -27,45 +33,6 @@ type Order = {
   completedAt?: Date;
 };
 
-const bulkRows: BulkRow[] = [
-  { emoji: "🍛", name: "Chole Poori", category: "Main Course", units: 100, tone: "primary" },
-  { emoji: "🍔", name: "Burger", category: "Snacks", units: 45, tone: "accent" },
-  { emoji: "🥤", name: "Juice", category: "Beverages", units: 30, tone: "warning" },
-];
-
-const liveOrders: Order[] = [
-  {
-    id: "2299",
-    agoMinutes: 2,
-    payment: "Online",
-    total: 480,
-    items: [
-      { emoji: "🍔", name: "Cheese Burst Burger", qty: 2 },
-      { emoji: "🥤", name: "Iced Peach Tea", qty: 1 },
-    ],
-  },
-  {
-    id: "2298",
-    agoMinutes: 5,
-    payment: "Cash",
-    total: 220,
-    items: [
-      { emoji: "🍛", name: "Chole Poori", qty: 1 },
-      { emoji: "🥤", name: "Juice", qty: 1 },
-    ],
-  },
-  {
-    id: "2297",
-    agoMinutes: 9,
-    payment: "Online",
-    total: 360,
-    items: [
-      { emoji: "🍔", name: "Burger", qty: 2 },
-      { emoji: "🍟", name: "Fries", qty: 1 },
-    ],
-  },
-];
-
 const startOfDay = (d: Date) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -76,49 +43,6 @@ const endOfDay = (d: Date) => {
   x.setHours(23, 59, 59, 999);
   return x;
 };
-const daysAgo = (n: number) => {
-  const x = new Date();
-  x.setDate(x.getDate() - n);
-  return x;
-};
-
-const historyOrders: Order[] = [
-  {
-    id: "2280",
-    agoMinutes: 65,
-    payment: "Online",
-    total: 540,
-    items: [
-      { emoji: "🍛", name: "Chole Poori", qty: 2 },
-      { emoji: "🥤", name: "Juice", qty: 2 },
-    ],
-    completedAt: new Date(),
-  },
-  {
-    id: "2279",
-    agoMinutes: 90,
-    payment: "Cash",
-    total: 180,
-    items: [{ emoji: "🍔", name: "Burger", qty: 1 }],
-    completedAt: new Date(),
-  },
-  {
-    id: "2275",
-    agoMinutes: 60 * 26,
-    payment: "Online",
-    total: 320,
-    items: [{ emoji: "🍔", name: "Cheese Burst Burger", qty: 1 }],
-    completedAt: daysAgo(1),
-  },
-  {
-    id: "2270",
-    agoMinutes: 60 * 24 * 4,
-    payment: "Cash",
-    total: 240,
-    items: [{ emoji: "🍟", name: "Fries", qty: 2 }],
-    completedAt: daysAgo(4),
-  },
-];
 
 const toneClasses: Record<BulkRow["tone"], string> = {
   primary: "text-primary",
@@ -138,6 +62,48 @@ const SellerOrders = () => {
   const [query, setQuery] = useState("");
   const [startDate, setStartDate] = useState<Date>(() => startOfDay(new Date()));
   const [endDate, setEndDate] = useState<Date>(() => endOfDay(new Date()));
+  const [storeOrders, setStoreOrders] = useState<StoreOrder[]>(() => getOrders());
+
+  useEffect(() => subscribeOrders(() => setStoreOrders(getOrders())), []);
+
+  const liveOrders: Order[] = useMemo(
+    () =>
+      storeOrders
+        .filter((o) => o.status === "Pending")
+        .map(toOrder),
+    [storeOrders],
+  );
+
+  const historyOrders: Order[] = useMemo(
+    () =>
+      storeOrders
+        .filter((o) => o.status !== "Pending")
+        .map(toOrder),
+    [storeOrders],
+  );
+
+  // Aggregate items across live orders for the bulk summary view.
+  const bulkRows: BulkRow[] = useMemo(() => {
+    const map = new Map<string, BulkRow & { units: number }>();
+    const tones: BulkRow["tone"][] = ["primary", "accent", "warning"];
+    storeOrders
+      .filter((o) => o.status === "Pending")
+      .forEach((o) =>
+        o.items.forEach((it) => {
+          const cur = map.get(it.itemId);
+          if (cur) cur.units += it.qty;
+          else
+            map.set(it.itemId, {
+              emoji: it.icon,
+              name: it.name,
+              category: it.category,
+              units: it.qty,
+              tone: tones[map.size % tones.length],
+            });
+        }),
+      );
+    return Array.from(map.values()).sort((a, b) => b.units - a.units);
+  }, [storeOrders]);
 
   const sourceOrders = useMemo(() => {
     if (tab === "live") return liveOrders;
@@ -148,7 +114,7 @@ const SellerOrders = () => {
       const t = o.completedAt.getTime();
       return t >= from && t <= to;
     });
-  }, [tab, startDate, endDate]);
+  }, [tab, startDate, endDate, liveOrders, historyOrders]);
 
   const filteredOrders = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -341,6 +307,15 @@ const SellerOrders = () => {
                       <p className="mt-0.5 text-xl font-extrabold">₹{o.total}</p>
                     </div>
                   </div>
+                  {tab === "live" && (
+                    <button
+                      type="button"
+                      onClick={() => setOrderStatus(o.id, "Completed")}
+                      className="mt-3 w-full rounded-full bg-primary py-2 text-xs font-extrabold uppercase tracking-wider text-primary-foreground transition hover:bg-primary/90"
+                    >
+                      Mark Completed
+                    </button>
+                  )}
                 </article>
               ))}
             </div>
@@ -367,6 +342,20 @@ const SellerOrders = () => {
 };
 
 export default SellerOrders;
+
+// Convert a store order to the local UI shape.
+function toOrder(o: StoreOrder): Order {
+  const completedAt = o.completedAt ? new Date(o.completedAt) : undefined;
+  const ago = Math.max(0, Math.floor((Date.now() - o.createdAt) / 60000));
+  return {
+    id: o.id,
+    agoMinutes: ago,
+    payment: o.payment,
+    total: o.total,
+    items: o.items.map((i) => ({ emoji: i.icon, name: i.name, qty: i.qty })),
+    completedAt,
+  };
+}
 
 type DateFieldProps = {
   label: string;

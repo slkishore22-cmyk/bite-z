@@ -1,69 +1,56 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { getOrders, subscribeOrders, type Order } from "@/lib/sellerOrders";
+import { ordersInRange, summariseByCategory, totalRevenue } from "@/lib/sellerStats";
 
-type CategoryItem = { name: string; qty: number };
-type Category = {
-  key: string;
-  icon: string;
-  name: string;
-  itemsSold: number;
-  revenue: number;
-  items: CategoryItem[];
+const CATEGORY_ICON: Record<string, string> = {
+  Food: "restaurant",
+  Snacks: "bakery_dining",
+  Drinks: "local_bar",
 };
-
-const categories: Category[] = [
-  {
-    key: "food",
-    icon: "restaurant",
-    name: "Food",
-    itemsSold: 1240,
-    revenue: 42100,
-    items: [
-      { name: "Signature Truffle Pasta", qty: 450 },
-      { name: "Midnight Burger", qty: 380 },
-    ],
-  },
-  {
-    key: "snacks",
-    icon: "bakery_dining",
-    name: "Snacks",
-    itemsSold: 890,
-    revenue: 18400,
-    items: [
-      { name: "Masala Fries", qty: 410 },
-      { name: "Veg Puff", qty: 480 },
-    ],
-  },
-  {
-    key: "drinks",
-    icon: "local_bar",
-    name: "Drinks",
-    itemsSold: 2100,
-    revenue: 23700,
-    items: [
-      { name: "Iced Peach Tea", qty: 1100 },
-      { name: "Cold Coffee", qty: 1000 },
-    ],
-  },
-];
 
 const formatINR = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 const formatINRShort = (n: number) =>
   n >= 1000 ? `₹${(n / 1000).toFixed(1)}k` : `₹${n}`;
 
 const SalesReports = () => {
-  const [startDate, setStartDate] = useState<Date>(new Date("2024-10-01"));
-  const [endDate, setEndDate] = useState<Date>(new Date("2024-10-31"));
-  const [openKey, setOpenKey] = useState<string | null>("food");
+  // Default: last 30 days.
+  const [startDate, setStartDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 29);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+  const [endDate, setEndDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(23, 59, 59, 999);
+    return d;
+  });
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>(() => getOrders());
 
-  const totalSales = 84200;
-  const totalOrders = 3421;
-  const avgPerDay = useMemo(() => 24600, []);
+  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+
+  const ranged = useMemo(
+    () => ordersInRange(orders, startDate.getTime(), endDate.getTime()),
+    [orders, startDate, endDate],
+  );
+  const totalSales = useMemo(() => totalRevenue(ranged), [ranged]);
+  const totalOrders = ranged.length;
+  const avgPerDay = useMemo(() => {
+    const days = Math.max(
+      1,
+      Math.ceil((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)),
+    );
+    return Math.round(totalSales / days);
+  }, [totalSales, startDate, endDate]);
+  const categories = useMemo(() => summariseByCategory(ranged), [ranged]);
+  const effectiveOpenKey = openKey ?? categories[0]?.category ?? null;
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -133,27 +120,32 @@ const SalesReports = () => {
           <h2 className="text-lg font-extrabold tracking-tight">Category Breakdown</h2>
 
           <div className="mt-4 space-y-3">
+            {categories.length === 0 && (
+              <p className="rounded-2xl border border-dashed border-border bg-secondary/40 p-6 text-center text-sm text-muted-foreground">
+                No sales in this range yet.
+              </p>
+            )}
             {categories.map((cat) => {
-              const open = openKey === cat.key;
+              const open = effectiveOpenKey === cat.category;
               return (
                 <div
-                  key={cat.key}
+                  key={cat.category}
                   className="overflow-hidden rounded-2xl border border-border bg-gradient-card shadow-card"
                 >
                   <button
-                    onClick={() => setOpenKey(open ? null : cat.key)}
+                    onClick={() => setOpenKey(open ? "" : cat.category)}
                     className="flex w-full items-center gap-3 p-4 text-left"
                     aria-expanded={open}
                   >
                     <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
                       <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
-                        {cat.icon}
+                        {CATEGORY_ICON[cat.category] ?? "restaurant"}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-base font-bold leading-tight">{cat.name}</p>
+                      <p className="text-base font-bold leading-tight">{cat.category}</p>
                       <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                        {cat.itemsSold.toLocaleString("en-IN")} items sold
+                        {cat.totalSold.toLocaleString("en-IN")} items sold
                       </p>
                     </div>
                     <div className="flex items-center gap-1 text-right">
@@ -178,7 +170,7 @@ const SalesReports = () => {
                         >
                           <span className="truncate text-sm font-semibold">{it.name}</span>
                           <span className="text-sm font-bold text-primary">
-                            {it.qty} qty
+                            {it.sold} qty
                           </span>
                         </div>
                       ))}

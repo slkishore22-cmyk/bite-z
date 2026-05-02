@@ -1,36 +1,20 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import { canteens } from "@/data/menu";
+import {
+  getInventory,
+  subscribeInventory,
+  type SellerInventoryItem,
+} from "@/lib/sellerInventory";
+import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 
-type Item = { emoji: string; name: string; desc: string; price: number };
-type CategoryKey = "food" | "snacks" | "drinks";
-
-const DATA: Record<CategoryKey, Item[]> = {
-  food: [
-    { emoji: "🍱", name: "Artisan Bento Box", desc: "Premium salmon, tempura, and organic greens.", price: 450 },
-    { emoji: "🍜", name: "Midnight Miso Ramen", desc: "12-hour broth with slow-cooked pork belly.", price: 380 },
-    { emoji: "🌮", name: "Truffle Steak Tacos", desc: "Wagyu beef with truffle oil and cilantro.", price: 520 },
-    { emoji: "🍤", name: "Rock Shrimp Tempura", desc: "Crispy shrimp with spicy mayo glaze.", price: 420 },
-  ],
-  snacks: [
-    { emoji: "🥪", name: "Club Sandwich", desc: "Grilled chicken, cheese and crispy bacon.", price: 180 },
-    { emoji: "🍟", name: "Loaded Fries", desc: "Cheese, jalapeños, and house sauce.", price: 160 },
-    { emoji: "🥨", name: "Soft Pretzel", desc: "Warm pretzel with mustard dip.", price: 120 },
-    { emoji: "🌭", name: "Gourmet Hot Dog", desc: "Smoked sausage with caramelised onions.", price: 220 },
-  ],
-  drinks: [
-    { emoji: "🧃", name: "Cold Pressed Mango", desc: "Fresh Alphonso mango, no added sugar.", price: 90 },
-    { emoji: "🥤", name: "Sparkling Lemonade", desc: "House-made with mint and lime.", price: 80 },
-    { emoji: "☕", name: "Iced Caramel Latte", desc: "Double espresso, milk, caramel drizzle.", price: 140 },
-    { emoji: "🍵", name: "Matcha Cloud", desc: "Ceremonial matcha with oat foam.", price: 160 },
-  ],
-};
+type CategoryKey = "Food" | "Snacks" | "Drinks";
 
 const TABS: { key: CategoryKey; label: string; emoji: string }[] = [
-  { key: "food", label: "Food", emoji: "🍛" },
-  { key: "snacks", label: "Snacks", emoji: "🍟" },
-  { key: "drinks", label: "Drinks", emoji: "🥤" },
+  { key: "Food", label: "Food", emoji: "🍛" },
+  { key: "Snacks", label: "Snacks", emoji: "🍟" },
+  { key: "Drinks", label: "Drinks", emoji: "🥤" },
 ];
 
 const liquidGlass: React.CSSProperties = {
@@ -52,33 +36,43 @@ const Menu = () => {
   const canteen = canteens.find((c) => c.id === id);
   const title = canteen?.name ?? "Main Block Canteen";
 
-  const [active, setActive] = useState<CategoryKey>("food");
+  const [active, setActive] = useState<CategoryKey>("Food");
   const [query, setQuery] = useState("");
-  const [qty, setQty] = useState<Record<string, number>>({});
+  const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory());
+  const [cart, setCart] = useState(() => getCart());
 
-  const setCount = (key: string, n: number) =>
-    setQty((s) => ({ ...s, [key]: Math.max(0, n) }));
+  useEffect(() => subscribeInventory(() => setInventory(getInventory())), []);
+  useEffect(() => subscribeCart(() => setCart(getCart())), []);
+
+  const qtyOf = (itemId: string) => cart.find((c) => c.itemId === itemId)?.qty ?? 0;
+
+  const handleAdd = (it: SellerInventoryItem, n: number) => {
+    const current = qtyOf(it.id);
+    if (current === 0 && n > 0) {
+      addToCart(
+        { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category },
+        n,
+      );
+    } else {
+      setCartQty(it.id, n);
+    }
+  };
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return DATA[active].filter(
-      (it) => !q || it.name.toLowerCase().includes(q) || it.desc.toLowerCase().includes(q),
+    return inventory.filter(
+      (it) =>
+        it.category === active &&
+        it.status === "Active" &&
+        (!q || it.name.toLowerCase().includes(q)),
     );
-  }, [active, query]);
+  }, [inventory, active, query]);
 
   const { totalItems, totalPrice } = useMemo(() => {
-    let items = 0;
-    let price = 0;
-    (Object.keys(DATA) as CategoryKey[]).forEach((cat) => {
-      DATA[cat].forEach((it) => {
-        const k = `${cat}:${it.name}`;
-        const n = qty[k] ?? 0;
-        items += n;
-        price += n * it.price;
-      });
-    });
-    return { totalItems: items, totalPrice: price };
-  }, [qty]);
+    const totalItems = cart.reduce((s, i) => s + i.qty, 0);
+    const totalPrice = cart.reduce((s, i) => s + i.qty * i.price, 0);
+    return { totalItems, totalPrice };
+  }, [cart]);
 
   return (
     <UserLayout>
@@ -204,14 +198,18 @@ const Menu = () => {
           {/* Food list */}
           <div className="space-y-8">
             {visible.map((it, idx) => {
-              const k = `${active}:${it.name}`;
-              const n = qty[k] ?? 0;
+              const n = qtyOf(it.id);
               return (
                 <FoodCard
-                  key={k}
-                  item={it}
+                  key={it.id}
+                  item={{
+                    emoji: it.icon,
+                    name: it.name,
+                    desc: it.iconLabel,
+                    price: it.price,
+                  }}
                   qty={n}
-                  onChange={(v) => setCount(k, v)}
+                  onChange={(v) => handleAdd(it, v)}
                   delay={idx * 60}
                 />
               );
@@ -225,7 +223,9 @@ const Menu = () => {
                   fontSize: 14,
                 }}
               >
-                No items match your search.
+                {inventory.length === 0
+                  ? "Menu coming soon."
+                  : "No items match your search."}
               </div>
             )}
           </div>
@@ -264,13 +264,14 @@ const Menu = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
+                onClick={() => navigate("/cart")}
                 style={{ fontSize: 12, fontWeight: 700, color: "#6B7280" }}
               >
-                Add to Cart
+                View Cart
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/payment")}
+                onClick={() => navigate("/cart")}
                 style={{
                   background: "linear-gradient(135deg, #2563eb, #3b82f6)",
                   color: "#FFFFFF",
@@ -281,7 +282,7 @@ const Menu = () => {
                   fontWeight: 700,
                 }}
               >
-                Pay Now
+                Checkout
               </button>
             </div>
           </div>
@@ -291,13 +292,15 @@ const Menu = () => {
   );
 };
 
+type FoodCardItem = { emoji: string; name: string; desc: string; price: number };
+
 const FoodCard = ({
   item,
   qty,
   onChange,
   delay,
 }: {
-  item: Item;
+  item: FoodCardItem;
   qty: number;
   onChange: (n: number) => void;
   delay: number;

@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
+import {
+  getOrders,
+  subscribeOrders,
+  type Order,
+} from "@/lib/sellerOrders";
 
 type OrderRow = {
   id: string;
@@ -19,36 +24,54 @@ type CanteenGroup = {
   orders: OrderRow[];
 };
 
-const pendingGroups: CanteenGroup[] = [
-  {
-    id: "gourmet",
-    name: "The Gourmet Hub",
-    icon: "restaurant",
-    iconBg: "#D6E3FF",
-    iconColor: "#2563EB",
-    status: "pending",
-    orders: [
-      { id: "2299", itemsCount: 2, total: 120, emojis: ["🍱", "🥤"] },
-    ],
-  },
-];
-
-const completedGroups: CanteenGroup[] = [
-  {
-    id: "caffeine",
-    name: "Caffeine & Co.",
-    icon: "local_cafe",
-    iconBg: "#F5F5F7",
-    iconColor: "#984061",
-    status: "completed",
-    orders: [{ id: "2104", itemsCount: 1, total: 380, emojis: ["☕"] }],
-  },
-];
+const toOrderRow = (o: Order): OrderRow => ({
+  id: o.id,
+  itemsCount: o.items.reduce((s, i) => s + i.qty, 0),
+  total: o.total,
+  emojis: o.items.slice(0, 3).map((i) => i.icon),
+});
 
 const Orders = () => {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState<Order[]>(() => getOrders());
+
+  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+
+  const { pendingGroups, completedGroups } = useMemo(() => {
+    const pending = orders.filter((o) => o.status === "Pending");
+    const completed = orders.filter((o) => o.status === "Completed");
+
+    const pendingGroups: CanteenGroup[] = pending.length
+      ? [
+          {
+            id: "pending",
+            name: "Bitez Canteen",
+            icon: "restaurant",
+            iconBg: "#D6E3FF",
+            iconColor: "#2563EB",
+            status: "pending",
+            orders: pending.map(toOrderRow),
+          },
+        ]
+      : [];
+    const completedGroups: CanteenGroup[] = completed.length
+      ? [
+          {
+            id: "completed",
+            name: "Bitez Canteen",
+            icon: "local_cafe",
+            iconBg: "#F5F5F7",
+            iconColor: "#984061",
+            status: "completed",
+            orders: completed.map(toOrderRow),
+          },
+        ]
+      : [];
+    return { pendingGroups, completedGroups };
+  }, [orders]);
+
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({
-    gourmet: true,
+    pending: true,
   });
   const toggle = (id: string) =>
     setOpenIds((p) => ({ ...p, [id]: !p[id] }));
@@ -79,26 +102,34 @@ const Orders = () => {
 
           {/* Pending Pickup */}
           <Section title="Pending Pickup">
-            {pendingGroups.map((g) => (
-              <GroupCard
-                key={g.id}
-                group={g}
-                open={!!openIds[g.id]}
-                onToggle={() => toggle(g.id)}
-              />
-            ))}
+            {pendingGroups.length === 0 ? (
+              <EmptyHint text="No pending orders. Place an order to see it here." />
+            ) : (
+              pendingGroups.map((g) => (
+                <GroupCard
+                  key={g.id}
+                  group={g}
+                  open={!!openIds[g.id]}
+                  onToggle={() => toggle(g.id)}
+                />
+              ))
+            )}
           </Section>
 
           {/* Completed Orders */}
           <Section title="Completed Orders" mt={28}>
-            {completedGroups.map((g) => (
-              <GroupCard
-                key={g.id}
-                group={g}
-                open={!!openIds[g.id]}
-                onToggle={() => toggle(g.id)}
-              />
-            ))}
+            {completedGroups.length === 0 ? (
+              <EmptyHint text="Completed orders will appear here." />
+            ) : (
+              completedGroups.map((g) => (
+                <GroupCard
+                  key={g.id}
+                  group={g}
+                  open={!!openIds[g.id]}
+                  onToggle={() => toggle(g.id)}
+                />
+              ))
+            )}
           </Section>
 
           {/* Reorder card */}
@@ -193,6 +224,26 @@ const Section = ({
       {title}
     </h3>
     <div className="space-y-3">{children}</div>
+  </div>
+);
+
+const EmptyHint = ({ text }: { text: string }) => (
+  <div
+    style={{
+      borderRadius: 22,
+      background: "rgba(255,255,255,0.7)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      border: "1px solid rgba(255,255,255,0.6)",
+      boxShadow:
+        "0 4px 24px -1px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,1)",
+      padding: 18,
+      color: "#6E6E73",
+      fontSize: 13,
+      textAlign: "center",
+    }}
+  >
+    {text}
   </div>
 );
 

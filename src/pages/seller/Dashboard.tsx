@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SellerHeader from "@/components/seller/SellerHeader";
+import { getOrders, subscribeOrders, type Order } from "@/lib/sellerOrders";
+import { hourlySales, ordersInRange, rangeBounds, totalRevenue } from "@/lib/sellerStats";
 import {
   Area,
   AreaChart,
@@ -9,16 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const salesData = [
-  { time: "08:00 AM", value: 800 },
-  { time: "10:00 AM", value: 2200 },
-  { time: "12:00 PM", value: 3100 },
-  { time: "02:00 PM", value: 1800 },
-  { time: "04:00 PM", value: 1200 },
-  { time: "06:00 PM", value: 3400 },
-  { time: "08:00 PM", value: 4200 },
-];
 
 type Tile = {
   icon: string;
@@ -42,6 +34,14 @@ const LONG_PRESS_MS = 500;
 const SellerDashboard = () => {
   const navigate = useNavigate();
   const lastChartTap = useRef(0);
+
+  const [orders, setOrders] = useState<Order[]>(() => getOrders());
+  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+
+  const { from, to } = useMemo(() => rangeBounds("today"), []);
+  const todaysOrders = useMemo(() => ordersInRange(orders, from, to), [orders, from, to]);
+  const todaysRevenue = useMemo(() => totalRevenue(todaysOrders), [todaysOrders]);
+  const salesData = useMemo(() => hourlySales(todaysOrders), [todaysOrders]);
 
   const handleChartTap = () => {
     const now = Date.now();
@@ -127,12 +127,14 @@ const SellerDashboard = () => {
             TODAY&apos;S SALES
           </p>
           <div className="mt-2 flex items-end justify-between gap-3">
-            <p className="text-4xl font-extrabold tracking-tight">₹12,450</p>
-            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">
+            <p className="text-4xl font-extrabold tracking-tight">
+              ₹{todaysRevenue.toLocaleString("en-IN")}
+            </p>
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
-                trending_up
+                receipt_long
               </span>
-              +12%
+              {todaysOrders.length} orders
             </span>
           </div>
 
