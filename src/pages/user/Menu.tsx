@@ -302,13 +302,15 @@ const Menu = () => {
   );
 };
 
+type FoodCardItem = { emoji: string; name: string; desc: string; price: number };
+
 const FoodCard = ({
   item,
   qty,
   onChange,
   delay,
 }: {
-  item: Item;
+  item: FoodCardItem;
   qty: number;
   onChange: (n: number) => void;
   delay: number;
