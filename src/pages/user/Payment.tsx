@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { clearCart, getCart } from "@/lib/userCart";
+import { createOrder } from "@/lib/sellerOrders";
 
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.05)",
@@ -30,6 +32,29 @@ const HERO_IMG =
 
 const Payment = () => {
   const navigate = useNavigate();
+
+  const placeOrder = (method: "Online" | "Cash") => {
+    const cart = getCart();
+    if (cart.length === 0) {
+      navigate("/cart");
+      return;
+    }
+    const order = createOrder({
+      payment: method,
+      items: cart.map((c) => ({
+        itemId: c.itemId,
+        name: c.name,
+        icon: c.icon,
+        category: c.category,
+        price: c.price,
+        qty: c.qty,
+      })),
+    });
+    clearCart();
+    navigate(
+      `/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`,
+    );
+  };
 
   return (
     <div
@@ -124,6 +149,7 @@ const Payment = () => {
           {/* UPI Card */}
           <button
             type="button"
+            onClick={() => placeOrder("Online")}
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
             style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
           >
@@ -179,7 +205,7 @@ const Payment = () => {
           {/* Cash Card */}
           <button
             type="button"
-            onClick={() => navigate("/order-status?method=cod")}
+            onClick={() => placeOrder("Cash")}
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
             style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
           >
