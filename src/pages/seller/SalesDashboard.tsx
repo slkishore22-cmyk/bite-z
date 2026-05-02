@@ -49,7 +49,7 @@ const SalesDashboard = () => {
             Track your canteen performance
           </p>
 
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <div className="inline-flex rounded-full bg-secondary/70 p-1">
               {(["today", "week", "month"] as RangeKey[]).map((k) => {
                 const active = range === k;
@@ -57,7 +57,7 @@ const SalesDashboard = () => {
                   <button
                     key={k}
                     onClick={() => setRange(k)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition sm:px-4 sm:text-xs ${
                       active ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground"
                     }`}
                   >
@@ -73,12 +73,12 @@ const SalesDashboard = () => {
             </div>
             <button
               onClick={() => navigate("/seller/sales/reports")}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-4 py-2 text-xs font-bold uppercase tracking-wide text-primary transition hover:bg-primary/20"
+              className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/15 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-primary transition hover:bg-primary/20 sm:px-4 sm:text-xs"
             >
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 bar_chart
               </span>
-              View Reports
+              <span className="whitespace-nowrap">View Reports</span>
             </button>
           </div>
           </div>
