@@ -262,31 +262,59 @@ const PageHeader = ({ title, subtitle, onBack }: { title: string; subtitle?: str
   </header>
 );
 
-const GeneralOfferForm = ({ onBack, onSubmit }: { onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) => (
+type FormFieldProps = {
+  name: string;
+  setName: (v: string) => void;
+  startDate: string;
+  setStartDate: (v: string) => void;
+  endDate: string;
+  setEndDate: (v: string) => void;
+  discount: string;
+  setDiscount: (v: string) => void;
+  condition: string;
+  setCondition: (v: string) => void;
+};
+
+const GeneralOfferForm = ({
+  onBack,
+  onSubmit,
+  name,
+  setName,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  discount,
+  setDiscount,
+  condition,
+  setCondition,
+}: { onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void } & FormFieldProps) => (
   <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
     <main className="mx-auto w-full max-w-md px-5 pb-12">
       <PageHeader title="General Offer" subtitle="Apply discounts across all items" onBack={onBack} />
 
       <form onSubmit={onSubmit} className="mt-8 rounded-3xl border border-border bg-gradient-card p-5 shadow-card">
         <FieldLabel>Offer Name</FieldLabel>
-        <IconInput placeholder="Fest Offer" icon="label" />
+        <IconInput placeholder="Fest Offer" icon="label" value={name} onChange={setName} />
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>Start Date</FieldLabel>
-            <DateInput />
+            <DateInput value={startDate} onChange={setStartDate} />
           </div>
           <div>
             <FieldLabel>End Date</FieldLabel>
-            <DateInput />
+            <DateInput value={endDate} onChange={setEndDate} />
           </div>
         </div>
 
         <FieldLabel className="mt-5">Discount Percentage</FieldLabel>
-        <IconInput placeholder="Enter discount %" icon="percent" />
+        <IconInput placeholder="Enter discount %" icon="percent" value={discount} onChange={setDiscount} type="number" />
 
         <FieldLabel className="mt-5">Offer Condition (Optional)</FieldLabel>
         <textarea
+          value={condition}
+          onChange={(e) => setCondition(e.target.value)}
           placeholder="Enter condition (e.g. Buy above ₹200)"
           className="mt-2 min-h-24 w-full resize-none rounded-2xl border border-border bg-secondary/70 px-5 py-4 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
         />
@@ -315,6 +343,16 @@ const InventoryOfferForm = ({
   items,
   selectedItems,
   toggleItem,
+  name,
+  setName,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  discount,
+  setDiscount,
+  condition,
+  setCondition,
 }: {
   onBack: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -323,31 +361,31 @@ const InventoryOfferForm = ({
   items: InventoryItem[];
   selectedItems: string[];
   toggleItem: (id: string) => void;
-}) => (
+} & FormFieldProps) => (
   <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
     <main className="mx-auto w-full max-w-md px-5 pb-12">
       <PageHeader title="Create Offer" subtitle="Fill in the details" onBack={onBack} />
 
       <form onSubmit={onSubmit} className="mt-8">
         <FieldLabel>Offer Name</FieldLabel>
-        <PlainInput placeholder="e.g. Midnight Feast" />
+        <PlainInput placeholder="e.g. Midnight Feast" value={name} onChange={setName} />
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>Start Date</FieldLabel>
-            <CompactDateInput />
+            <CompactDateInput value={startDate} onChange={setStartDate} />
           </div>
           <div>
             <FieldLabel>End Date</FieldLabel>
-            <CompactDateInput />
+            <CompactDateInput value={endDate} onChange={setEndDate} />
           </div>
         </div>
 
         <FieldLabel className="mt-5">Discount Percentage</FieldLabel>
-        <IconInput placeholder="20" icon="percent" compact />
+        <IconInput placeholder="20" icon="percent" compact value={discount} onChange={setDiscount} type="number" />
 
         <FieldLabel className="mt-5">Condition</FieldLabel>
-        <PlainInput placeholder="Buy more than ₹200 and get 20% off" />
+        <PlainInput placeholder="Buy more than ₹200 and get 20% off" value={condition} onChange={setCondition} />
 
         <div className="mt-6 flex items-center justify-between gap-4">
           <FieldLabel>Inventory Selection</FieldLabel>
@@ -367,6 +405,11 @@ const InventoryOfferForm = ({
         </div>
 
         <div className="mt-4 space-y-3">
+          {items.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-border bg-secondary/40 p-6 text-center text-sm text-muted-foreground">
+              No inventory items yet. Add items first.
+            </p>
+          )}
           {items.map((item) => {
             const selected = selectedItems.includes(item.id);
             return (
@@ -406,16 +449,21 @@ const FieldLabel = ({ children, className = "" }: { children: React.ReactNode; c
   <label className={`block text-xs font-extrabold uppercase tracking-[0.16em] text-muted-foreground ${className}`}>{children}</label>
 );
 
-const PlainInput = ({ placeholder }: { placeholder: string }) => (
+const PlainInput = ({ placeholder, value, onChange }: { placeholder: string; value?: string; onChange?: (v: string) => void }) => (
   <input
+    value={value ?? ""}
+    onChange={(e) => onChange?.(e.target.value)}
     placeholder={placeholder}
     className="mt-2 w-full rounded-full border-0 bg-secondary/70 px-5 py-3.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
   />
 );
 
-const IconInput = ({ placeholder, icon, compact = false }: { placeholder: string; icon: string; compact?: boolean }) => (
+const IconInput = ({ placeholder, icon, compact = false, value, onChange, type = "text" }: { placeholder: string; icon: string; compact?: boolean; value?: string; onChange?: (v: string) => void; type?: string }) => (
   <div className={`mt-2 flex items-center border border-border bg-secondary/70 px-5 focus-within:ring-2 focus-within:ring-primary/60 ${compact ? "rounded-full py-3.5" : "rounded-full py-3.5"}`}>
     <input
+      value={value ?? ""}
+      onChange={(e) => onChange?.(e.target.value)}
+      type={type}
       placeholder={placeholder}
       className="min-w-0 flex-1 border-0 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none"
     />
