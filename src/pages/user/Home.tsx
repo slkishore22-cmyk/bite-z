@@ -99,14 +99,16 @@ const Home = () => {
         </h1>
 
         {/* Today's Offers — horizontal scroll */}
-        <div
-          className="no-scrollbar flex gap-4 overflow-x-auto"
-          style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
-        >
-          {offers.map((o, i) => (
-            <OfferCard key={i} offer={o} />
-          ))}
-        </div>
+        {offers.length > 0 && (
+          <div
+            className="no-scrollbar flex gap-4 overflow-x-auto"
+            style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
+          >
+            {offers.map((o, i) => (
+              <OfferCard key={i} offer={o} />
+            ))}
+          </div>
+        )}
 
         {repeats.length > 0 && (
           <>
