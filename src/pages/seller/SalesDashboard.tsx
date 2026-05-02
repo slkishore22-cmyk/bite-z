@@ -1,56 +1,35 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getOrders, subscribeOrders, type Order } from "@/lib/sellerOrders";
+import {
+  ordersInRange,
+  rangeBounds,
+  summariseByCategory,
+  totalRevenue,
+  type RangeKey,
+} from "@/lib/sellerStats";
 
-type RangeKey = "today" | "week" | "month";
-
-type CategoryItem = { name: string; sold: number };
-type Category = {
-  key: string;
-  emoji: string;
-  name: string;
-  totalSold: number;
-  items: CategoryItem[];
+const CATEGORY_EMOJI: Record<string, string> = {
+  Food: "🍛",
+  Snacks: "🍟",
+  Drinks: "🥤",
 };
-
-const categories: Category[] = [
-  {
-    key: "food",
-    emoji: "🍛",
-    name: "Food",
-    totalSold: 142,
-    items: [
-      { name: "Signature Cheeseburger", sold: 62 },
-      { name: "Truffle Parmesan Fries", sold: 80 },
-    ],
-  },
-  {
-    key: "snacks",
-    emoji: "🍟",
-    name: "Snacks",
-    totalSold: 85,
-    items: [
-      { name: "Masala Fries", sold: 40 },
-      { name: "Veg Puff", sold: 45 },
-    ],
-  },
-  {
-    key: "drinks",
-    emoji: "🥤",
-    name: "Drinks",
-    totalSold: 98,
-    items: [
-      { name: "Iced Peach Tea", sold: 55 },
-      { name: "Cold Coffee", sold: 43 },
-    ],
-  },
-];
 
 const SalesDashboard = () => {
   const navigate = useNavigate();
   const [range, setRange] = useState<RangeKey>("today");
-  const [openKey, setOpenKey] = useState<string | null>("food");
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>(() => getOrders());
 
+  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+
+  const { from, to } = useMemo(() => rangeBounds(range), [range]);
+  const ranged = useMemo(() => ordersInRange(orders, from, to), [orders, from, to]);
+  const revenue = useMemo(() => totalRevenue(ranged), [ranged]);
+  const categories = useMemo(() => summariseByCategory(ranged), [ranged]);
   const totalCats = categories.length;
+  // Default-open the first category for visual consistency.
+  const effectiveOpenKey = openKey ?? categories[0]?.category ?? null;
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -122,7 +101,7 @@ const SalesDashboard = () => {
             {range === "today" ? "TODAY'S SALES" : range === "week" ? "THIS WEEK" : "THIS MONTH"}
           </p>
           <p className="mt-1.5 text-4xl font-extrabold tracking-tight">
-            ₹12,450
+            ₹{revenue.toLocaleString("en-IN")}
             <span className="ml-2 align-middle text-xs font-bold tracking-wide text-muted-foreground">
               INR
             </span>
@@ -139,23 +118,28 @@ const SalesDashboard = () => {
           </div>
 
           <div className="mt-4 space-y-3">
+            {categories.length === 0 && (
+              <p className="rounded-2xl border border-dashed border-border bg-secondary/40 p-6 text-center text-sm text-muted-foreground">
+                No sales in this range yet.
+              </p>
+            )}
             {categories.map((cat) => {
-              const open = openKey === cat.key;
+              const open = effectiveOpenKey === cat.category;
               return (
                 <div
-                  key={cat.key}
+                  key={cat.category}
                   className="overflow-hidden rounded-2xl border border-border bg-gradient-card shadow-card"
                 >
                   <button
-                    onClick={() => setOpenKey(open ? null : cat.key)}
+                    onClick={() => setOpenKey(open ? "" : cat.category)}
                     className="flex w-full items-center gap-3 p-4 text-left"
                     aria-expanded={open}
                   >
                     <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary text-2xl">
-                      {cat.emoji}
+                      {CATEGORY_EMOJI[cat.category] ?? "🍽️"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-base font-bold leading-tight">{cat.name}</p>
+                      <p className="text-base font-bold leading-tight">{cat.category}</p>
                       <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                         {cat.totalSold} items sold
                       </p>
@@ -198,7 +182,9 @@ const SalesDashboard = () => {
             <p className="mt-3 text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
               PEAK HOUR
             </p>
-            <p className="mt-1 text-xl font-extrabold tracking-tight">1:30 PM</p>
+            <p className="mt-1 text-xl font-extrabold tracking-tight">
+              {peakHourLabelLocal(ranged)}
+            </p>
           </div>
           <div className="rounded-2xl border border-border bg-gradient-card p-4 shadow-card">
             <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/15 text-primary">
@@ -209,7 +195,9 @@ const SalesDashboard = () => {
             <p className="mt-3 text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
               TOP ITEM
             </p>
-            <p className="mt-1 text-xl font-extrabold tracking-tight">Burger</p>
+            <p className="mt-1 truncate text-xl font-extrabold tracking-tight">
+              {topItemLocal(ranged)}
+            </p>
           </div>
         </section>
       </div>
@@ -218,3 +206,28 @@ const SalesDashboard = () => {
 };
 
 export default SalesDashboard;
+
+function peakHourLabelLocal(orders: Order[]): string {
+  if (orders.length === 0) return "—";
+  const hours = new Array(24).fill(0);
+  for (const o of orders) hours[new Date(o.createdAt).getHours()] += o.total;
+  let best = 0;
+  let bestVal = 0;
+  hours.forEach((v, i) => { if (v > bestVal) { bestVal = v; best = i; } });
+  if (bestVal === 0) return "—";
+  const h12 = best % 12 === 0 ? 12 : best % 12;
+  return `${h12}:00 ${best < 12 ? "AM" : "PM"}`;
+}
+
+function topItemLocal(orders: Order[]): string {
+  if (orders.length === 0) return "—";
+  const map = new Map<string, { name: string; qty: number }>();
+  for (const o of orders) for (const it of o.items) {
+    const cur = map.get(it.itemId) ?? { name: it.name, qty: 0 };
+    cur.qty += it.qty;
+    map.set(it.itemId, cur);
+  }
+  let best: { name: string; qty: number } | null = null;
+  map.forEach((v) => { if (!best || v.qty > best.qty) best = v; });
+  return best ? best.name : "—";
+}
