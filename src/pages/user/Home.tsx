@@ -3,28 +3,34 @@ import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
+import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
 type Repeat = { itemId: string; emoji: string; name: string; price: number; category: "Food" | "Snacks" | "Drinks"; tag: string | null };
 type Spot = { id: string; icon: string; name: string; sub: string };
-
-const offers: Offer[] = [
-  { canteen: "THE MAIN SQUARE", title: "Mega Midnight Deal", discount: "40% OFF", active: true },
-  { canteen: "NORTH CANTEEN", title: "Burger Bonanza", discount: "FREE SIDES", active: true },
-];
 
 const spots: Spot[] = [
   { id: "c1", icon: "restaurant", name: "The Main Square", sub: "Fastest bites on campus" },
   { id: "c2", icon: "local_cafe", name: "The Main Square", sub: "Fastest bites on campus" },
 ];
 
+const toDisplayOffer = (o: SellerOffer): Offer => ({
+  canteen: o.kind === "general" ? "ALL ITEMS" : "SELECTED ITEMS",
+  title: o.name,
+  discount: `${o.discountPct}% OFF`,
+  active: true,
+});
+
 const Home = () => {
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState(() => getOrders());
   const [cart, setCart] = useState(() => getCart());
+  const [liveOffers, setLiveOffers] = useState<SellerOffer[]>(() => getActiveOffers());
   useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
+  useEffect(() => subscribeOffers(() => setLiveOffers(getActiveOffers())), []);
+  const offers: Offer[] = useMemo(() => liveOffers.map(toDisplayOffer), [liveOffers]);
 
   // Derive "On Repeat" from the user's most-ordered items in the last 30 days.
   const repeats: Repeat[] = useMemo(() => {
@@ -93,14 +99,16 @@ const Home = () => {
         </h1>
 
         {/* Today's Offers — horizontal scroll */}
-        <div
-          className="no-scrollbar flex gap-4 overflow-x-auto"
-          style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
-        >
-          {offers.map((o, i) => (
-            <OfferCard key={i} offer={o} />
-          ))}
-        </div>
+        {offers.length > 0 && (
+          <div
+            className="no-scrollbar flex gap-4 overflow-x-auto"
+            style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
+          >
+            {offers.map((o, i) => (
+              <OfferCard key={i} offer={o} />
+            ))}
+          </div>
+        )}
 
         {repeats.length > 0 && (
           <>
