@@ -1,19 +1,15 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  addInventoryItem,
+  getInventory,
+  subscribeInventory,
+  type SellerInventoryItem,
+} from "@/lib/sellerInventory";
 
 type Category = "Food" | "Snacks" | "Drinks";
 type InvType = "Active" | "Inactive";
-
-type Item = {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  subcategory: string;
-  icon: string;
-  status: InvType;
-};
 
 /**
  * Rich icon library per category with searchable keyword tags.
@@ -416,12 +412,6 @@ const ICON_LIBRARY: Record<Category, IconEntry[]> = {
   ],
 };
 
-const initialItems: Item[] = [
-  { id: "1", name: "Burger", price: 120, category: "Fast Food", subcategory: "Main", icon: "🍔", status: "Active" },
-  { id: "2", name: "French Fries", price: 80, category: "Snacks", subcategory: "Side", icon: "🍟", status: "Active" },
-  { id: "3", name: "Cold Coffee", price: 60, category: "Beverages", subcategory: "Drinks", icon: "🥤", status: "Active" },
-];
-
 const Chip = ({
   active,
   onClick,
@@ -449,9 +439,15 @@ const SellerInventory = () => {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState<Category>("Food");
   const [invType, setInvType] = useState<InvType>("Active");
-  const [items, setItems] = useState<Item[]>(initialItems);
+  const [items, setItems] = useState<SellerInventoryItem[]>(() => getInventory());
   const [activeIconTab, setActiveIconTab] = useState<IconTabKey>("all");
   const [selectedIcon, setSelectedIcon] = useState<{ emoji: string; label: string } | null>(null);
+
+  // Keep the recently-added list in sync with localStorage (also across tabs).
+  useEffect(() => {
+    const unsub = subscribeInventory(() => setItems(getInventory()));
+    return unsub;
+  }, []);
 
   /**
    * Smart icon list:
@@ -505,16 +501,14 @@ const SellerInventory = () => {
       toast.error("Please choose an icon");
       return;
     }
-    const newItem: Item = {
-      id: crypto.randomUUID(),
+    addInventoryItem({
       name: trimmed,
       price: priceNum,
       category,
-      subcategory: invType,
       icon: selectedIcon.emoji,
+      iconLabel: selectedIcon.label,
       status: invType,
-    };
-    setItems((prev) => [newItem, ...prev]);
+    });
     toast.success(`${trimmed} added to inventory`);
     setName("");
     setPrice("");
@@ -812,6 +806,11 @@ const SellerInventory = () => {
           </div>
 
           <ul className="mt-4 space-y-3">
+            {items.length === 0 && (
+              <li className="rounded-2xl border border-dashed border-border bg-secondary/30 p-6 text-center text-sm text-muted-foreground">
+                No items yet. Items you save will appear here.
+              </li>
+            )}
             {items.map((it) => (
               <li
                 key={it.id}
@@ -823,7 +822,7 @@ const SellerInventory = () => {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-base font-bold">{it.name}</p>
                   <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    {it.category} • {it.subcategory}
+                    {it.category} • {it.iconLabel}
                   </p>
                 </div>
                 <div className="text-right">
