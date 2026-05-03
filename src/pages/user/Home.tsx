@@ -396,12 +396,7 @@ const CanteenCard = ({ spot, onClick }: { spot: Spot; onClick?: () => void }) =>
           WebkitBackdropFilter: "blur(12px)",
         }}
       >
-        <span
-          className="material-symbols-outlined"
-          style={{ fontSize: 24, color: "#2563EB" }}
-        >
-          {spot.icon}
-        </span>
+        <span style={{ fontSize: 26, lineHeight: 1 }}>{spot.icon}</span>
       </div>
       <div className="min-w-0">
         <div
