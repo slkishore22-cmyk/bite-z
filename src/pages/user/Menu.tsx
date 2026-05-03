@@ -125,7 +125,7 @@ const Menu = () => {
         >
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/app/home")}
             aria-label="Back"
             className="flex items-center gap-3"
           >
