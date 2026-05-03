@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder } from "@/lib/sellerOrders";
-import { getProfile } from "@/lib/sellerProfile";
 import { pinItem } from "@/lib/userPins";
 import { useOrderConfirmation } from "../../utils/useOrderConfirmation";
 
@@ -45,11 +44,13 @@ const Payment = () => {
       navigate("/app/cart");
       return;
     }
-    const profile = getProfile();
+    const firstCartItem = cart[0];
     setPlacing(true);
     try {
       const order = await createOrder({
         payment: method,
+        sellerId: firstCartItem?.canteenId ?? null,
+        sellerName: firstCartItem?.canteenName ?? null,
         items: cart.map((c) => ({
           itemId: c.itemId,
           name: c.name,
@@ -57,8 +58,8 @@ const Payment = () => {
           category: c.category,
           price: c.price,
           qty: c.qty,
-          canteenId: c.canteenId ?? profile.id,
-          canteenIcon: c.canteenIcon ?? profile.icon,
+          canteenId: c.canteenId,
+          canteenIcon: c.canteenIcon,
         })),
       });
       clearCart();
