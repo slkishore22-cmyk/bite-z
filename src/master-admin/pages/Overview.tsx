@@ -6,6 +6,7 @@ import {
 import Shell from "../components/Shell";
 import { db } from "../db";
 import { CHART_COLORS, axisStyle, daysAgoISO, inr, todayISO, tooltipStyle } from "../format";
+import { toast } from "sonner";
 
 type Seller = { id: string; canteen_name: string; is_active: boolean; is_suspended: boolean };
 type Sale = { seller_id: string; date: string; total_orders: number; total_revenue: number };
@@ -158,6 +159,7 @@ export default function Overview() {
               ))}
             </aside>
           </div>
+          <DangerZone />
         </>
       )}
     </Shell>
@@ -176,5 +178,129 @@ function StatCard({ icon, tone, value, label, sub, subColor }: {
       <div style={{ fontSize: 12, color: "var(--ma-text-2)" }}>{label}</div>
       {sub && <div style={{ fontSize: 11, color: subColor ?? "var(--ma-text-3)", marginTop: 4 }}>{sub}</div>}
     </div>
+  );
+}
+
+function DangerZone() {
+  const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const resetBtnStyle: React.CSSProperties = {
+    background: "#7F1D1D",
+    color: "#FCA5A5",
+    borderRadius: 9999,
+    padding: "10px 24px",
+    fontWeight: 700,
+    border: "none",
+    cursor: "pointer",
+  };
+
+  const handleReset = async () => {
+    setBusy(true);
+    const tables = [
+      "user_analytics",
+      "user_spend",
+      "seller_sessions",
+      "seller_sales",
+      "seller_products",
+      "orders",
+      "sellers",
+    ];
+    try {
+      for (const t of tables) {
+        const { error } = await db.from(t).delete().not("id", "is", null);
+        if (error) throw new Error(`${t}: ${error.message}`);
+      }
+      toast.success("App reset complete. All data cleared.");
+      setOpen(false);
+      setConfirmText("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Reset failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <div
+        className="ma-card"
+        style={{
+          marginTop: 24,
+          border: "1px solid #7F1D1D",
+          background: "#1A0A0A",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        <h3 style={{ margin: 0, fontSize: 14, color: "#FCA5A5", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Danger Zone
+        </h3>
+        <p style={{ margin: 0, fontSize: 13, color: "var(--ma-text-2)" }}>
+          Permanently delete all sellers, inventory, orders and user data. This action cannot be undone.
+        </p>
+        <div>
+          <button type="button" style={resetBtnStyle} onClick={() => setOpen(true)}>
+            Factory Reset
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div
+          onClick={() => !busy && setOpen(false)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#0F0F1A", border: "1px solid #7F1D1D", borderRadius: 12,
+              padding: 24, maxWidth: 460, width: "90%", display: "flex", flexDirection: "column", gap: 14,
+            }}
+          >
+            <h3 style={{ margin: 0, color: "#FCA5A5", fontSize: 18 }}>Factory Reset</h3>
+            <p style={{ margin: 0, fontSize: 14, color: "var(--ma-text-2)", lineHeight: 1.5 }}>
+              This will permanently delete ALL sellers, inventory, orders and user data. This cannot be undone. Type <strong style={{ color: "#FCA5A5" }}>RESET</strong> to confirm.
+            </p>
+            <input
+              autoFocus
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="Type RESET"
+              style={{
+                padding: "10px 12px", borderRadius: 8, border: "1px solid #2A2A3A",
+                background: "#1A1A2A", color: "white", fontSize: 14, outline: "none",
+              }}
+            />
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => { setOpen(false); setConfirmText(""); }}
+                style={{
+                  padding: "10px 20px", borderRadius: 9999, background: "transparent",
+                  border: "1px solid #2A2A3A", color: "var(--ma-text-2)", cursor: "pointer", fontWeight: 600,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={busy || confirmText !== "RESET"}
+                onClick={handleReset}
+                style={{ ...resetBtnStyle, opacity: busy || confirmText !== "RESET" ? 0.5 : 1 }}
+              >
+                {busy ? "Resetting…" : "Confirm Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
