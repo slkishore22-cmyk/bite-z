@@ -8,6 +8,13 @@ import {
   type SellerInventoryItem,
 } from "@/lib/sellerInventory";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
+import {
+  getFavorites,
+  getPinned,
+  pinItem,
+  subscribePins,
+  toggleFavorite,
+} from "@/lib/userPins";
 
 type CategoryKey = "Food" | "Snacks" | "Drinks";
 
@@ -40,35 +47,55 @@ const Menu = () => {
   const [query, setQuery] = useState("");
   const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory());
   const [cart, setCart] = useState(() => getCart());
+  const [pinned, setPinned] = useState(() => getPinned());
+  const [favorites, setFavorites] = useState(() => getFavorites());
 
   useEffect(() => subscribeInventory(() => setInventory(getInventory())), []);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
+  useEffect(
+    () =>
+      subscribePins(() => {
+        setPinned(getPinned());
+        setFavorites(getFavorites());
+      }),
+    [],
+  );
 
   const qtyOf = (itemId: string) => cart.find((c) => c.itemId === itemId)?.qty ?? 0;
 
   const handleAdd = (it: SellerInventoryItem, n: number) => {
     const current = qtyOf(it.id);
     if (current === 0 && n > 0) {
+      pinItem(it.id);
       addToCart(
         { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category },
         n,
       );
     } else {
+      if (n > current) pinItem(it.id);
       setCartQty(it.id, n);
     }
   };
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (q) {
-      return inventory.filter(
-        (it) => it.status === "Active" && it.name.toLowerCase().includes(q),
-      );
-    }
-    return inventory.filter(
-      (it) => it.category === active && it.status === "Active",
-    );
-  }, [inventory, active, query]);
+    const base = q
+      ? inventory.filter(
+          (it) => it.status === "Active" && it.name.toLowerCase().includes(q),
+        )
+      : inventory.filter(
+          (it) => it.category === active && it.status === "Active",
+        );
+    return [...base].sort((a, b) => {
+      const fa = favorites[a.id] ?? 0;
+      const fb = favorites[b.id] ?? 0;
+      if (fa !== fb) return fb - fa;
+      const pa = pinned[a.id] ?? 0;
+      const pb = pinned[b.id] ?? 0;
+      if (pa !== pb) return pb - pa;
+      return 0;
+    });
+  }, [inventory, active, query, pinned, favorites]);
 
   const { totalItems, totalPrice } = useMemo(() => {
     const totalItems = cart.reduce((s, i) => s + i.qty, 0);
@@ -212,6 +239,8 @@ const Menu = () => {
                   }}
                   qty={n}
                   onChange={(v) => handleAdd(it, v)}
+                  isFavorite={Boolean(favorites[it.id])}
+                  onToggleFavorite={() => toggleFavorite(it.id)}
                   delay={idx * 60}
                 />
               );
