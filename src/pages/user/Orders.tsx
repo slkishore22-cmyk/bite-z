@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import {
   getOrders,
+  loadOrdersFromBackend,
   subscribeOrders,
   type Order,
 } from "@/lib/sellerOrders";
@@ -35,7 +36,11 @@ const Orders = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
 
-  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+  useEffect(() => {
+    const unsub = subscribeOrders(() => setOrders(getOrders()));
+    loadOrdersFromBackend().then(setOrders).catch(() => setOrders([]));
+    return unsub;
+  }, []);
 
   const { pendingGroups, completedGroups } = useMemo(() => {
     const pending = orders.filter((o) => o.status === "Pending");
