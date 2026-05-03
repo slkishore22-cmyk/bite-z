@@ -139,6 +139,8 @@ export async function createOrder(
     payload.items.reduce((s, i) => s + i.price * i.qty, 0);
   const total = payload.total ?? subtotal;
 
+  const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
+  const userId = getCurrentUserId();
   const order: Order = {
     id: nextShortId(),
     uid: uuid(),
@@ -148,9 +150,10 @@ export async function createOrder(
     items: payload.items,
     subtotal,
     total,
+    sellerId,
+    sellerName: payload.sellerName ?? null,
+    appUserId: userId,
   };
-  const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
-  const userId = getCurrentUserId();
   const { error } = await db.from("user_analytics").insert({
     user_id: userId && String(userId).includes("-") ? userId : null,
     session_id: order.uid,
