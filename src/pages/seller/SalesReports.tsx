@@ -5,8 +5,9 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { getOrders, subscribeOrders, type Order } from "@/lib/sellerOrders";
+import { getOrders, loadOrdersFromBackend, subscribeOrders, type Order } from "@/lib/sellerOrders";
 import { ordersInRange, summariseByCategory, totalRevenue } from "@/lib/sellerStats";
+import { getSellerSession } from "@/utils/sessionManager";
 
 const CATEGORY_ICON: Record<string, string> = {
   Food: "restaurant",
@@ -34,7 +35,12 @@ const SalesReports = () => {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
 
-  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+  useEffect(() => {
+    const sellerId = getSellerSession()?.id;
+    const unsub = subscribeOrders(() => setOrders(getOrders()));
+    loadOrdersFromBackend(sellerId).then(setOrders).catch(() => setOrders([]));
+    return unsub;
+  }, []);
 
   const ranged = useMemo(
     () => ordersInRange(orders, startDate.getTime(), endDate.getTime()),
