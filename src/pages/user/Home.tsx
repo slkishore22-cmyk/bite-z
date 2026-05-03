@@ -37,6 +37,7 @@ const Home = () => {
   // Derive "On Repeat" from the user's most-ordered items in the last 30 days.
   const repeats: Repeat[] = useMemo(() => {
     const counts = new Map<string, Repeat & { count: number }>();
+    const canteenIcon = canteens[0]?.icon ?? null;
     for (const o of orders) {
       for (const i of o.items) {
         const cur = counts.get(i.itemId);
@@ -49,16 +50,15 @@ const Home = () => {
             name: i.name,
             price: i.price,
             category: i.category,
-            tag: null,
+            tag: canteenIcon,
             count: i.qty,
           });
         }
       }
     }
     const arr = Array.from(counts.values()).sort((a, b) => b.count - a.count);
-    if (arr[0]) arr[0].tag = "🔥";
     return arr.slice(0, 6);
-  }, [orders]);
+  }, [orders, canteens]);
 
   const qtyOf = (id: string) => cart.find((c) => c.itemId === id)?.qty ?? 0;
   const setCount = (r: Repeat, n: number) => {
