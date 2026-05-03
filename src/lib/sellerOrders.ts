@@ -147,12 +147,13 @@ export async function createOrder(
     total,
   };
   const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
+  const userId = getCurrentUserId();
   const { error } = await db.from("user_analytics").insert({
-    user_id: null,
+    user_id: userId && String(userId).includes("-") ? userId : null,
     session_id: order.uid,
     screen_name: "order",
     event_type: "order",
-    metadata: { ...order, sellerId },
+    metadata: { ...order, sellerId, sellerName: payload.sellerName ?? null },
   });
   if (error) throw new Error(error.message);
   write([order, ...read()]);
