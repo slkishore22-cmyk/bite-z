@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder } from "@/lib/sellerOrders";
 import { getProfile } from "@/lib/sellerProfile";
+import { pinItem } from "@/lib/userPins";
 import { useOrderConfirmation } from "../../utils/useOrderConfirmation";
 
 const liquidGlass: React.CSSProperties = {
@@ -57,6 +58,7 @@ const Payment = () => {
       })),
     });
     clearCart();
+    cart.forEach((c) => pinItem(c.itemId));
     confirm();
     navigate(
       `/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`,
