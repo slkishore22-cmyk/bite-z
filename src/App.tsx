@@ -16,6 +16,8 @@ import SellerSettings from "./pages/seller/Settings.tsx";
 import SellerOrders from "./pages/seller/Orders.tsx";
 import SalesDashboard from "./pages/seller/SalesDashboard.tsx";
 import SalesReports from "./pages/seller/SalesReports.tsx";
+import SellerLogin from "./pages/seller/Login.tsx";
+import SellerProtectedRoute from "./components/seller/SellerProtectedRoute.tsx";
 import UserHome from "./pages/user/Home.tsx";
 import UserCart from "./pages/user/Cart.tsx";
 import UserOrders from "./pages/user/Orders.tsx";
@@ -75,15 +77,16 @@ const App = () => (
           <Route path="/canteen/:id" element={<UserMenu />} />
           <Route path="/payment" element={<UserPayment />} />
           <Route path="/order-status" element={<UserOrderStatus />} />
-          <Route path="/seller" element={<SellerDashboard />} />
-          <Route path="/seller/inventory" element={<SellerInventory />} />
-          <Route path="/seller/menu" element={<SellerMenu />} />
-          <Route path="/seller/staff" element={<SellerStaff />} />
-          <Route path="/seller/offers" element={<SellerOffers />} />
-          <Route path="/seller/settings" element={<SellerSettings />} />
-          <Route path="/seller/orders" element={<SellerOrders />} />
-          <Route path="/seller/sales" element={<SalesDashboard />} />
-          <Route path="/seller/sales/reports" element={<SalesReports />} />
+          <Route path="/seller/login" element={<SellerLogin />} />
+          <Route path="/seller" element={<SellerProtectedRoute><SellerDashboard /></SellerProtectedRoute>} />
+          <Route path="/seller/inventory" element={<SellerProtectedRoute><SellerInventory /></SellerProtectedRoute>} />
+          <Route path="/seller/menu" element={<SellerProtectedRoute><SellerMenu /></SellerProtectedRoute>} />
+          <Route path="/seller/staff" element={<SellerProtectedRoute><SellerStaff /></SellerProtectedRoute>} />
+          <Route path="/seller/offers" element={<SellerProtectedRoute><SellerOffers /></SellerProtectedRoute>} />
+          <Route path="/seller/settings" element={<SellerProtectedRoute><SellerSettings /></SellerProtectedRoute>} />
+          <Route path="/seller/orders" element={<SellerProtectedRoute><SellerOrders /></SellerProtectedRoute>} />
+          <Route path="/seller/sales" element={<SellerProtectedRoute><SalesDashboard /></SellerProtectedRoute>} />
+          <Route path="/seller/sales/reports" element={<SellerProtectedRoute><SalesReports /></SellerProtectedRoute>} />
           {/* Master Admin (separate dashboard) */}
           <Route path="/master-admin" element={<MaProtected><MaOverview /></MaProtected>} />
           <Route path="/master-admin/login" element={<MaLogin />} />
