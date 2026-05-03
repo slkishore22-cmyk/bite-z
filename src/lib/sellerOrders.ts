@@ -14,6 +14,8 @@ export type OrderItem = {
   category: SellerCategory;
   price: number;
   qty: number;
+  canteenId?: string;
+  canteenIcon?: string;
 };
 
 export type OrderStatus = "Pending" | "Completed" | "Cancelled";
