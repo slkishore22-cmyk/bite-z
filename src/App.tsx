@@ -43,6 +43,7 @@ import AdminRoute from "./components/guards/AdminRoute.jsx";
 import { preloadInventoryForSellers } from "@/lib/sellerInventory";
 import { loadOrdersFromBackend } from "@/lib/sellerOrders";
 import { getRegisteredCanteensFromBackend } from "@/lib/sellerProfile";
+import { getUserSession } from "@/utils/sessionManager";
 
 // Aggressive caching tuned for low-bandwidth campus networks.
 // Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
@@ -69,7 +70,8 @@ const AppDataPreloader = () => {
     getRegisteredCanteensFromBackend()
       .then((canteens) => alive && preloadInventoryForSellers(canteens.map((c) => c.id)))
       .catch(() => null);
-    loadOrdersFromBackend().catch(() => null);
+    const userId = getUserSession()?.id;
+    if (userId) loadOrdersFromBackend(null, userId).catch(() => null);
     return () => { alive = false; };
   }, []);
   return null;
