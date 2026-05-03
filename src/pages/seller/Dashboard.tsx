@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SellerHeader from "@/components/seller/SellerHeader";
-import { getOrders, subscribeOrders, type Order } from "@/lib/sellerOrders";
+import { getOrders, loadOrdersFromBackend, subscribeOrders, type Order } from "@/lib/sellerOrders";
 import { hourlySales, ordersInRange, rangeBounds, totalRevenue } from "@/lib/sellerStats";
+import { getSellerSession } from "@/utils/sessionManager";
 import {
   Area,
   AreaChart,
@@ -36,7 +37,12 @@ const SellerDashboard = () => {
   const lastChartTap = useRef(0);
 
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
-  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+  useEffect(() => {
+    const sellerId = getSellerSession()?.id;
+    const unsub = subscribeOrders(() => setOrders(getOrders()));
+    loadOrdersFromBackend(sellerId).then(setOrders).catch(() => setOrders([]));
+    return unsub;
+  }, []);
 
   const { from, to } = useMemo(() => rangeBounds("today"), []);
   const todaysOrders = useMemo(() => ordersInRange(orders, from, to), [orders, from, to]);
