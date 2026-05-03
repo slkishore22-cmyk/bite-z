@@ -44,7 +44,7 @@ const SellerHeader = () => {
 
   return (
     <header className="flex items-center justify-between">
-      <Link to="/seller" className="flex items-center gap-2">
+      <Link to="/seller/dashboard" className="flex items-center gap-2">
         <span className="material-symbols-outlined text-primary" style={{ fontSize: 26 }}>
           shield_lock
         </span>

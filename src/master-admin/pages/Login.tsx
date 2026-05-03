@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSession, loginMasterAdmin, setSession, logAudit } from "../auth";
+import { saveAdminSession } from "@/utils/sessionManager";
 import "../theme.css";
 
 export default function Login() {
@@ -26,6 +27,7 @@ export default function Login() {
         return;
       }
       setSession(username.trim());
+      saveAdminSession();
       await logAudit("ADMIN_LOGIN", username.trim());
       navigate("/master-admin/overview", { replace: true });
     } catch (err) {

@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { getSellerSession } from "@/lib/sellerAuth";
+import { getSellerSession } from "@/utils/sessionManager";
 
 const SellerProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const session = getSellerSession();

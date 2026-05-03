@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getProfile, saveProfile, type SellerProfile } from "@/lib/sellerProfile";
-import { clearSellerSession } from "@/lib/sellerAuth";
+import { clearSellerSession as clearLegacySellerSession } from "@/lib/sellerAuth";
+import { clearSellerSession } from "@/utils/sessionManager";
 
 const canteenIcons = ["🍽️", "🍛", "🍔", "🍕", "🏪", "🥗", "☕"];
 
@@ -89,7 +90,7 @@ const SellerSettings = () => {
       <main className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
         <header className="flex items-center gap-3">
           <Link
-            to="/seller"
+            to="/seller/dashboard"
             aria-label="Back to dashboard"
             className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
           >
@@ -119,6 +120,7 @@ const SellerSettings = () => {
             type="button"
             onClick={() => {
               clearSellerSession();
+              clearLegacySellerSession();
               toast.success("Logged out");
               navigate("/seller/login", { replace: true });
             }}

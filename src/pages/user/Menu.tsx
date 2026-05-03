@@ -264,14 +264,14 @@ const Menu = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => navigate("/cart")}
+                onClick={() => navigate("/app/cart")}
                 style={{ fontSize: 12, fontWeight: 700, color: "#6B7280" }}
               >
                 View Cart
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/cart")}
+                onClick={() => navigate("/app/cart")}
                 style={{
                   background: "linear-gradient(135deg, #2563eb, #3b82f6)",
                   color: "#FFFFFF",

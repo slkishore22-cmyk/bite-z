@@ -134,7 +134,7 @@ const SellerOrders = () => {
         {/* Header */}
         <header className="flex items-center gap-3">
           <Link
-            to="/seller"
+            to="/seller/dashboard"
             aria-label="Back"
             className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
           >

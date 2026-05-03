@@ -2,10 +2,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import LiquidGlassNav from "@/components/LiquidGlassNav";
 
 const tabToPath: Record<string, string> = {
-  home: "/home",
-  orders: "/orders",
-  cart: "/cart",
-  events: "/events",
+  home: "/app/home",
+  orders: "/app/orders",
+  cart: "/app/cart",
+  events: "/app/events",
 };
 
 const pathToTab = (pathname: string) => {
@@ -18,9 +18,9 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation();
   const active = pathToTab(pathname);
   const hideNav =
-    pathname.startsWith("/canteen/") ||
-    pathname.startsWith("/payment") ||
-    pathname.startsWith("/order-status");
+    pathname.startsWith("/app/menu/") ||
+    pathname.startsWith("/app/payment") ||
+    pathname.startsWith("/app/order-status");
 
   return (
     <>

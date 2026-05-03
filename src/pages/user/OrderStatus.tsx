@@ -237,7 +237,7 @@ const OrderStatus = () => {
         {/* Action */}
         <div className="mt-10 w-full flex flex-col gap-4">
           <button
-            onClick={() => navigate("/home")}
+            onClick={() => navigate("/app/home")}
             className="w-full font-bold transition-all duration-400"
             style={{
               background: "#FFFFFF",

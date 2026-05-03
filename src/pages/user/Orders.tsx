@@ -161,7 +161,7 @@ const Orders = () => {
                 Explore the latest additions to Bitez kitchens.
               </p>
               <button
-                onClick={() => navigate("/home")}
+                onClick={() => navigate("/app/home")}
                 className="active:scale-95 transition-transform"
                 style={{
                   padding: "12px 24px",
@@ -339,7 +339,7 @@ const GroupCard = ({
             <button
               key={o.id}
               onClick={() =>
-                isPending ? navigate("/order-status") : undefined
+                isPending ? navigate("/app/order-status") : undefined
               }
               className="w-full text-left active:scale-[0.99] transition-transform"
               style={{

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getSellerSession, loginSeller } from "@/lib/sellerAuth";
+import { loginSeller } from "@/lib/sellerAuth";
+import { getSellerSession, saveSellerSession } from "@/utils/sessionManager";
 
 const SellerLogin = () => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ const SellerLogin = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (getSellerSession()) navigate("/seller", { replace: true });
+    if (getSellerSession()) navigate("/seller/dashboard", { replace: true });
   }, [navigate]);
 
   const submit = async (e: React.FormEvent) => {
@@ -22,9 +23,16 @@ const SellerLogin = () => {
     }
     setLoading(true);
     try {
-      await loginSeller(identifier, password);
+      const s = await loginSeller(identifier, password);
+      saveSellerSession({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        username: s.username,
+        canteenName: s.canteen_name,
+      });
       toast.success("Welcome back");
-      navigate("/seller", { replace: true });
+      navigate("/seller/dashboard", { replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Login failed");
     } finally {

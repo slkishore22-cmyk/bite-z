@@ -56,7 +56,7 @@ const SellerStaff = () => {
       <main className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
         <header className="flex items-center gap-3">
           <Link
-            to="/seller"
+            to="/seller/dashboard"
             aria-label="Back to dashboard"
             className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
           >
