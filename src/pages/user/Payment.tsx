@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder } from "@/lib/sellerOrders";
+import { useOrderConfirmation } from "../../utils/useOrderConfirmation";
 
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.05)",
@@ -32,6 +33,7 @@ const HERO_IMG =
 
 const Payment = () => {
   const navigate = useNavigate();
+  const { confirm } = useOrderConfirmation();
 
   const placeOrder = (method: "Online" | "Cash") => {
     const cart = getCart();
@@ -51,6 +53,7 @@ const Payment = () => {
       })),
     });
     clearCart();
+    confirm();
     navigate(
       `/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`,
     );
