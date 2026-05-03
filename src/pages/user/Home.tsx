@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
-import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
+import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
 import { getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
@@ -24,7 +24,11 @@ const Home = () => {
   const [cart, setCart] = useState(() => getCart());
   const [liveOffers, setLiveOffers] = useState<SellerOffer[]>(() => getActiveOffers());
   const [canteens, setCanteens] = useState<SellerProfile[]>([]);
-  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+  useEffect(() => {
+    const unsub = subscribeOrders(() => setOrders(getOrders()));
+    loadOrdersFromBackend().then(setOrders).catch(() => null);
+    return unsub;
+  }, []);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(() => subscribeOffers(() => setLiveOffers(getActiveOffers())), []);
   useEffect(() => {
