@@ -156,7 +156,7 @@ export async function createOrder(
     session_id: order.uid,
     screen_name: "order",
     event_type: "order",
-    metadata: { ...order, sellerId, sellerName: payload.sellerName ?? null },
+    metadata: { ...order, sellerId, sellerName: payload.sellerName ?? null, appUserId: userId },
   });
   if (error) throw new Error(error.message);
   write([order, ...read()]);
