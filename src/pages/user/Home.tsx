@@ -4,15 +4,11 @@ import UserLayout from "@/components/user/UserLayout";
 import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
+import { getRegisteredCanteens, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
 type Repeat = { itemId: string; emoji: string; name: string; price: number; category: "Food" | "Snacks" | "Drinks"; tag: string | null };
 type Spot = { id: string; icon: string; name: string; sub: string };
-
-const spots: Spot[] = [
-  { id: "c1", icon: "restaurant", name: "The Main Square", sub: "Fastest bites on campus" },
-  { id: "c2", icon: "local_cafe", name: "The Main Square", sub: "Fastest bites on campus" },
-];
 
 const toDisplayOffer = (o: SellerOffer): Offer => ({
   canteen: o.kind === "general" ? "ALL ITEMS" : "SELECTED ITEMS",
@@ -27,10 +23,16 @@ const Home = () => {
   const [orders, setOrders] = useState(() => getOrders());
   const [cart, setCart] = useState(() => getCart());
   const [liveOffers, setLiveOffers] = useState<SellerOffer[]>(() => getActiveOffers());
+  const [canteens, setCanteens] = useState<SellerProfile[]>(() => getRegisteredCanteens());
   useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(() => subscribeOffers(() => setLiveOffers(getActiveOffers())), []);
+  useEffect(() => subscribeProfile(() => setCanteens(getRegisteredCanteens())), []);
   const offers: Offer[] = useMemo(() => liveOffers.map(toDisplayOffer), [liveOffers]);
+  const spots: Spot[] = useMemo(
+    () => canteens.map((c) => ({ id: c.id, icon: c.icon, name: c.canteenName, sub: c.slogan })),
+    [canteens],
+  );
 
   // Derive "On Repeat" from the user's most-ordered items in the last 30 days.
   const repeats: Repeat[] = useMemo(() => {
@@ -143,6 +145,8 @@ const Home = () => {
         )}
 
         {/* Pick a Spot? */}
+        {spots.length > 0 && (
+          <>
         <h2
           style={{
             paddingLeft: 24,
@@ -164,6 +168,8 @@ const Home = () => {
             <CanteenCard key={i} spot={s} onClick={() => navigate(`/canteen/${s.id}`)} />
           ))}
         </div>
+          </>
+        )}
       </div>
     </UserLayout>
   );
