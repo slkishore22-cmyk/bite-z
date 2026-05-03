@@ -198,19 +198,24 @@ function DangerZone() {
 
   const handleReset = async () => {
     setBusy(true);
-    const tables = [
-      "user_analytics",
-      "user_spend",
-      "seller_sessions",
-      "seller_sales",
-      "seller_products",
-      "orders",
-      "sellers",
-    ];
     try {
-      for (const t of tables) {
-        const { error } = await db.from(t).delete().not("id", "is", null);
-        if (error) throw new Error(`${t}: ${error.message}`);
+      const NIL = "00000000-0000-0000-0000-000000000000";
+      const steps: Array<() => Promise<{ error: { message: string } | null }>> = [
+        () => db.from("user_analytics").delete().neq("id", NIL),
+        () => db.from("user_spend").delete().neq("id", NIL),
+        () => db.from("seller_sessions").delete().neq("id", NIL),
+        () => db.from("seller_sales").delete().neq("id", NIL),
+        () => db.from("seller_products").delete().neq("id", NIL),
+        () => db.from("orders").delete().neq("id", NIL),
+        () => db.from("sellers").delete().neq("id", NIL),
+      ];
+      const labels = [
+        "user_analytics", "user_spend", "seller_sessions", "seller_sales",
+        "seller_products", "orders", "sellers",
+      ];
+      for (let i = 0; i < steps.length; i++) {
+        const { error } = await steps[i]();
+        if (error) throw new Error(`${labels[i]}: ${error.message}`);
       }
       toast.success("App reset complete. All data cleared.");
       setOpen(false);
