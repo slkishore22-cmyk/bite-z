@@ -344,7 +344,7 @@ const FoodCard = ({
   const [holdProgress, setHoldProgress] = useState(0);
   const holdTimer = useRef<number | null>(null);
   const holdRaf = useRef<number | null>(null);
-  const HOLD_MS = 1500;
+  const HOLD_MS = 800;
 
   const clearHold = () => {
     if (holdTimer.current) window.clearTimeout(holdTimer.current);
