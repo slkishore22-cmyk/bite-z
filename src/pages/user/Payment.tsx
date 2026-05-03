@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder } from "@/lib/sellerOrders";
@@ -36,33 +37,37 @@ const HERO_IMG =
 const Payment = () => {
   const navigate = useNavigate();
   const { confirm } = useOrderConfirmation();
+  const [placing, setPlacing] = useState(false);
 
-  const placeOrder = (method: "Online" | "Cash") => {
+  const placeOrder = async (method: "Online" | "Cash") => {
     const cart = getCart();
     if (cart.length === 0) {
       navigate("/app/cart");
       return;
     }
     const profile = getProfile();
-    const order = createOrder({
-      payment: method,
-      items: cart.map((c) => ({
-        itemId: c.itemId,
-        name: c.name,
-        icon: c.icon,
-        category: c.category,
-        price: c.price,
-        qty: c.qty,
-        canteenId: c.canteenId ?? profile.id,
-        canteenIcon: c.canteenIcon ?? profile.icon,
-      })),
-    });
-    clearCart();
-    cart.forEach((c) => pinItem(c.itemId));
-    confirm();
-    navigate(
-      `/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`,
-    );
+    setPlacing(true);
+    try {
+      const order = await createOrder({
+        payment: method,
+        items: cart.map((c) => ({
+          itemId: c.itemId,
+          name: c.name,
+          icon: c.icon,
+          category: c.category,
+          price: c.price,
+          qty: c.qty,
+          canteenId: c.canteenId ?? profile.id,
+          canteenIcon: c.canteenIcon ?? profile.icon,
+        })),
+      });
+      clearCart();
+      cart.forEach((c) => pinItem(c.itemId));
+      confirm();
+      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
+    } finally {
+      setPlacing(false);
+    }
   };
 
   return (
