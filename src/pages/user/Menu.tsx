@@ -48,22 +48,31 @@ const Menu = () => {
   const [query, setQuery] = useState("");
   const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory(id));
   const [cart, setCart] = useState(() => getCart());
+  // Frozen snapshots: order is captured on entry to this canteen and does NOT
+  // shuffle while the user browses. It refreshes on next visit (id change).
   const [pinned, setPinned] = useState(() => getPinned());
   const [favorites, setFavorites] = useState(() => getFavorites());
+  // Live favorites used only for the heart UI (so the heart appears immediately
+  // when the user double-taps), without re-sorting the visible list.
+  const [favoritesLive, setFavoritesLive] = useState(() => getFavorites());
 
   useEffect(() => {
     const refreshLocal = () => setInventory(getInventory(id));
     const unsub = subscribeInventory(refreshLocal);
     loadInventoryFromBackend(id).then(setInventory).catch(() => setInventory([]));
     getRegisteredCanteensFromBackend().then((rows) => setCanteen(rows.find((c) => c.id === id) ?? null)).catch(() => setCanteen(getRegisteredCanteens().find((c) => c.id === id) ?? null));
+    // Re-snapshot pin/favorite order only when the canteen changes
+    setPinned(getPinned());
+    setFavorites(getFavorites());
+    setFavoritesLive(getFavorites());
     return unsub;
   }, [id]);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(
     () =>
       subscribePins(() => {
-        setPinned(getPinned());
-        setFavorites(getFavorites());
+        // Only update the heart indicator; do not re-sort the menu in place.
+        setFavoritesLive(getFavorites());
       }),
     [],
   );
@@ -73,6 +82,9 @@ const Menu = () => {
   const handleAdd = (it: SellerInventoryItem, n: number) => {
     const current = qtyOf(it.id);
     if (current === 0 && n > 0) {
+      // Pin silently — do NOT reorder the visible list right now. The new
+      // pinned position will only be reflected on the next visit / after
+      // checkout when the snapshot is rebuilt.
       pinItem(it.id);
       addToCart(
         { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category, canteenId: it.sellerId ?? id, canteenIcon: canteen?.icon, canteenName: canteen?.canteenName },
@@ -257,7 +269,7 @@ const Menu = () => {
                   }}
                   qty={n}
                   onChange={(v) => handleAdd(it, v)}
-                  isFavorite={Boolean(favorites[it.id])}
+                  isFavorite={Boolean(favoritesLive[it.id])}
                   onToggleFavorite={() => toggleFavorite(it.id)}
                   delay={idx * 60}
                 />
