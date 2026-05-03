@@ -13,6 +13,7 @@ export type CartItem = {
   qty: number;
   canteenId?: string;
   canteenIcon?: string;
+  canteenName?: string;
 };
 
 const STORAGE_KEY = "bitez:user:cart";
