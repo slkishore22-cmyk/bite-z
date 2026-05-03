@@ -26,6 +26,9 @@ export type Order = {
   items: OrderItem[];
   subtotal: number;
   total: number;
+  sellerId?: string | null;
+  sellerName?: string | null;
+  appUserId?: string | null;
 };
 
 const STORAGE_KEY = "bitez:orders";
@@ -59,6 +62,18 @@ function write(items: Order[]) {
   window.dispatchEvent(new CustomEvent(EVENT_NAME));
 }
 
+function getCurrentUserId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem("bitez_user_session");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { id?: string };
+    return parsed.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function nextShortId(): string {
   if (typeof window === "undefined") return "1000";
   const raw = window.localStorage.getItem(ID_COUNTER_KEY);
@@ -86,17 +101,22 @@ function fromAnalytics(row: any): Order | null {
     items: m.items,
     subtotal: Number(m.subtotal ?? 0),
     total: Number(m.total ?? m.subtotal ?? 0),
+    sellerId: m.sellerId ?? null,
+    sellerName: m.sellerName ?? null,
+    appUserId: m.appUserId ?? null,
   };
 }
 
-export async function loadOrdersFromBackend(sellerId?: string | null): Promise<Order[]> {
+export async function loadOrdersFromBackend(sellerId?: string | null, userId = getCurrentUserId()): Promise<Order[]> {
   let query = db
     .from("user_analytics")
-    .select("id, session_id, created_at, metadata")
+    .select("id, session_id, created_at, metadata, user_id")
     .eq("event_type", "order")
     .eq("screen_name", "order")
     .order("created_at", { ascending: false });
   if (sellerId) query = query.eq("metadata->>sellerId", sellerId);
+  else if (userId && String(userId).includes("-")) query = query.eq("user_id", userId);
+  else if (userId) query = query.eq("metadata->>appUserId", userId);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   const orders = (data ?? []).map(fromAnalytics).filter(Boolean) as Order[];
@@ -119,6 +139,8 @@ export async function createOrder(
     payload.items.reduce((s, i) => s + i.price * i.qty, 0);
   const total = payload.total ?? subtotal;
 
+  const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
+  const userId = getCurrentUserId();
   const order: Order = {
     id: nextShortId(),
     uid: uuid(),
@@ -128,14 +150,16 @@ export async function createOrder(
     items: payload.items,
     subtotal,
     total,
+    sellerId,
+    sellerName: payload.sellerName ?? null,
+    appUserId: userId,
   };
-  const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
   const { error } = await db.from("user_analytics").insert({
-    user_id: null,
+    user_id: userId && String(userId).includes("-") ? userId : null,
     session_id: order.uid,
     screen_name: "order",
     event_type: "order",
-    metadata: { ...order, sellerId },
+    metadata: { ...order, sellerId, sellerName: payload.sellerName ?? null, appUserId: userId },
   });
   if (error) throw new Error(error.message);
   write([order, ...read()]);

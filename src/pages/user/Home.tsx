@@ -4,7 +4,7 @@ import UserLayout from "@/components/user/UserLayout";
 import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
-import { getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
+import { getRegisteredCanteens, getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
 type Repeat = { itemId: string; emoji: string; name: string; price: number; category: "Food" | "Snacks" | "Drinks"; tag: string | null };
@@ -23,7 +23,7 @@ const Home = () => {
   const [orders, setOrders] = useState(() => getOrders());
   const [cart, setCart] = useState(() => getCart());
   const [liveOffers, setLiveOffers] = useState<SellerOffer[]>(() => getActiveOffers());
-  const [canteens, setCanteens] = useState<SellerProfile[]>([]);
+  const [canteens, setCanteens] = useState<SellerProfile[]>(() => getRegisteredCanteens());
   useEffect(() => {
     const unsub = subscribeOrders(() => setOrders(getOrders()));
     loadOrdersFromBackend().then(setOrders).catch(() => null);
@@ -32,7 +32,7 @@ const Home = () => {
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(() => subscribeOffers(() => setLiveOffers(getActiveOffers())), []);
   useEffect(() => {
-    const refresh = () => getRegisteredCanteensFromBackend().then(setCanteens).catch(() => setCanteens([]));
+    const refresh = () => getRegisteredCanteensFromBackend().then(setCanteens).catch(() => setCanteens(getRegisteredCanteens()));
     refresh();
     return subscribeProfile(refresh);
   }, []);

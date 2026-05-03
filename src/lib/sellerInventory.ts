@@ -71,6 +71,14 @@ function write(items: SellerInventoryItem[]) {
   window.dispatchEvent(new CustomEvent(EVENT_NAME));
 }
 
+function upsertCache(incoming: SellerInventoryItem[], sellerId?: string | null) {
+  const existing = read();
+  const kept = sellerId ? existing.filter((it) => it.sellerId !== sellerId) : [];
+  const nextById = new Map<string, SellerInventoryItem>();
+  [...incoming, ...kept].forEach((it) => nextById.set(it.id, it));
+  write(Array.from(nextById.values()));
+}
+
 export function getInventory(sellerId?: string | null): SellerInventoryItem[] {
   const rows = read();
   const scoped = sellerId ? rows.filter((it) => it.sellerId === sellerId) : rows;
@@ -87,8 +95,22 @@ export async function loadInventoryFromBackend(sellerId?: string | null): Promis
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   const incoming = (data ?? []).map(fromProduct);
-  const others = sellerId ? read().filter((it) => it.sellerId !== sellerId) : [];
-  write([...incoming, ...others]);
+  upsertCache(incoming, sellerId);
+  return incoming;
+}
+
+export async function preloadInventoryForSellers(sellerIds: string[]): Promise<SellerInventoryItem[]> {
+  const ids = Array.from(new Set(sellerIds.filter(Boolean)));
+  if (ids.length === 0) return [];
+  const { data, error } = await db
+    .from("seller_products")
+    .select("id, seller_id, product_name, price, category, emoji, is_active, created_at")
+    .in("seller_id", ids)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  const incoming = (data ?? []).map(fromProduct);
+  const existing = read().filter((it) => !it.sellerId || !ids.includes(it.sellerId));
+  write([...incoming, ...existing]);
   return incoming;
 }
 

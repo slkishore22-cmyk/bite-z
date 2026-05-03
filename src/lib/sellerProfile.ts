@@ -12,6 +12,7 @@ export type SellerProfile = {
 };
 
 const STORAGE_KEY = "bitez.seller.profile";
+const CANTEENS_STORAGE_KEY = "bitez:shared:canteens:v1";
 const EVENT = "bitez:seller:profile:change";
 const DEFAULT_ID = "main";
 const SESSION_KEY = "bitez_seller_session";
@@ -64,8 +65,15 @@ export function isProfileComplete(p: SellerProfile): boolean {
 }
 
 export function getRegisteredCanteens(): SellerProfile[] {
-  const p = getProfile();
-  return isProfileComplete(p) ? [p] : [];
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(CANTEENS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as SellerProfile[]) : [];
+  } catch {
+    return [];
+  }
 }
 
 function writeProfile(p: SellerProfile) {
@@ -74,14 +82,22 @@ function writeProfile(p: SellerProfile) {
   window.dispatchEvent(new CustomEvent(EVENT));
 }
 
+function writeCanteens(rows: SellerProfile[]) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(CANTEENS_STORAGE_KEY, JSON.stringify(rows));
+  window.dispatchEvent(new CustomEvent(EVENT));
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fromSeller(row: any): SellerProfile {
+  const rawIcon = String(row.canteen_type ?? "").trim();
+  const icon = /^\p{Extended_Pictographic}/u.test(rawIcon) ? rawIcon : "🍽️";
   return {
     id: row.id,
     canteenName: row.canteen_name ?? "Canteen",
     slogan: row.canteen_location ?? row.canteen_type ?? "Open now",
     ownerPhone: row.phone ?? "",
-    icon: row.canteen_type ?? "🍽️",
+    icon,
     accountNumber: row.bank_account_number ?? "",
     ifsc: row.bank_ifsc ?? "",
     upiId: row.upi_id ?? "",
@@ -96,7 +112,9 @@ export async function getRegisteredCanteensFromBackend(): Promise<SellerProfile[
     .eq("is_suspended", false)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return (data ?? []).map(fromSeller);
+  const rows = (data ?? []).map(fromSeller);
+  writeCanteens(rows);
+  return rows;
 }
 
 export async function loadCurrentSellerProfile(): Promise<SellerProfile> {

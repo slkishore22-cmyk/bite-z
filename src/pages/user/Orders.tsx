@@ -7,6 +7,7 @@ import {
   subscribeOrders,
   type Order,
 } from "@/lib/sellerOrders";
+import { getUserSession } from "@/utils/sessionManager";
 
 type OrderRow = {
   id: string;
@@ -38,7 +39,7 @@ const Orders = () => {
 
   useEffect(() => {
     const unsub = subscribeOrders(() => setOrders(getOrders()));
-    loadOrdersFromBackend().then(setOrders).catch(() => setOrders([]));
+    loadOrdersFromBackend(null, getUserSession()?.id).then(setOrders).catch(() => setOrders([]));
     return unsub;
   }, []);
 
@@ -46,32 +47,24 @@ const Orders = () => {
     const pending = orders.filter((o) => o.status === "Pending");
     const completed = orders.filter((o) => o.status === "Completed");
 
-    const pendingGroups: CanteenGroup[] = pending.length
-      ? [
-          {
-            id: "pending",
-            name: "Bitez Canteen",
-            icon: "restaurant",
-            iconBg: "#D6E3FF",
-            iconColor: "#2563EB",
-            status: "pending",
-            orders: pending.map(toOrderRow),
-          },
-        ]
-      : [];
-    const completedGroups: CanteenGroup[] = completed.length
-      ? [
-          {
-            id: "completed",
-            name: "Bitez Canteen",
-            icon: "local_cafe",
-            iconBg: "#F5F5F7",
-            iconColor: "#984061",
-            status: "completed",
-            orders: completed.map(toOrderRow),
-          },
-        ]
-      : [];
+    const groupByCanteen = (rows: Order[], status: "pending" | "completed") =>
+      Array.from(rows.reduce((map, order) => {
+        const id = order.sellerId ?? "unknown";
+        const existing = map.get(id) ?? {
+          id: `${status}-${id}`,
+          name: order.sellerName ?? "Canteen",
+          icon: status === "pending" ? "restaurant" : "local_cafe",
+          iconBg: status === "pending" ? "#D6E3FF" : "#F5F5F7",
+          iconColor: status === "pending" ? "#2563EB" : "#984061",
+          status,
+          orders: [],
+        };
+        existing.orders.push(toOrderRow(order));
+        map.set(id, existing);
+        return map;
+      }, new Map<string, CanteenGroup>()).values());
+    const pendingGroups = groupByCanteen(pending, "pending");
+    const completedGroups = groupByCanteen(completed, "completed");
     return { pendingGroups, completedGroups };
   }, [orders]);
 
