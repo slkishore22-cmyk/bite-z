@@ -2,5 +2,12 @@ import { Navigate } from 'react-router-dom';
 import { getSellerSession } from '../../utils/sessionManager';
 
 export default function SellerRoute({ children }) {
-  return getSellerSession() ? children : <Navigate to="/seller/login" replace />;
+  const session = getSellerSession();
+  if (!session) return <Navigate to="/seller/login" replace />;
+  if (session?.id && !String(session.id).includes('-')) {
+    localStorage.removeItem('bitez_seller_session');
+    localStorage.removeItem('bitez.seller.session.v1');
+    return <Navigate to="/seller/login" replace />;
+  }
+  return children;
 }
