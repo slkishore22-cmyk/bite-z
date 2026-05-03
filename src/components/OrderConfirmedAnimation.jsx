@@ -29,7 +29,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { playOrderConfirmation, preloadOrderSound } from './orderConfirmation';
+import { playOrderConfirmation, preloadOrderSound } from '../utils/orderConfirmation';
 
 // ── CSS keyframes injected once into <head> ──────────────────────
 const STYLES = `

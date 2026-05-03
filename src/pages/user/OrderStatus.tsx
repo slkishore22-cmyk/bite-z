@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { getOrderById, getOrders } from "@/lib/sellerOrders";
+import OrderConfirmedAnimation from "../../components/OrderConfirmedAnimation";
 
 const OrderStatus = () => {
   const navigate = useNavigate();
@@ -42,44 +43,7 @@ const OrderStatus = () => {
       </header>
 
       <main className="flex-1 w-full max-w-md px-6 pt-6 flex flex-col items-center pb-12">
-        {/* Success Indicator */}
-        <div className="flex flex-col items-center mb-12 relative">
-          <div
-            className="rounded-full"
-            style={{ boxShadow: "0 0 200px 80px rgba(34,197,94,0.12)" }}
-          >
-            <div
-              className="w-24 h-24 rounded-full flex items-center justify-center transition-all duration-400"
-              style={{
-                background: "rgba(34,197,94,0.20)",
-                boxShadow: "0 0 20px 5px rgba(34,197,94,0.4)",
-              }}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  color: "#22C55E",
-                  fontSize: 48,
-                  fontVariationSettings: "'FILL' 1",
-                }}
-              >
-                check_circle
-              </span>
-            </div>
-          </div>
-          <h2
-            className="font-semibold mt-8 mb-2"
-            style={{ fontSize: 22, color: "#0F172A" }}
-          >
-            Order Confirmed
-          </h2>
-          <p
-            className="text-center px-8"
-            style={{ fontSize: 14, color: "#64748B" }}
-          >
-            Your order has been placed successfully and is being shared with the chef.
-          </p>
-        </div>
+        <OrderConfirmedAnimation />
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-4 w-full">
@@ -87,6 +51,7 @@ const OrderStatus = () => {
           <div
             className="flex flex-col items-center justify-center transition-all duration-400"
             style={{
+              animation: 'ob-card-slide-up 500ms 900ms ease both',
               background: "#FFFFFF",
               padding: 20,
               borderRadius: 16,
@@ -137,6 +102,7 @@ const OrderStatus = () => {
           <div
             className="flex items-center justify-between"
             style={{
+              animation: 'ob-card-slide-up 500ms 1050ms ease both',
               background: "#FFFFFF",
               padding: 20,
               borderRadius: 16,
@@ -178,6 +144,7 @@ const OrderStatus = () => {
           <div
             className="relative overflow-hidden"
             style={{
+              animation: 'ob-card-slide-up 500ms 1200ms ease both',
               background: "#FFFFFF",
               padding: 24,
               borderRadius: 16,
