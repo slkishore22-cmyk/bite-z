@@ -11,6 +11,8 @@ export type CartItem = {
   icon: string;
   category: SellerCategory;
   qty: number;
+  canteenId?: string;
+  canteenIcon?: string;
 };
 
 const STORAGE_KEY = "bitez:user:cart";
