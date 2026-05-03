@@ -137,7 +137,7 @@ const Home = () => {
                   item={r}
                   qty={qtyOf(r.itemId) || 1}
                   onChange={(n) => setCount(r, n)}
-                  onOrder={() => navigate("/cart")}
+                  onOrder={() => navigate("/app/cart")}
                 />
               ))}
             </div>
@@ -164,7 +164,7 @@ const Home = () => {
             style={{ paddingLeft: 24, paddingRight: 24 }}
           >
             {spots.map((s, i) => (
-              <CanteenCard key={i} spot={s} onClick={() => navigate(`/canteen/${s.id}`)} />
+              <CanteenCard key={i} spot={s} onClick={() => navigate(`/app/menu/${s.id}`)} />
             ))}
           </div>
         ) : (

@@ -292,7 +292,7 @@ const Cart = () => {
             style={{ bottom: 96 }}
           >
             <button
-              onClick={() => navigate("/payment")}
+              onClick={() => navigate("/app/payment")}
               className="w-full flex items-center justify-between relative overflow-hidden active:scale-[0.98] transition-all duration-[400ms]"
               style={{
                 height: 56,

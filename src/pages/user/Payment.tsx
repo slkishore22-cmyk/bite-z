@@ -38,7 +38,7 @@ const Payment = () => {
   const placeOrder = (method: "Online" | "Cash") => {
     const cart = getCart();
     if (cart.length === 0) {
-      navigate("/cart");
+      navigate("/app/cart");
       return;
     }
     const order = createOrder({
@@ -55,7 +55,7 @@ const Payment = () => {
     clearCart();
     confirm();
     navigate(
-      `/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`,
+      `/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`,
     );
   };
 
