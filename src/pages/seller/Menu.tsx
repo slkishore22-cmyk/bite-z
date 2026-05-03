@@ -6,6 +6,7 @@ import {
   removeInventoryItem,
   setInventoryStatus,
   subscribeInventory,
+  updateInventoryItem,
   type SellerCategory,
   type SellerInventoryItem,
 } from "@/lib/sellerInventory";
@@ -23,6 +24,41 @@ const SellerMenu = () => {
   const [items, setItems] = useState<SellerInventoryItem[]>(() => getInventory());
   const [activeCat, setActiveCat] = useState<SellerCategory>("Food");
   const [query, setQuery] = useState("");
+  const [editing, setEditing] = useState<SellerInventoryItem | null>(null);
+  const [eName, setEName] = useState("");
+  const [ePrice, setEPrice] = useState("");
+  const [eCategory, setECategory] = useState<SellerCategory>("Food");
+  const [eStatus, setEStatus] = useState<"Active" | "Inactive">("Active");
+  const [eIcon, setEIcon] = useState("");
+
+  const openEdit = (item: SellerInventoryItem) => {
+    setEditing(item);
+    setEName(item.name);
+    setEPrice(String(item.price));
+    setECategory(item.category);
+    setEStatus(item.status);
+    setEIcon(item.icon);
+  };
+
+  const closeEdit = () => setEditing(null);
+
+  const saveEdit = () => {
+    if (!editing) return;
+    const trimmed = eName.trim();
+    const priceNum = Number(ePrice);
+    if (!trimmed) return toast.error("Name is required");
+    if (!priceNum || priceNum <= 0) return toast.error("Enter a valid price");
+    if (!eIcon.trim()) return toast.error("Icon is required");
+    updateInventoryItem(editing.id, {
+      name: trimmed,
+      price: priceNum,
+      category: eCategory,
+      status: eStatus,
+      icon: eIcon.trim(),
+    });
+    toast.success("Item updated");
+    closeEdit();
+  };
 
   useEffect(() => {
     const unsub = subscribeInventory(() => setItems(getInventory()));
@@ -191,9 +227,17 @@ const SellerMenu = () => {
 
                   {/* Footer: category label + delete */}
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      {item.iconLabel}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => openEdit(item)}
+                      aria-label={`Edit ${item.name}`}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-primary transition hover:bg-primary/15"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                        edit
+                      </span>
+                      Edit
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleRemove(item)}
@@ -211,6 +255,128 @@ const SellerMenu = () => {
             </div>
           </section>
         ))}
+
+        {/* Edit dialog */}
+        {editing && (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 pt-10 sm:items-center"
+            onClick={closeEdit}
+          >
+            <div
+              className="w-full max-w-md rounded-3xl border border-border bg-gradient-card p-5 shadow-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-base font-extrabold tracking-tight">Edit Item</h3>
+                <button
+                  type="button"
+                  onClick={closeEdit}
+                  aria-label="Close"
+                  className="grid h-9 w-9 place-items-center rounded-full bg-secondary text-foreground hover:bg-secondary/80"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
+                </button>
+              </div>
+
+              <label className="block">
+                <span className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">NAME</span>
+                <input
+                  type="text"
+                  value={eName}
+                  onChange={(e) => setEName(e.target.value)}
+                  className="mt-2 w-full rounded-full bg-secondary/70 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/60"
+                />
+              </label>
+
+              <label className="mt-4 block">
+                <span className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">PRICE (₹)</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  value={ePrice}
+                  onChange={(e) => setEPrice(e.target.value)}
+                  className="mt-2 w-full rounded-full bg-secondary/70 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/60"
+                />
+              </label>
+
+              <label className="mt-4 block">
+                <span className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">ICON (EMOJI)</span>
+                <input
+                  type="text"
+                  value={eIcon}
+                  onChange={(e) => setEIcon(e.target.value)}
+                  maxLength={4}
+                  className="mt-2 w-full rounded-full bg-secondary/70 px-5 py-3 text-center text-2xl outline-none focus:ring-2 focus:ring-primary/60"
+                />
+              </label>
+
+              <div className="mt-5">
+                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">CATEGORY</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(CATEGORIES.map((c) => c.key) as SellerCategory[]).map((c) => {
+                    const active = eCategory === c;
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setECategory(c)}
+                        className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+                          active
+                            ? "bg-primary text-primary-foreground shadow-glow"
+                            : "bg-secondary text-foreground/80 hover:bg-secondary/80"
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">STATUS</p>
+                <div className="mt-2 grid grid-cols-2 gap-1 rounded-full bg-secondary/60 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setEStatus("Active")}
+                    className={`rounded-full py-2 text-xs font-bold uppercase tracking-wider transition ${
+                      eStatus === "Active" ? "bg-success/20 text-success" : "text-muted-foreground"
+                    }`}
+                  >
+                    Active
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEStatus("Inactive")}
+                    className={`rounded-full py-2 text-xs font-bold uppercase tracking-wider transition ${
+                      eStatus === "Inactive" ? "bg-destructive/20 text-destructive" : "text-muted-foreground"
+                    }`}
+                  >
+                    Inactive
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={closeEdit}
+                  className="flex-1 rounded-full bg-secondary py-3 text-sm font-semibold text-foreground hover:bg-secondary/80"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={saveEdit}
+                  className="flex-1 rounded-full bg-gradient-primary py-3 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
