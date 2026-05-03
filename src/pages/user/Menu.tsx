@@ -329,29 +329,111 @@ const FoodCard = ({
   item,
   qty,
   onChange,
+  isFavorite,
+  onToggleFavorite,
   delay,
 }: {
   item: FoodCardItem;
   qty: number;
   onChange: (n: number) => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
   delay: number;
 }) => {
   const [hover, setHover] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [startX, setStartX] = useState<number | null>(null);
+  const REVEAL = 84;
+
+  const onTouchStart = (e: React.TouchEvent) => setStartX(e.touches[0].clientX);
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (startX === null) return;
+    const dx = e.touches[0].clientX - startX;
+    if (dx < 0) setDragX(Math.max(dx, -REVEAL));
+  };
+  const onTouchEnd = () => {
+    setDragX((d) => (d < -REVEAL / 2 ? -REVEAL : 0));
+    setStartX(null);
+  };
+  const onPointerDown = (e: React.PointerEvent) => {
+    setStartX(e.clientX);
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (startX === null) return;
+    const dx = e.clientX - startX;
+    if (dx < 0) setDragX(Math.max(dx, -REVEAL));
+  };
+  const onPointerUp = () => {
+    setDragX((d) => (d < -REVEAL / 2 ? -REVEAL : 0));
+    setStartX(null);
+  };
+
   return (
+    <div style={{ position: "relative" }}>
+      {/* Reveal action behind */}
+      <button
+        type="button"
+        onClick={() => {
+          onToggleFavorite();
+          setDragX(0);
+        }}
+        aria-label={isFavorite ? "Remove favorite" : "Add to favorites"}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: REVEAL,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: isFavorite
+            ? "linear-gradient(135deg, #f43f5e, #e11d48)"
+            : "linear-gradient(135deg, #fb7185, #f43f5e)",
+          borderRadius: 22,
+          color: "#fff",
+          fontSize: 28,
+        }}
+      >
+        {isFavorite ? "💖" : "🤍"}
+      </button>
     <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
       className="flex items-center animate-fade-in"
       style={{
         ...liquidGlass,
         background: hover ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.4)",
         padding: 12,
         gap: 12,
-        transition: "background 400ms ease",
+        transition: "background 400ms ease, transform 250ms ease",
+        transform: `translateX(${dragX}px)`,
+        position: "relative",
+        touchAction: "pan-y",
         animationDelay: `${delay}ms`,
         animationFillMode: "both",
       }}
     >
+      {isFavorite && (
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: 6,
+            left: 6,
+            fontSize: 14,
+          }}
+        >
+          ❤️
+        </span>
+      )}
       <div
         className="flex items-center justify-center shrink-0"
         style={{ width: 48, height: 48, fontSize: 30 }}
@@ -472,6 +554,7 @@ const FoodCard = ({
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };
