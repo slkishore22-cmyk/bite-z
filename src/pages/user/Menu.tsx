@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import { canteens } from "@/data/menu";
@@ -341,86 +341,79 @@ const FoodCard = ({
   delay: number;
 }) => {
   const [hover, setHover] = useState(false);
-  const [dragX, setDragX] = useState(0);
-  const [startX, setStartX] = useState<number | null>(null);
-  const REVEAL = 84;
+  const [holdProgress, setHoldProgress] = useState(0);
+  const holdTimer = useRef<number | null>(null);
+  const holdRaf = useRef<number | null>(null);
+  const HOLD_MS = 1500;
 
-  const onTouchStart = (e: React.TouchEvent) => setStartX(e.touches[0].clientX);
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (startX === null) return;
-    const dx = e.touches[0].clientX - startX;
-    if (dx < 0) setDragX(Math.max(dx, -REVEAL));
+  const clearHold = () => {
+    if (holdTimer.current) window.clearTimeout(holdTimer.current);
+    if (holdRaf.current) cancelAnimationFrame(holdRaf.current);
+    holdTimer.current = null;
+    holdRaf.current = null;
+    setHoldProgress(0);
   };
-  const onTouchEnd = () => {
-    setDragX((d) => (d < -REVEAL / 2 ? -REVEAL : 0));
-    setStartX(null);
-  };
-  const onPointerDown = (e: React.PointerEvent) => {
-    setStartX(e.clientX);
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (startX === null) return;
-    const dx = e.clientX - startX;
-    if (dx < 0) setDragX(Math.max(dx, -REVEAL));
-  };
-  const onPointerUp = () => {
-    setDragX((d) => (d < -REVEAL / 2 ? -REVEAL : 0));
-    setStartX(null);
+
+  const startHold = () => {
+    clearHold();
+    const start = performance.now();
+    const tick = () => {
+      const p = Math.min(1, (performance.now() - start) / HOLD_MS);
+      setHoldProgress(p);
+      if (p < 1) holdRaf.current = requestAnimationFrame(tick);
+    };
+    holdRaf.current = requestAnimationFrame(tick);
+    holdTimer.current = window.setTimeout(() => {
+      onToggleFavorite();
+      if ("vibrate" in navigator) navigator.vibrate?.(30);
+      clearHold();
+    }, HOLD_MS);
   };
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Reveal action behind */}
-      <button
-        type="button"
-        onClick={() => {
-          onToggleFavorite();
-          setDragX(0);
-        }}
-        aria-label={isFavorite ? "Remove favorite" : "Add to favorites"}
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: REVEAL,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: isFavorite
-            ? "linear-gradient(135deg, #f43f5e, #e11d48)"
-            : "linear-gradient(135deg, #fb7185, #f43f5e)",
-          borderRadius: 22,
-          color: "#fff",
-          fontSize: 28,
-        }}
-      >
-        {isFavorite ? "💖" : "🤍"}
-      </button>
     <div
       onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
+      onMouseLeave={() => {
+        setHover(false);
+        clearHold();
+      }}
+      onPointerDown={startHold}
+      onPointerUp={clearHold}
+      onPointerCancel={clearHold}
+      onPointerLeave={clearHold}
+      onContextMenu={(e) => e.preventDefault()}
       className="flex items-center animate-fade-in"
       style={{
         ...liquidGlass,
         background: hover ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.4)",
         padding: 12,
         gap: 12,
-        transition: "background 400ms ease, transform 250ms ease",
-        transform: `translateX(${dragX}px)`,
+        transition: "background 400ms ease",
         position: "relative",
         touchAction: "pan-y",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitTouchCallout: "none",
         animationDelay: `${delay}ms`,
         animationFillMode: "both",
       }}
     >
+      {holdProgress > 0 && holdProgress < 1 && (
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            height: 3,
+            width: `${holdProgress * 100}%`,
+            background: "linear-gradient(90deg, #fb7185, #e11d48)",
+            borderRadius: 9999,
+            transition: "width 60ms linear",
+            pointerEvents: "none",
+          }}
+        />
+      )}
       {isFavorite && (
         <span
           aria-hidden
@@ -554,7 +547,6 @@ const FoodCard = ({
           </div>
         )}
       </div>
-    </div>
     </div>
   );
 };
