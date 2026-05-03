@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
-import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
+import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
-import { getRegisteredCanteens, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
+import { getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
 type Repeat = { itemId: string; emoji: string; name: string; price: number; category: "Food" | "Snacks" | "Drinks"; tag: string | null };
@@ -23,11 +23,19 @@ const Home = () => {
   const [orders, setOrders] = useState(() => getOrders());
   const [cart, setCart] = useState(() => getCart());
   const [liveOffers, setLiveOffers] = useState<SellerOffer[]>(() => getActiveOffers());
-  const [canteens, setCanteens] = useState<SellerProfile[]>(() => getRegisteredCanteens());
-  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+  const [canteens, setCanteens] = useState<SellerProfile[]>([]);
+  useEffect(() => {
+    const unsub = subscribeOrders(() => setOrders(getOrders()));
+    loadOrdersFromBackend().then(setOrders).catch(() => null);
+    return unsub;
+  }, []);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(() => subscribeOffers(() => setLiveOffers(getActiveOffers())), []);
-  useEffect(() => subscribeProfile(() => setCanteens(getRegisteredCanteens())), []);
+  useEffect(() => {
+    const refresh = () => getRegisteredCanteensFromBackend().then(setCanteens).catch(() => setCanteens([]));
+    refresh();
+    return subscribeProfile(refresh);
+  }, []);
   const offers: Offer[] = useMemo(() => liveOffers.map(toDisplayOffer), [liveOffers]);
   const spots: Spot[] = useMemo(
     () => canteens.map((c) => ({ id: c.id, icon: c.icon, name: c.canteenName, sub: c.slogan })),
@@ -211,7 +219,7 @@ const Home = () => {
                   maxWidth: 280,
                 }}
               >
-                Save your canteen details in Settings and they'll show up here for students to order from.
+                Canteens created in Master Admin will show up here for students to order from.
               </div>
             </div>
           </div>

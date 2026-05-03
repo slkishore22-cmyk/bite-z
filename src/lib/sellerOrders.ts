@@ -1,9 +1,4 @@
-// Shared local-first orders store. The customer creates orders here and the
-// seller pages read from the same store — so dashboards, sales, and order
-// queues all reflect real activity.
-//
-// Optimised for low-bandwidth campus networks: zero network round-trips,
-// instant reads, optimistic writes, cross-tab sync via storage + CustomEvent.
+import { supabase } from "@/integrations/supabase/client";
 
 import type { SellerCategory } from "./sellerInventory";
 
@@ -37,6 +32,15 @@ const STORAGE_KEY = "bitez:orders";
 const EVENT_NAME = "bitez:orders:change";
 const ID_COUNTER_KEY = "bitez:orders:counter";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
+function uuid(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}00000000-0000-4000-8000-000000000000`.slice(0, 36);
+}
+
 function read(): Order[] {
   if (typeof window === "undefined") return [];
   try {
@@ -64,27 +68,52 @@ function nextShortId(): string {
   return String(next);
 }
 
-function uid(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `o_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
 export function getOrders(): Order[] {
   return read().sort((a, b) => b.createdAt - a.createdAt);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function fromAnalytics(row: any): Order | null {
+  const m = row.metadata ?? {};
+  if (!Array.isArray(m.items)) return null;
+  return {
+    id: String(m.id ?? row.session_id ?? "----"),
+    uid: String(row.session_id ?? m.uid ?? row.id),
+    createdAt: row.created_at ? new Date(row.created_at).getTime() : Number(m.createdAt ?? Date.now()),
+    completedAt: m.completedAt ? Number(m.completedAt) : undefined,
+    payment: m.payment === "Online" ? "Online" : "Cash",
+    status: m.status === "Completed" || m.status === "Cancelled" ? m.status : "Pending",
+    items: m.items,
+    subtotal: Number(m.subtotal ?? 0),
+    total: Number(m.total ?? m.subtotal ?? 0),
+  };
+}
+
+export async function loadOrdersFromBackend(sellerId?: string | null): Promise<Order[]> {
+  let query = db
+    .from("user_analytics")
+    .select("id, session_id, created_at, metadata")
+    .eq("event_type", "order")
+    .eq("screen_name", "order")
+    .order("created_at", { ascending: false });
+  if (sellerId) query = query.eq("metadata->>sellerId", sellerId);
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  const orders = (data ?? []).map(fromAnalytics).filter(Boolean) as Order[];
+  write(orders);
+  return orders;
 }
 
 export function getOrderById(id: string): Order | undefined {
   return read().find((o) => o.id === id || o.uid === id);
 }
 
-export function createOrder(
+export async function createOrder(
   payload: Omit<Order, "id" | "uid" | "createdAt" | "status" | "subtotal" | "total"> & {
     subtotal?: number;
     total?: number;
   },
-): Order {
+): Promise<Order> {
   const subtotal =
     payload.subtotal ??
     payload.items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -92,7 +121,7 @@ export function createOrder(
 
   const order: Order = {
     id: nextShortId(),
-    uid: uid(),
+    uid: uuid(),
     createdAt: Date.now(),
     status: "Pending",
     payment: payload.payment,
@@ -100,21 +129,39 @@ export function createOrder(
     subtotal,
     total,
   };
+  const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
+  const { error } = await db.from("user_analytics").insert({
+    user_id: null,
+    session_id: order.uid,
+    screen_name: "order",
+    event_type: "order",
+    metadata: { ...order, sellerId },
+  });
+  if (error) throw new Error(error.message);
   write([order, ...read()]);
   return order;
 }
 
-export function setOrderStatus(uidOrId: string, status: OrderStatus) {
+export async function setOrderStatus(uidOrId: string, status: OrderStatus) {
+  const target = read().find((o) => o.uid === uidOrId || o.id === uidOrId);
+  const completedAt = status === "Completed" ? target?.completedAt ?? Date.now() : target?.completedAt;
   const next = read().map((o) =>
     o.uid === uidOrId || o.id === uidOrId
       ? {
           ...o,
           status,
-          completedAt:
-            status === "Completed" ? o.completedAt ?? Date.now() : o.completedAt,
+          completedAt,
         }
       : o,
   );
+  if (target) {
+    const { error } = await db
+      .from("user_analytics")
+      .update({ metadata: { ...target, status, completedAt, sellerId: target.items.find((i) => i.canteenId)?.canteenId ?? null } })
+      .eq("session_id", target.uid)
+      .eq("event_type", "order");
+    if (error) throw new Error(error.message);
+  }
   write(next);
 }
 

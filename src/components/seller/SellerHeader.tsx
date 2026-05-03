@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
+import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
+import { getSellerSession } from "@/utils/sessionManager";
 
 const PROFILE_STORAGE_KEY = "bitez.seller.profile";
 
@@ -28,6 +29,7 @@ const SellerHeader = () => {
     const refresh = () =>
       setHasActiveOrders(getOrders().some((o) => o.status === "Pending"));
     refresh();
+    loadOrdersFromBackend(getSellerSession()?.id).then(refresh).catch(() => null);
     return subscribeOrders(refresh);
   }, []);
 

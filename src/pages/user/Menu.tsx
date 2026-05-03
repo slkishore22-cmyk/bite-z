@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
-import { canteens } from "@/data/menu";
 import {
   getInventory,
+  loadInventoryFromBackend,
   subscribeInventory,
   type SellerInventoryItem,
 } from "@/lib/sellerInventory";
+import { getRegisteredCanteensFromBackend, type SellerProfile } from "@/lib/sellerProfile";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import {
   getFavorites,
@@ -40,17 +41,23 @@ const textGlass: React.CSSProperties = {
 const Menu = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const canteen = canteens.find((c) => c.id === id);
-  const title = canteen?.name ?? "Main Block Canteen";
+  const [canteen, setCanteen] = useState<SellerProfile | null>(null);
+  const title = canteen?.canteenName ?? "Canteen";
 
   const [active, setActive] = useState<CategoryKey>("Food");
   const [query, setQuery] = useState("");
-  const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory());
+  const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory(id));
   const [cart, setCart] = useState(() => getCart());
   const [pinned, setPinned] = useState(() => getPinned());
   const [favorites, setFavorites] = useState(() => getFavorites());
 
-  useEffect(() => subscribeInventory(() => setInventory(getInventory())), []);
+  useEffect(() => {
+    const refreshLocal = () => setInventory(getInventory(id));
+    const unsub = subscribeInventory(refreshLocal);
+    loadInventoryFromBackend(id).then(setInventory).catch(() => setInventory([]));
+    getRegisteredCanteensFromBackend().then((rows) => setCanteen(rows.find((c) => c.id === id) ?? null)).catch(() => setCanteen(null));
+    return unsub;
+  }, [id]);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(
     () =>
@@ -68,7 +75,7 @@ const Menu = () => {
     if (current === 0 && n > 0) {
       pinItem(it.id);
       addToCart(
-        { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category },
+        { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category, canteenId: it.sellerId ?? id, canteenIcon: canteen?.icon },
         n,
       );
     } else {

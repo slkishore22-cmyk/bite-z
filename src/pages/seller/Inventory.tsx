@@ -4,9 +4,11 @@ import { toast } from "sonner";
 import {
   addInventoryItem,
   getInventory,
+  loadInventoryFromBackend,
   subscribeInventory,
   type SellerInventoryItem,
 } from "@/lib/sellerInventory";
+import { getSellerSession } from "@/utils/sessionManager";
 
 type Category = "Food" | "Snacks" | "Drinks";
 type InvType = "Active" | "Inactive";
@@ -439,13 +441,15 @@ const SellerInventory = () => {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState<Category>("Food");
   const [invType, setInvType] = useState<InvType>("Active");
-  const [items, setItems] = useState<SellerInventoryItem[]>(() => getInventory());
+  const [items, setItems] = useState<SellerInventoryItem[]>(() => getInventory(getSellerSession()?.id));
   const [activeIconTab, setActiveIconTab] = useState<IconTabKey>("all");
   const [selectedIcon, setSelectedIcon] = useState<{ emoji: string; label: string } | null>(null);
 
   // Keep the recently-added list in sync with localStorage (also across tabs).
   useEffect(() => {
-    const unsub = subscribeInventory(() => setItems(getInventory()));
+    const sellerId = getSellerSession()?.id;
+    const unsub = subscribeInventory(() => setItems(getInventory(sellerId)));
+    loadInventoryFromBackend(sellerId).then(setItems).catch((e) => toast.error(e instanceof Error ? e.message : "Could not load inventory"));
     return unsub;
   }, []);
 
@@ -485,7 +489,7 @@ const SellerInventory = () => {
     return scored.slice(0, 6).map((x) => x.icon);
   }, [name]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
     const priceNum = Number(price);
@@ -501,19 +505,23 @@ const SellerInventory = () => {
       toast.error("Please choose an icon");
       return;
     }
-    addInventoryItem({
-      name: trimmed,
-      price: priceNum,
-      category,
-      icon: selectedIcon.emoji,
-      iconLabel: selectedIcon.label,
-      status: invType,
-    });
-    toast.success(`${trimmed} added to inventory`);
-    setName("");
-    setPrice("");
-    setSelectedIcon(null);
-    setActiveIconTab("all");
+    try {
+      await addInventoryItem({
+        name: trimmed,
+        price: priceNum,
+        category,
+        icon: selectedIcon.emoji,
+        iconLabel: selectedIcon.label,
+        status: invType,
+      });
+      toast.success(`${trimmed} added to inventory`);
+      setName("");
+      setPrice("");
+      setSelectedIcon(null);
+      setActiveIconTab("all");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save item");
+    }
   };
 
   return (

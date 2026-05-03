@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder } from "@/lib/sellerOrders";
@@ -36,33 +37,37 @@ const HERO_IMG =
 const Payment = () => {
   const navigate = useNavigate();
   const { confirm } = useOrderConfirmation();
+  const [placing, setPlacing] = useState(false);
 
-  const placeOrder = (method: "Online" | "Cash") => {
+  const placeOrder = async (method: "Online" | "Cash") => {
     const cart = getCart();
     if (cart.length === 0) {
       navigate("/app/cart");
       return;
     }
     const profile = getProfile();
-    const order = createOrder({
-      payment: method,
-      items: cart.map((c) => ({
-        itemId: c.itemId,
-        name: c.name,
-        icon: c.icon,
-        category: c.category,
-        price: c.price,
-        qty: c.qty,
-        canteenId: c.canteenId ?? profile.id,
-        canteenIcon: c.canteenIcon ?? profile.icon,
-      })),
-    });
-    clearCart();
-    cart.forEach((c) => pinItem(c.itemId));
-    confirm();
-    navigate(
-      `/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`,
-    );
+    setPlacing(true);
+    try {
+      const order = await createOrder({
+        payment: method,
+        items: cart.map((c) => ({
+          itemId: c.itemId,
+          name: c.name,
+          icon: c.icon,
+          category: c.category,
+          price: c.price,
+          qty: c.qty,
+          canteenId: c.canteenId ?? profile.id,
+          canteenIcon: c.canteenIcon ?? profile.icon,
+        })),
+      });
+      clearCart();
+      cart.forEach((c) => pinItem(c.itemId));
+      confirm();
+      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
+    } finally {
+      setPlacing(false);
+    }
   };
 
   return (
@@ -158,9 +163,10 @@ const Payment = () => {
           {/* UPI Card */}
           <button
             type="button"
+            disabled={placing}
             onClick={() => placeOrder("Online")}
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
-            style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
+            style={{ ...liquidGlass, padding: 16, borderRadius: 20, opacity: placing ? 0.65 : 1 }}
           >
             <span style={glassHighlight} aria-hidden />
             <div className="flex items-center relative z-10" style={{ gap: 14 }}>
@@ -214,9 +220,10 @@ const Payment = () => {
           {/* Cash Card */}
           <button
             type="button"
+            disabled={placing}
             onClick={() => placeOrder("Cash")}
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
-            style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
+            style={{ ...liquidGlass, padding: 16, borderRadius: 20, opacity: placing ? 0.65 : 1 }}
           >
             <span style={glassHighlight} aria-hidden />
             <div className="flex items-center relative z-10" style={{ gap: 14 }}>

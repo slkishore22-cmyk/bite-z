@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getOrders, subscribeOrders, type Order } from "@/lib/sellerOrders";
+import { getOrders, loadOrdersFromBackend, subscribeOrders, type Order } from "@/lib/sellerOrders";
 import {
   ordersInRange,
   rangeBounds,
@@ -8,6 +8,7 @@ import {
   totalRevenue,
   type RangeKey,
 } from "@/lib/sellerStats";
+import { getSellerSession } from "@/utils/sessionManager";
 
 const CATEGORY_EMOJI: Record<string, string> = {
   Food: "🍛",
@@ -21,7 +22,12 @@ const SalesDashboard = () => {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
 
-  useEffect(() => subscribeOrders(() => setOrders(getOrders())), []);
+  useEffect(() => {
+    const sellerId = getSellerSession()?.id;
+    const unsub = subscribeOrders(() => setOrders(getOrders()));
+    loadOrdersFromBackend(sellerId).then(setOrders).catch(() => setOrders([]));
+    return unsub;
+  }, []);
 
   const { from, to } = useMemo(() => rangeBounds(range), [range]);
   const ranged = useMemo(() => ordersInRange(orders, from, to), [orders, from, to]);
