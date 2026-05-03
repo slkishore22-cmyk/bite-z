@@ -7,10 +7,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import {
   getOrders,
+  loadOrdersFromBackend,
   setOrderStatus,
   subscribeOrders,
   type Order as StoreOrder,
 } from "@/lib/sellerOrders";
+import { getSellerSession } from "@/utils/sessionManager";
 
 type TabKey = "live" | "history";
 type ViewKey = "bulk" | "individual";
@@ -64,7 +66,12 @@ const SellerOrders = () => {
   const [endDate, setEndDate] = useState<Date>(() => endOfDay(new Date()));
   const [storeOrders, setStoreOrders] = useState<StoreOrder[]>(() => getOrders());
 
-  useEffect(() => subscribeOrders(() => setStoreOrders(getOrders())), []);
+  useEffect(() => {
+    const sellerId = getSellerSession()?.id;
+    const unsub = subscribeOrders(() => setStoreOrders(getOrders()));
+    loadOrdersFromBackend(sellerId).then(setStoreOrders).catch(() => setStoreOrders([]));
+    return unsub;
+  }, []);
 
   const liveOrders: Order[] = useMemo(
     () =>
