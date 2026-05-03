@@ -11,6 +11,7 @@ import {
   type SellerCategory,
   type SellerInventoryItem,
 } from "@/lib/sellerInventory";
+import { getSellerSession } from "@/utils/sessionManager";
 
 const CATEGORIES: { key: SellerCategory; label: string; emoji: string }[] = [
   { key: "Food", label: "Food", emoji: "🍛" },
@@ -22,7 +23,7 @@ const CATEGORIES: { key: SellerCategory; label: string; emoji: string }[] = [
 const NEW_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 const SellerMenu = () => {
-  const [items, setItems] = useState<SellerInventoryItem[]>(() => getInventory());
+  const [items, setItems] = useState<SellerInventoryItem[]>(() => getInventory(getSellerSession()?.id));
   const [activeCat, setActiveCat] = useState<SellerCategory>("Food");
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<SellerInventoryItem | null>(null);
@@ -63,8 +64,9 @@ const SellerMenu = () => {
   };
 
   useEffect(() => {
-    const unsub = subscribeInventory(() => setItems(getInventory()));
-    loadInventoryFromBackend().then(setItems).catch((e) => toast.error(e instanceof Error ? e.message : "Could not load menu"));
+    const sellerId = getSellerSession()?.id;
+    const unsub = subscribeInventory(() => setItems(getInventory(sellerId)));
+    loadInventoryFromBackend(sellerId).then(setItems).catch((e) => toast.error(e instanceof Error ? e.message : "Could not load menu"));
     return unsub;
   }, []);
 
