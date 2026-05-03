@@ -60,11 +60,13 @@ const Menu = () => {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
+    if (q) {
+      return inventory.filter(
+        (it) => it.status === "Active" && it.name.toLowerCase().includes(q),
+      );
+    }
     return inventory.filter(
-      (it) =>
-        it.category === active &&
-        it.status === "Active" &&
-        (!q || it.name.toLowerCase().includes(q)),
+      (it) => it.category === active && it.status === "Active",
     );
   }, [inventory, active, query]);
 
