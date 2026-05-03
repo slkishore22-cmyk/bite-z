@@ -20,7 +20,6 @@ import UserHome from "./pages/user/Home.tsx";
 import UserCart from "./pages/user/Cart.tsx";
 import UserOrders from "./pages/user/Orders.tsx";
 import UserProfile from "./pages/user/Profile.tsx";
-import UserEvents from "./pages/user/Events.tsx";
 import UserMenu from "./pages/user/Menu.tsx";
 import UserPayment from "./pages/user/Payment.tsx";
 import UserOrderStatus from "./pages/user/OrderStatus.tsx";
@@ -78,21 +77,10 @@ const App = () => (
           <Route path="/app/cart" element={<UserRoute><UserCart /></UserRoute>} />
           <Route path="/app/orders" element={<UserRoute><UserOrders /></UserRoute>} />
           <Route path="/app/profile" element={<UserRoute><UserProfile /></UserRoute>} />
-          <Route path="/app/events" element={<UserRoute><UserEvents /></UserRoute>} />
           <Route path="/app/menu/:id" element={<UserRoute><UserMenu /></UserRoute>} />
           <Route path="/app/payment" element={<UserRoute><UserPayment /></UserRoute>} />
           <Route path="/app/order-status" element={<UserRoute><UserOrderStatus /></UserRoute>} />
           <Route path="/app" element={<Navigate to="/app/home" replace />} />
-
-          {/* Legacy user paths -> /app/* */}
-          <Route path="/home" element={<Navigate to="/app/home" replace />} />
-          <Route path="/cart" element={<Navigate to="/app/cart" replace />} />
-          <Route path="/orders" element={<Navigate to="/app/orders" replace />} />
-          <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
-          <Route path="/events" element={<Navigate to="/app/events" replace />} />
-          <Route path="/canteen/:id" element={<Navigate to="/app/home" replace />} />
-          <Route path="/payment" element={<Navigate to="/app/payment" replace />} />
-          <Route path="/order-status" element={<Navigate to="/app/order-status" replace />} />
 
           {/* SELLER APP */}
           <Route path="/seller/login" element={<SellerLogin />} />
