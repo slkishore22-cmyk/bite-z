@@ -48,22 +48,31 @@ const Menu = () => {
   const [query, setQuery] = useState("");
   const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory(id));
   const [cart, setCart] = useState(() => getCart());
+  // Frozen snapshots: order is captured on entry to this canteen and does NOT
+  // shuffle while the user browses. It refreshes on next visit (id change).
   const [pinned, setPinned] = useState(() => getPinned());
   const [favorites, setFavorites] = useState(() => getFavorites());
+  // Live favorites used only for the heart UI (so the heart appears immediately
+  // when the user double-taps), without re-sorting the visible list.
+  const [favoritesLive, setFavoritesLive] = useState(() => getFavorites());
 
   useEffect(() => {
     const refreshLocal = () => setInventory(getInventory(id));
     const unsub = subscribeInventory(refreshLocal);
     loadInventoryFromBackend(id).then(setInventory).catch(() => setInventory([]));
     getRegisteredCanteensFromBackend().then((rows) => setCanteen(rows.find((c) => c.id === id) ?? null)).catch(() => setCanteen(getRegisteredCanteens().find((c) => c.id === id) ?? null));
+    // Re-snapshot pin/favorite order only when the canteen changes
+    setPinned(getPinned());
+    setFavorites(getFavorites());
+    setFavoritesLive(getFavorites());
     return unsub;
   }, [id]);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(
     () =>
       subscribePins(() => {
-        setPinned(getPinned());
-        setFavorites(getFavorites());
+        // Only update the heart indicator; do not re-sort the menu in place.
+        setFavoritesLive(getFavorites());
       }),
     [],
   );
@@ -73,6 +82,9 @@ const Menu = () => {
   const handleAdd = (it: SellerInventoryItem, n: number) => {
     const current = qtyOf(it.id);
     if (current === 0 && n > 0) {
+      // Pin silently — do NOT reorder the visible list right now. The new
+      // pinned position will only be reflected on the next visit / after
+      // checkout when the snapshot is rebuilt.
       pinItem(it.id);
       addToCart(
         { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category, canteenId: it.sellerId ?? id, canteenIcon: canteen?.icon, canteenName: canteen?.canteenName },
@@ -257,7 +269,7 @@ const Menu = () => {
                   }}
                   qty={n}
                   onChange={(v) => handleAdd(it, v)}
-                  isFavorite={Boolean(favorites[it.id])}
+                  isFavorite={Boolean(favoritesLive[it.id])}
                   onToggleFavorite={() => toggleFavorite(it.id)}
                   delay={idx * 60}
                 />
@@ -359,46 +371,25 @@ const FoodCard = ({
   delay: number;
 }) => {
   const [hover, setHover] = useState(false);
-  const [holdProgress, setHoldProgress] = useState(0);
-  const holdTimer = useRef<number | null>(null);
-  const holdRaf = useRef<number | null>(null);
-  const HOLD_MS = 800;
+  const lastTapRef = useRef<number>(0);
+  const DOUBLE_TAP_MS = 300;
 
-  const clearHold = () => {
-    if (holdTimer.current) window.clearTimeout(holdTimer.current);
-    if (holdRaf.current) cancelAnimationFrame(holdRaf.current);
-    holdTimer.current = null;
-    holdRaf.current = null;
-    setHoldProgress(0);
-  };
-
-  const startHold = () => {
-    clearHold();
-    const start = performance.now();
-    const tick = () => {
-      const p = Math.min(1, (performance.now() - start) / HOLD_MS);
-      setHoldProgress(p);
-      if (p < 1) holdRaf.current = requestAnimationFrame(tick);
-    };
-    holdRaf.current = requestAnimationFrame(tick);
-    holdTimer.current = window.setTimeout(() => {
+  const handleTap = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < DOUBLE_TAP_MS) {
       onToggleFavorite();
-      if ("vibrate" in navigator) navigator.vibrate?.(30);
-      clearHold();
-    }, HOLD_MS);
+      if ("vibrate" in navigator) navigator.vibrate?.(20);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
   };
 
   return (
     <div
       onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => {
-        setHover(false);
-        clearHold();
-      }}
-      onPointerDown={startHold}
-      onPointerUp={clearHold}
-      onPointerCancel={clearHold}
-      onPointerLeave={clearHold}
+      onMouseLeave={() => setHover(false)}
+      onPointerUp={handleTap}
       onContextMenu={(e) => e.preventDefault()}
       className="flex items-center animate-fade-in"
       style={{
@@ -416,22 +407,6 @@ const FoodCard = ({
         animationFillMode: "both",
       }}
     >
-      {holdProgress > 0 && holdProgress < 1 && (
-        <span
-          aria-hidden
-          style={{
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-            height: 3,
-            width: `${holdProgress * 100}%`,
-            background: "linear-gradient(90deg, #fb7185, #e11d48)",
-            borderRadius: 9999,
-            transition: "width 60ms linear",
-            pointerEvents: "none",
-          }}
-        />
-      )}
       {isFavorite && (
         <span
           aria-hidden
