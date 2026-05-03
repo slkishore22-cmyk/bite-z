@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getProfile, saveProfile, type SellerProfile } from "@/lib/sellerProfile";
+import { getProfile, loadCurrentSellerProfile, saveProfileToBackend, type SellerProfile } from "@/lib/sellerProfile";
 import { clearSellerSession as clearLegacySellerSession } from "@/lib/sellerAuth";
 import { clearSellerSession } from "@/utils/sessionManager";
 
@@ -54,7 +54,7 @@ const SellerSettings = () => {
     setIsEditing(false);
   };
 
-  const saveSettings = (event: FormEvent<HTMLFormElement>) => {
+  const saveSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const required: Array<[keyof Profile, string]> = [
       ["canteenName", "Canteen Name"],
@@ -70,16 +70,20 @@ const SellerSettings = () => {
         return;
       }
     }
-    setProfile(draft);
-    saveProfile(draft);
-    if (newPassword || currentPassword) {
-      setCurrentPassword("");
-      setNewPassword("");
-      toast.success("Profile & password updated");
-    } else {
-      toast.success("Profile saved");
+    try {
+      const saved = await saveProfileToBackend(draft);
+      setProfile(toDraft(saved));
+      if (newPassword || currentPassword) {
+        setCurrentPassword("");
+        setNewPassword("");
+        toast.success("Profile & password updated");
+      } else {
+        toast.success("Profile saved");
+      }
+      setIsEditing(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save profile");
     }
-    setIsEditing(false);
   };
 
   const updateDraft = <K extends keyof Profile>(key: K, value: Profile[K]) =>
