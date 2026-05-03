@@ -1,43 +1,19 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { getProfile, saveProfile, type SellerProfile } from "@/lib/sellerProfile";
 
 const canteenIcons = ["🍽️", "🍛", "🍔", "🍕", "🏪", "🥗", "☕"];
-const STORAGE_KEY = "bitez.seller.profile";
 
-type Profile = {
-  canteenName: string;
-  slogan: string;
-  ownerPhone: string;
-  icon: string;
-  accountNumber: string;
-  ifsc: string;
-  upiId: string;
-};
+type Profile = Omit<SellerProfile, "id">;
 
-const emptyProfile: Profile = {
-  canteenName: "",
-  slogan: "",
-  ownerPhone: "",
-  icon: canteenIcons[0],
-  accountNumber: "",
-  ifsc: "",
-  upiId: "",
-};
-
-const loadProfile = (): Profile => {
-  if (typeof window === "undefined") return emptyProfile;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyProfile;
-    return { ...emptyProfile, ...(JSON.parse(raw) as Partial<Profile>) };
-  } catch {
-    return emptyProfile;
-  }
+const toDraft = (p: SellerProfile): Profile => {
+  const { id: _id, ...rest } = p;
+  return rest;
 };
 
 const SellerSettings = () => {
-  const [profile, setProfile] = useState<Profile>(loadProfile);
+  const [profile, setProfile] = useState<Profile>(() => toDraft(getProfile()));
   const [draft, setDraft] = useState<Profile>(profile);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -92,11 +68,7 @@ const SellerSettings = () => {
       }
     }
     setProfile(draft);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-    } catch {
-      /* ignore */
-    }
+    saveProfile(draft);
     if (newPassword || currentPassword) {
       setCurrentPassword("");
       setNewPassword("");
