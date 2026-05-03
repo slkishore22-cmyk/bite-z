@@ -7,7 +7,7 @@ import {
   subscribeInventory,
   type SellerInventoryItem,
 } from "@/lib/sellerInventory";
-import { getRegisteredCanteensFromBackend, type SellerProfile } from "@/lib/sellerProfile";
+import { getRegisteredCanteens, getRegisteredCanteensFromBackend, type SellerProfile } from "@/lib/sellerProfile";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import {
   getFavorites,
@@ -41,7 +41,7 @@ const textGlass: React.CSSProperties = {
 const Menu = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [canteen, setCanteen] = useState<SellerProfile | null>(null);
+  const [canteen, setCanteen] = useState<SellerProfile | null>(() => getRegisteredCanteens().find((c) => c.id === id) ?? null);
   const title = canteen?.canteenName ?? "Canteen";
 
   const [active, setActive] = useState<CategoryKey>("Food");
@@ -55,7 +55,7 @@ const Menu = () => {
     const refreshLocal = () => setInventory(getInventory(id));
     const unsub = subscribeInventory(refreshLocal);
     loadInventoryFromBackend(id).then(setInventory).catch(() => setInventory([]));
-    getRegisteredCanteensFromBackend().then((rows) => setCanteen(rows.find((c) => c.id === id) ?? null)).catch(() => setCanteen(null));
+    getRegisteredCanteensFromBackend().then((rows) => setCanteen(rows.find((c) => c.id === id) ?? null)).catch(() => setCanteen(getRegisteredCanteens().find((c) => c.id === id) ?? null));
     return unsub;
   }, [id]);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
@@ -75,7 +75,7 @@ const Menu = () => {
     if (current === 0 && n > 0) {
       pinItem(it.id);
       addToCart(
-        { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category, canteenId: it.sellerId ?? id, canteenIcon: canteen?.icon },
+        { itemId: it.id, name: it.name, price: it.price, icon: it.icon, category: it.category, canteenId: it.sellerId ?? id, canteenIcon: canteen?.icon, canteenName: canteen?.canteenName },
         n,
       );
     } else {
