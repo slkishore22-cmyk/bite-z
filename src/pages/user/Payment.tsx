@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder } from "@/lib/sellerOrders";
+import { getProfile } from "@/lib/sellerProfile";
 import { useOrderConfirmation } from "../../utils/useOrderConfirmation";
 
 const liquidGlass: React.CSSProperties = {
@@ -41,6 +42,7 @@ const Payment = () => {
       navigate("/app/cart");
       return;
     }
+    const profile = getProfile();
     const order = createOrder({
       payment: method,
       items: cart.map((c) => ({
@@ -50,6 +52,8 @@ const Payment = () => {
         category: c.category,
         price: c.price,
         qty: c.qty,
+        canteenId: c.canteenId ?? profile.id,
+        canteenIcon: c.canteenIcon ?? profile.icon,
       })),
     });
     clearCart();
