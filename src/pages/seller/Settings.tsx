@@ -40,6 +40,16 @@ const SellerSettings = () => {
     if (!isComplete) setIsEditing(true);
   }, [isComplete]);
 
+  useEffect(() => {
+    loadCurrentSellerProfile()
+      .then((p) => {
+        const next = toDraft(p);
+        setProfile(next);
+        setDraft(next);
+      })
+      .catch(() => null);
+  }, []);
+
   const startEdit = () => {
     setDraft(profile);
     setIsEditing(true);
