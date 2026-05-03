@@ -145,8 +145,6 @@ const Home = () => {
         )}
 
         {/* Pick a Spot? */}
-        {spots.length > 0 && (
-          <>
         <h2
           style={{
             paddingLeft: 24,
@@ -160,15 +158,63 @@ const Home = () => {
         >
           Pick a Spot?
         </h2>
-        <div
-          className="flex flex-col gap-3"
-          style={{ paddingLeft: 24, paddingRight: 24 }}
-        >
-          {spots.map((s, i) => (
-            <CanteenCard key={i} spot={s} onClick={() => navigate(`/canteen/${s.id}`)} />
-          ))}
-        </div>
-          </>
+        {spots.length > 0 ? (
+          <div
+            className="flex flex-col gap-3"
+            style={{ paddingLeft: 24, paddingRight: 24 }}
+          >
+            {spots.map((s, i) => (
+              <CanteenCard key={i} spot={s} onClick={() => navigate(`/canteen/${s.id}`)} />
+            ))}
+          </div>
+        ) : (
+          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+            <div
+              className="cb-glass flex flex-col items-center text-center"
+              style={{ padding: "28px 24px", borderRadius: 28 }}
+            >
+              <div
+                className="flex items-center justify-center"
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.7)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  marginBottom: 14,
+                }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: 28, color: "#2563EB" }}
+                >
+                  storefront
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  letterSpacing: "-0.01em",
+                  color: "#1D1D1F",
+                  marginBottom: 6,
+                }}
+              >
+                No canteens yet
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "#6E6E73",
+                  lineHeight: 1.5,
+                  maxWidth: 280,
+                }}
+              >
+                Save your canteen details in Settings and they'll show up here for students to order from.
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </UserLayout>
