@@ -199,23 +199,22 @@ function DangerZone() {
   const handleReset = async () => {
     setBusy(true);
     try {
-      const NIL = "00000000-0000-0000-0000-000000000000";
-      const steps: Array<() => Promise<{ error: { message: string } | null }>> = [
-        () => db.from("user_analytics").delete().neq("id", NIL),
-        () => db.from("user_spend").delete().neq("id", NIL),
-        () => db.from("seller_sessions").delete().neq("id", NIL),
-        () => db.from("seller_sales").delete().neq("id", NIL),
-        () => db.from("seller_products").delete().neq("id", NIL),
-        () => db.from("orders").delete().neq("id", NIL),
-        () => db.from("sellers").delete().neq("id", NIL),
-      ];
       const labels = [
         "user_analytics", "user_spend", "seller_sessions", "seller_sales",
         "seller_products", "orders", "sellers",
       ];
-      for (let i = 0; i < steps.length; i++) {
-        const { error } = await steps[i]();
-        if (error) throw new Error(`${labels[i]}: ${error.message}`);
+      for (const table of labels) {
+        const { data, error: readError } = await db.from(table).select("id");
+        if (readError) throw new Error(`${table}: ${readError.message}`);
+        for (const row of data ?? []) {
+          const { error } = await db.from(table).delete().eq("id", row.id);
+          if (error) throw new Error(`${table}: ${error.message}`);
+        }
+      }
+      if (typeof window !== "undefined") {
+        Object.keys(window.localStorage).forEach((key) => {
+          if (key.startsWith("bitez") || key.startsWith("Bitez")) window.localStorage.removeItem(key);
+        });
       }
       toast.success("App reset complete. All data cleared.");
       setOpen(false);
