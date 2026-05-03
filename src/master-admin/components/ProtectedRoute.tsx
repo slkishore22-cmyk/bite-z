@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { getSession } from "../auth";
+import { getAdminSession } from "@/utils/sessionManager";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const s = getSession();
+  const s = getAdminSession();
   if (!s) return <Navigate to="/master-admin/login" replace />;
   return <>{children}</>;
 }

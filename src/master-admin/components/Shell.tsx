@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { clearSession, getSession, logAudit } from "../auth";
+import { clearAdminSession } from "@/utils/sessionManager";
 import "../theme.css";
 
 const NAV = [
@@ -49,6 +50,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await logAudit("ADMIN_LOGOUT", session?.username);
     clearSession();
+    clearAdminSession();
     navigate("/master-admin/login", { replace: true });
   };
 

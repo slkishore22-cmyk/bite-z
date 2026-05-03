@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getProfile, saveProfile, type SellerProfile } from "@/lib/sellerProfile";
-import { clearSellerSession } from "@/lib/sellerAuth";
+import { clearSellerSession as clearLegacySellerSession } from "@/lib/sellerAuth";
+import { clearSellerSession } from "@/utils/sessionManager";
 
 const canteenIcons = ["🍽️", "🍛", "🍔", "🍕", "🏪", "🥗", "☕"];
 
@@ -119,6 +120,7 @@ const SellerSettings = () => {
             type="button"
             onClick={() => {
               clearSellerSession();
+              clearLegacySellerSession();
               toast.success("Logged out");
               navigate("/seller/login", { replace: true });
             }}
