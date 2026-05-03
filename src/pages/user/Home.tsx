@@ -328,7 +328,7 @@ const RepeatCard = ({
       >
         {item.emoji}
       </div>
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center min-w-0" style={{ gap: 12 }}>
         <span
           style={{
             fontSize: 16,
@@ -340,7 +340,7 @@ const RepeatCard = ({
           {item.name}
         </span>
         {item.tag && (
-          <span style={{ fontSize: 22, lineHeight: 1, marginLeft: 6 }}>
+          <span style={{ fontSize: 24, lineHeight: 1, marginLeft: 8 }}>
             {item.tag}
           </span>
         )}
