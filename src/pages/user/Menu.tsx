@@ -371,46 +371,25 @@ const FoodCard = ({
   delay: number;
 }) => {
   const [hover, setHover] = useState(false);
-  const [holdProgress, setHoldProgress] = useState(0);
-  const holdTimer = useRef<number | null>(null);
-  const holdRaf = useRef<number | null>(null);
-  const HOLD_MS = 800;
+  const lastTapRef = useRef<number>(0);
+  const DOUBLE_TAP_MS = 300;
 
-  const clearHold = () => {
-    if (holdTimer.current) window.clearTimeout(holdTimer.current);
-    if (holdRaf.current) cancelAnimationFrame(holdRaf.current);
-    holdTimer.current = null;
-    holdRaf.current = null;
-    setHoldProgress(0);
-  };
-
-  const startHold = () => {
-    clearHold();
-    const start = performance.now();
-    const tick = () => {
-      const p = Math.min(1, (performance.now() - start) / HOLD_MS);
-      setHoldProgress(p);
-      if (p < 1) holdRaf.current = requestAnimationFrame(tick);
-    };
-    holdRaf.current = requestAnimationFrame(tick);
-    holdTimer.current = window.setTimeout(() => {
+  const handleTap = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < DOUBLE_TAP_MS) {
       onToggleFavorite();
-      if ("vibrate" in navigator) navigator.vibrate?.(30);
-      clearHold();
-    }, HOLD_MS);
+      if ("vibrate" in navigator) navigator.vibrate?.(20);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
   };
 
   return (
     <div
       onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => {
-        setHover(false);
-        clearHold();
-      }}
-      onPointerDown={startHold}
-      onPointerUp={clearHold}
-      onPointerCancel={clearHold}
-      onPointerLeave={clearHold}
+      onMouseLeave={() => setHover(false)}
+      onPointerUp={handleTap}
       onContextMenu={(e) => e.preventDefault()}
       className="flex items-center animate-fade-in"
       style={{
@@ -428,22 +407,6 @@ const FoodCard = ({
         animationFillMode: "both",
       }}
     >
-      {holdProgress > 0 && holdProgress < 1 && (
-        <span
-          aria-hidden
-          style={{
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-            height: 3,
-            width: `${holdProgress * 100}%`,
-            background: "linear-gradient(90deg, #fb7185, #e11d48)",
-            borderRadius: 9999,
-            transition: "width 60ms linear",
-            pointerEvents: "none",
-          }}
-        />
-      )}
       {isFavorite && (
         <span
           aria-hidden
