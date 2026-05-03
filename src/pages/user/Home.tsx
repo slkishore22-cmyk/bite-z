@@ -37,7 +37,7 @@ const Home = () => {
   // Derive "On Repeat" from the user's most-ordered items in the last 30 days.
   const repeats: Repeat[] = useMemo(() => {
     const counts = new Map<string, Repeat & { count: number }>();
-    const canteenIcon = canteens[0]?.icon ?? null;
+    const fallbackIcon = canteens[0]?.icon ?? null;
     for (const o of orders) {
       for (const i of o.items) {
         const cur = counts.get(i.itemId);
@@ -50,7 +50,7 @@ const Home = () => {
             name: i.name,
             price: i.price,
             category: i.category,
-            tag: canteenIcon,
+            tag: i.canteenIcon ?? fallbackIcon,
             count: i.qty,
           });
         }
@@ -339,7 +339,11 @@ const RepeatCard = ({
         >
           {item.name}
         </span>
-        {item.tag && <span style={{ fontSize: 14 }}>{item.tag}</span>}
+        {item.tag && (
+          <span style={{ fontSize: 22, lineHeight: 1, marginLeft: 6 }}>
+            {item.tag}
+          </span>
+        )}
       </div>
     </div>
 
