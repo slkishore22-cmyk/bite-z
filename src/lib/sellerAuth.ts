@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const SESSION_KEY = "bitez.seller.session.v1";
+const SESSION_KEY = "bitez_seller_session";
+const LEGACY_SESSION_KEY = "bitez.seller.session.v1";
 const SESSION_MAX_MS = 12 * 60 * 60 * 1000;
 
 export type SellerSession = {
@@ -30,6 +31,7 @@ export function getSellerSession(): SellerSession | null {
 
 export function clearSellerSession() {
   localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(LEGACY_SESSION_KEY);
 }
 
 export async function loginSeller(identifier: string, password: string): Promise<SellerSession> {
