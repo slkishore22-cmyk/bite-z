@@ -57,6 +57,37 @@
     document.addEventListener('contextmenu',function(e){
       e.preventDefault();
     });
+    // Block browser back/forward swipe gestures (iOS/Android/trackpad)
+    try {
+      history.pushState(null, '', location.href);
+      window.addEventListener('popstate', function () {
+        history.pushState(null, '', location.href);
+      });
+    } catch (e) {}
+    // Prevent horizontal swipe navigation (two-finger trackpad / edge swipe)
+    document.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    // Prevent edge-swipe back on touch devices
+    document.addEventListener('touchstart', function (e) {
+      if (e.touches.length === 1) {
+        var x = e.touches[0].clientX;
+        if (x < 20 || x > window.innerWidth - 20) {
+          e.preventDefault();
+        }
+      }
+    }, { passive: false });
+    // Disable browser shortcuts for back/forward/reload
+    document.addEventListener('keydown', function (e) {
+      if ((e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) ||
+          ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R' ||
+            e.key === '[' || e.key === ']'))) {
+        e.preventDefault();
+      }
+      if (e.key === 'F5') e.preventDefault();
+    }, { passive: false });
     </script>
   </body>
 </html>
