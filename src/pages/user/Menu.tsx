@@ -313,7 +313,7 @@ const Menu = () => {
                   fontWeight: 700,
                 }}
               >
-                Checkout
+                Pay Now
               </button>
             </div>
           </div>
