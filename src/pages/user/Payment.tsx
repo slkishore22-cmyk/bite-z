@@ -163,9 +163,10 @@ const Payment = () => {
           {/* UPI Card */}
           <button
             type="button"
+            disabled={placing}
             onClick={() => placeOrder("Online")}
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
-            style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
+            style={{ ...liquidGlass, padding: 16, borderRadius: 20, opacity: placing ? 0.65 : 1 }}
           >
             <span style={glassHighlight} aria-hidden />
             <div className="flex items-center relative z-10" style={{ gap: 14 }}>
@@ -219,9 +220,10 @@ const Payment = () => {
           {/* Cash Card */}
           <button
             type="button"
+            disabled={placing}
             onClick={() => placeOrder("Cash")}
             className="text-left group active:scale-[0.98] transition-all duration-[400ms] ease-out flex items-center justify-between"
-            style={{ ...liquidGlass, padding: 16, borderRadius: 20 }}
+            style={{ ...liquidGlass, padding: 16, borderRadius: 20, opacity: placing ? 0.65 : 1 }}
           >
             <span style={glassHighlight} aria-hidden />
             <div className="flex items-center relative z-10" style={{ gap: 14 }}>
