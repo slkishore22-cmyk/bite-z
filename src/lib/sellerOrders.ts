@@ -28,6 +28,7 @@ export type Order = {
   total: number;
   sellerId?: string | null;
   sellerName?: string | null;
+  appUserId?: string | null;
 };
 
 const STORAGE_KEY = "bitez:orders";
@@ -102,6 +103,7 @@ function fromAnalytics(row: any): Order | null {
     total: Number(m.total ?? m.subtotal ?? 0),
     sellerId: m.sellerId ?? null,
     sellerName: m.sellerName ?? null,
+    appUserId: m.appUserId ?? null,
   };
 }
 
@@ -113,7 +115,8 @@ export async function loadOrdersFromBackend(sellerId?: string | null, userId = g
     .eq("screen_name", "order")
     .order("created_at", { ascending: false });
   if (sellerId) query = query.eq("metadata->>sellerId", sellerId);
-  else if (userId) query = query.eq("user_id", userId);
+  else if (userId && String(userId).includes("-")) query = query.eq("user_id", userId);
+  else if (userId) query = query.eq("metadata->>appUserId", userId);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   const orders = (data ?? []).map(fromAnalytics).filter(Boolean) as Order[];
