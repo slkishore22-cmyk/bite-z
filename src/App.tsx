@@ -24,6 +24,18 @@ import UserEvents from "./pages/user/Events.tsx";
 import UserMenu from "./pages/user/Menu.tsx";
 import UserPayment from "./pages/user/Payment.tsx";
 import UserOrderStatus from "./pages/user/OrderStatus.tsx";
+import MaLogin from "./master-admin/pages/Login.tsx";
+import MaOverview from "./master-admin/pages/Overview.tsx";
+import MaSellers from "./master-admin/pages/Sellers.tsx";
+import MaCreateSeller from "./master-admin/pages/CreateSeller.tsx";
+import MaSellerDetail from "./master-admin/pages/SellerDetail.tsx";
+import MaUsers from "./master-admin/pages/Users.tsx";
+import MaUserDetail from "./master-admin/pages/UserDetail.tsx";
+import MaSales from "./master-admin/pages/Sales.tsx";
+import MaBehaviour from "./master-admin/pages/Behaviour.tsx";
+import MaProducts from "./master-admin/pages/Products.tsx";
+import MaAudit from "./master-admin/pages/Audit.tsx";
+import MaProtected from "./master-admin/components/ProtectedRoute.tsx";
 
 // Aggressive caching tuned for low-bandwidth campus networks.
 // Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
@@ -72,6 +84,19 @@ const App = () => (
           <Route path="/seller/orders" element={<SellerOrders />} />
           <Route path="/seller/sales" element={<SalesDashboard />} />
           <Route path="/seller/sales/reports" element={<SalesReports />} />
+          {/* Master Admin (separate dashboard) */}
+          <Route path="/master-admin" element={<MaProtected><MaOverview /></MaProtected>} />
+          <Route path="/master-admin/login" element={<MaLogin />} />
+          <Route path="/master-admin/overview" element={<MaProtected><MaOverview /></MaProtected>} />
+          <Route path="/master-admin/sellers" element={<MaProtected><MaSellers /></MaProtected>} />
+          <Route path="/master-admin/sellers/new" element={<MaProtected><MaCreateSeller /></MaProtected>} />
+          <Route path="/master-admin/sellers/:id" element={<MaProtected><MaSellerDetail /></MaProtected>} />
+          <Route path="/master-admin/users" element={<MaProtected><MaUsers /></MaProtected>} />
+          <Route path="/master-admin/users/:id" element={<MaProtected><MaUserDetail /></MaProtected>} />
+          <Route path="/master-admin/sales" element={<MaProtected><MaSales /></MaProtected>} />
+          <Route path="/master-admin/behaviour" element={<MaProtected><MaBehaviour /></MaProtected>} />
+          <Route path="/master-admin/products" element={<MaProtected><MaProducts /></MaProtected>} />
+          <Route path="/master-admin/audit" element={<MaProtected><MaAudit /></MaProtected>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
