@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getProfile, saveProfile, type SellerProfile } from "@/lib/sellerProfile";
+import { clearSellerSession } from "@/lib/sellerAuth";
 
 const canteenIcons = ["🍽️", "🍛", "🍔", "🍕", "🏪", "🥗", "☕"];
 
@@ -13,6 +14,7 @@ const toDraft = (p: SellerProfile): Profile => {
 };
 
 const SellerSettings = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile>(() => toDraft(getProfile()));
   const [draft, setDraft] = useState<Profile>(profile);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -113,6 +115,20 @@ const SellerSettings = () => {
               Edit
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => {
+              clearSellerSession();
+              toast.success("Logged out");
+              navigate("/seller/login", { replace: true });
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-destructive/15 px-3.5 py-2 text-xs font-bold text-destructive transition hover:bg-destructive/25"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+              logout
+            </span>
+            Logout
+          </button>
         </header>
 
         {!isEditing && isComplete ? (
