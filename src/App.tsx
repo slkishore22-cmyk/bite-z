@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -39,6 +40,9 @@ import RootRedirect from "./components/RootRedirect.jsx";
 import UserRoute from "./components/guards/UserRoute.jsx";
 import SellerRoute from "./components/guards/SellerRoute.jsx";
 import AdminRoute from "./components/guards/AdminRoute.jsx";
+import { preloadInventoryForSellers } from "@/lib/sellerInventory";
+import { loadOrdersFromBackend } from "@/lib/sellerOrders";
+import { getRegisteredCanteensFromBackend } from "@/lib/sellerProfile";
 
 // Aggressive caching tuned for low-bandwidth campus networks.
 // Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
@@ -56,8 +60,20 @@ const queryClient = new QueryClient({
 
 const persister =
   typeof window !== "undefined"
-    ? createSyncStoragePersister({ storage: window.localStorage, key: "bitez-cache" })
+    ? createSyncStoragePersister({ storage: window.localStorage, key: "bitez-cache-v2" })
     : undefined;
+
+const AppDataPreloader = () => {
+  useEffect(() => {
+    let alive = true;
+    getRegisteredCanteensFromBackend()
+      .then((canteens) => alive && preloadInventoryForSellers(canteens.map((c) => c.id)))
+      .catch(() => null);
+    loadOrdersFromBackend().catch(() => null);
+    return () => { alive = false; };
+  }, []);
+  return null;
+};
 
 const App = () => (
   <PersistQueryClientProvider
@@ -67,6 +83,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <AppDataPreloader />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<RootRedirect />} />
