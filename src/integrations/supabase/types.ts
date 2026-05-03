@@ -68,6 +68,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          target: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -125,6 +152,27 @@ export type Database = {
           name?: string
           slug?: string
           sort_order?: number
+        }
+        Relationships: []
+      }
+      master_admin: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          username?: string
         }
         Relationships: []
       }
@@ -452,6 +500,56 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_products: {
+        Row: {
+          category: string | null
+          created_at: string
+          emoji: string | null
+          id: string
+          is_active: boolean
+          last_sold_at: string | null
+          price: number
+          product_name: string
+          seller_id: string | null
+          total_revenue: number
+          total_sold: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          last_sold_at?: string | null
+          price: number
+          product_name: string
+          seller_id?: string | null
+          total_revenue?: number
+          total_sold?: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          last_sold_at?: string | null
+          price?: number
+          product_name?: string
+          seller_id?: string | null
+          total_revenue?: number
+          total_sold?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_products_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_profiles: {
         Row: {
           address_line: string | null
@@ -515,6 +613,169 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_sales: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          seller_id: string | null
+          total_orders: number
+          total_revenue: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          seller_id?: string | null
+          total_orders?: number
+          total_revenue?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          seller_id?: string | null
+          total_orders?: number
+          total_revenue?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_sales_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_sessions: {
+        Row: {
+          id: string
+          ip_address: string | null
+          logged_in_at: string
+          logged_out_at: string | null
+          seller_id: string | null
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          logged_in_at?: string
+          logged_out_at?: string | null
+          seller_id?: string | null
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          logged_in_at?: string
+          logged_out_at?: string | null
+          seller_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_sessions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sellers: {
+        Row: {
+          bank_account_number: string | null
+          bank_ifsc: string | null
+          bank_name: string | null
+          canteen_location: string
+          canteen_name: string
+          canteen_type: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          is_active: boolean
+          is_suspended: boolean
+          name: string
+          password_hash: string
+          phone: string
+          upi_id: string | null
+          username: string | null
+        }
+        Insert: {
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
+          canteen_location: string
+          canteen_name: string
+          canteen_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          is_active?: boolean
+          is_suspended?: boolean
+          name: string
+          password_hash: string
+          phone: string
+          upi_id?: string | null
+          username?: string | null
+        }
+        Update: {
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
+          canteen_location?: string
+          canteen_name?: string
+          canteen_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean
+          is_suspended?: boolean
+          name?: string
+          password_hash?: string
+          phone?: string
+          upi_id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_analytics: {
+        Row: {
+          created_at: string
+          dwell_seconds: number
+          event_type: string
+          id: string
+          metadata: Json | null
+          screen_name: string
+          scroll_depth_pct: number
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          dwell_seconds?: number
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          screen_name: string
+          scroll_depth_pct?: number
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          dwell_seconds?: number
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          screen_name?: string
+          scroll_depth_pct?: number
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -536,6 +797,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_spend: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          order_id: string | null
+          payment_method: string | null
+          product_names: string[] | null
+          seller_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          payment_method?: string | null
+          product_names?: string[] | null
+          seller_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          payment_method?: string | null
+          product_names?: string[] | null
+          seller_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_spend_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -546,6 +848,15 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      hash_password: { Args: { p_password: string }; Returns: string }
+      verify_master_admin: {
+        Args: { p_password: string; p_username: string }
+        Returns: boolean
+      }
+      verify_seller_password: {
+        Args: { p_password: string; p_seller_id: string }
         Returns: boolean
       }
     }
