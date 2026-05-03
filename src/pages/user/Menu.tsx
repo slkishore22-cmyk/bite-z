@@ -170,7 +170,18 @@ const Menu = () => {
           {/* Sticky: search + tabs */}
           <div
             className="sticky z-40"
-            style={{ top: 64, paddingTop: 8, background: "transparent" }}
+            style={{
+              top: 64,
+              paddingTop: 8,
+              paddingBottom: 8,
+              marginLeft: -16,
+              marginRight: -16,
+              paddingLeft: 16,
+              paddingRight: 16,
+              background: "rgba(245,245,247,0.85)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+            }}
           >
             {/* Search */}
             <div
@@ -204,7 +215,7 @@ const Menu = () => {
             {/* Tabs */}
             <div
               className="no-scrollbar flex gap-3 overflow-x-auto"
-              style={{ marginTop: 32, marginBottom: 32 }}
+              style={{ marginTop: 16, marginBottom: 8 }}
             >
               {TABS.map((t) => {
                 const isActive = t.key === active;
