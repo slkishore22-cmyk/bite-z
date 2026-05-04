@@ -30,6 +30,8 @@ export type Order = {
   sellerName?: string | null;
   sellerIcon?: string | null;
   appUserId?: string | null;
+  paymentStatus?: "PENDING" | "SUCCESS" | "FAILED";
+  isSoundPlayed?: boolean;
 };
 
 const STORAGE_KEY = "bitez:orders";
