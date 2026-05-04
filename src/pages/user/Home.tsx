@@ -368,8 +368,7 @@ const RepeatCard = ({
   <div
     className="cb-glass flex flex-col shrink-0"
     style={{
-      width: 240,
-      minWidth: 240,
+      width: "min(82vw, 280px)",
       padding: 16,
       justifyContent: "center",
       scrollSnapAlign: "start",
