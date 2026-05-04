@@ -55,8 +55,7 @@ const Payment = () => {
     const firstCartItem = cart[0];
     setPlacing(true);
     const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
-    const platformFee = cart.length ? 1.2 : 0;
-    const totalAmount = Math.round((subtotal + platformFee));
+    const totalAmount = Math.round(subtotal);
     const finalize = async () => {
       const order = await createOrder({
         payment: method,
