@@ -36,6 +36,9 @@ const STORAGE_KEY = "bitez:orders";
 const EVENT_NAME = "bitez:orders:change";
 const ID_COUNTER_KEY = "bitez:orders:counter";
 
+// Cash orders auto-expire & delete after this duration.
+export const CASH_ORDER_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
