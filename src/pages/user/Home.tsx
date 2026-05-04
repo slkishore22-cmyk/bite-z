@@ -5,6 +5,7 @@ import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerO
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
 import { getRegisteredCanteens, getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
+import { getUserName } from "@/utils/sessionManager";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
 type Repeat = { itemId: string; emoji: string; name: string; price: number; category: "Food" | "Snacks" | "Drinks"; tag: string | null };
@@ -105,7 +106,7 @@ const Home = () => {
             marginBottom: 24,
           }}
         >
-          Hey, Alex 👋
+          Hey, {getUserName()} 👋
         </h1>
 
         {/* Today's Offers — horizontal scroll */}
