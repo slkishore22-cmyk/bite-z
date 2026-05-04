@@ -196,19 +196,28 @@ export async function createOrder(
 export async function setOrderStatus(uidOrId: string, status: OrderStatus) {
   const target = read().find((o) => o.uid === uidOrId || o.id === uidOrId);
   const completedAt = status === "Completed" ? target?.completedAt ?? Date.now() : target?.completedAt;
+  // Mark sales recorded when an order completes (covers both COD-on-completion and online-already-recorded).
+  const isSalesRecorded =
+    status === "Completed"
+      ? true
+      : status === "Cancelled" || status === "Expired"
+      ? Boolean(target?.isSalesRecorded && target?.payment === "Online")
+      : target?.isSalesRecorded;
   const next = read().map((o) =>
     o.uid === uidOrId || o.id === uidOrId
       ? {
           ...o,
           status,
           completedAt,
+          isSalesRecorded: isSalesRecorded ?? o.isSalesRecorded,
         }
       : o,
   );
   if (target) {
+    const updated = { ...target, status, completedAt, isSalesRecorded: isSalesRecorded ?? target.isSalesRecorded };
     const { error } = await db
       .from("user_analytics")
-      .update({ metadata: { ...target, status, completedAt, sellerId: target.items.find((i) => i.canteenId)?.canteenId ?? null } })
+      .update({ metadata: { ...updated, sellerId: target.items.find((i) => i.canteenId)?.canteenId ?? null } })
       .eq("session_id", target.uid)
       .eq("event_type", "order");
     if (error) throw new Error(error.message);
