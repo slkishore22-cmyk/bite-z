@@ -171,32 +171,37 @@ const Home = () => {
             >
               On Repeat!
             </h2>
-            <div
-              data-swipe-lock="true"
-              className="flex overflow-x-auto"
-              style={{
-                paddingLeft: 24,
-                paddingRight: 24,
-                paddingBottom: 14,
-                marginBottom: 32,
-                gap: 16,
-                WebkitOverflowScrolling: "touch",
-                scrollSnapType: "x mandatory",
-                overscrollBehaviorX: "contain",
-                touchAction: "pan-x",
-                scrollbarWidth: "thin",
-                scrollbarColor: "rgba(37,99,235,0.35) rgba(255,255,255,0.65)",
-              }}
-            >
-              {repeats.map((r) => (
-                <RepeatCard
-                  key={r.itemId}
-                  item={r}
-                  qty={qtyOf(r.itemId) || 1}
-                  onChange={(n) => setCount(r, n)}
-                  onOrder={() => orderRepeatNow(r)}
-                />
-              ))}
+            <div style={{ paddingLeft: 24, paddingRight: 24, marginBottom: 32, overflow: "hidden" }}>
+              <div
+                data-swipe-lock="true"
+                className="no-scrollbar flex overflow-x-auto"
+                onWheel={(event) => {
+                  if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+                  event.currentTarget.scrollLeft += event.deltaY;
+                  event.preventDefault();
+                }}
+                style={{
+                  width: "100%",
+                  maxWidth: "100%",
+                  gap: 12,
+                  paddingBottom: 2,
+                  WebkitOverflowScrolling: "touch",
+                  scrollSnapType: "x mandatory",
+                  scrollPaddingLeft: 0,
+                  overscrollBehaviorX: "contain",
+                  touchAction: "pan-x",
+                }}
+              >
+                {repeats.map((r) => (
+                  <RepeatCard
+                    key={r.itemId}
+                    item={r}
+                    qty={qtyOf(r.itemId) || 1}
+                    onChange={(n) => setCount(r, n)}
+                    onOrder={() => orderRepeatNow(r)}
+                  />
+                ))}
+              </div>
             </div>
           </>
         )}
@@ -368,10 +373,15 @@ const RepeatCard = ({
   <div
     className="cb-glass flex flex-col shrink-0"
     style={{
-      width: "min(82vw, 280px)",
+      width: "min(320px, calc(100% - 28px))",
+      flexBasis: "min(320px, calc(100% - 28px))",
+      minWidth: 0,
+      minHeight: 156,
+      boxSizing: "border-box",
       padding: 16,
       justifyContent: "center",
       scrollSnapAlign: "start",
+      scrollSnapStop: "always",
     }}
   >
     <div className="relative z-10 flex flex-col" style={{ gap: 12 }}>
