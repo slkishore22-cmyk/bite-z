@@ -36,7 +36,7 @@ const glassHighlight: React.CSSProperties = {
 const Cart = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<CartItem[]>(() => getCart());
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   useEffect(() => subscribeCart(() => setItems(getCart())), []);
 
@@ -48,6 +48,8 @@ const Cart = () => {
   const platformFee = items.length ? 1.2 : 0;
   const total = subtotal + platformFee;
   const totalQty = items.reduce((s, i) => s + i.qty, 0);
+  const canteenName = items.find((i) => i.canteenName)?.canteenName ?? "Your Order";
+  const canteenIcon = items.find((i) => i.canteenIcon)?.canteenIcon ?? "🍽️";
 
   return (
     <UserLayout>
@@ -121,28 +123,20 @@ const Cart = () => {
                         height: 40,
                         borderRadius: 9999,
                         background: "rgba(37,99,235,0.10)",
+                        fontSize: 22,
                       }}
                     >
-                      <span
-                        className="material-symbols-outlined"
-                        style={{
-                          color: "#2563EB",
-                          fontSize: 22,
-                          fontVariationSettings: "'FILL' 1",
-                        }}
-                      >
-                        restaurant
-                      </span>
+                      <span>{canteenIcon}</span>
                     </div>
                     <div className="text-left">
                       <h2 className="font-bold" style={{ fontSize: 15, color: "#1D1D1F" }}>
-                        Main Block Canteen
+                        {canteenName}
                       </h2>
                       <p
                         className="font-medium"
                         style={{ fontSize: 12, color: "#6E6E73", marginTop: 1 }}
                       >
-                        {totalQty} Item{totalQty > 1 ? "s" : ""} • 1.2 km away
+                        {totalQty} Item{totalQty > 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
@@ -286,7 +280,7 @@ const Cart = () => {
         </main>
 
         {/* Sticky Pay Now */}
-        {items.length > 0 && expanded && (
+        {items.length > 0 && (
           <div
             className="fixed left-1/2 -translate-x-1/2 z-30 px-6 w-full max-w-md"
             style={{ bottom: 96 }}

@@ -68,6 +68,13 @@ const Orders = () => {
     return { pendingGroups, completedGroups };
   }, [orders]);
 
+  const isEmpty = pendingGroups.length === 0 && completedGroups.length === 0;
+  const recentCanteenId = useMemo(() => {
+    const sorted = [...orders].sort((a, b) => b.createdAt - a.createdAt);
+    return sorted.find((o) => o.sellerId)?.sellerId ?? null;
+  }, [orders]);
+  const exploreTarget = recentCanteenId ? `/app/menu/${recentCanteenId}` : "/app/home";
+
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({
     pending: true,
   });
@@ -130,7 +137,8 @@ const Orders = () => {
             )}
           </Section>
 
-          {/* Reorder card */}
+          {/* Reorder card – only when no orders at all */}
+          {isEmpty && (
           <section
             className="relative overflow-hidden mt-10"
             style={{
@@ -159,7 +167,7 @@ const Orders = () => {
                 Explore the latest additions to Bitez kitchens.
               </p>
               <button
-                onClick={() => navigate("/app/home")}
+                onClick={() => navigate(exploreTarget)}
                 className="active:scale-95 transition-transform"
                 style={{
                   padding: "12px 24px",
@@ -193,6 +201,7 @@ const Orders = () => {
               </span>
             </div>
           </section>
+          )}
         </main>
       </div>
     </UserLayout>

@@ -70,16 +70,34 @@ const Home = () => {
   }, [orders, canteens]);
 
   const qtyOf = (id: string) => cart.find((c) => c.itemId === id)?.qty ?? 0;
+  const canteenForRepeat = (r: Repeat) => {
+    for (const o of orders) {
+      const it = o.items.find((i) => i.itemId === r.itemId);
+      if (it) return { canteenId: it.canteenId, canteenIcon: it.canteenIcon, canteenName: o.sellerName ?? undefined };
+    }
+    return { canteenId: undefined, canteenIcon: undefined, canteenName: undefined };
+  };
   const setCount = (r: Repeat, n: number) => {
     const cur = qtyOf(r.itemId);
     if (cur === 0 && n > 0) {
+      const c = canteenForRepeat(r);
       addToCart(
-        { itemId: r.itemId, name: r.name, price: r.price, icon: r.emoji, category: r.category },
+        { itemId: r.itemId, name: r.name, price: r.price, icon: r.emoji, category: r.category, ...c },
         n,
       );
     } else {
       setCartQty(r.itemId, Math.max(0, n));
     }
+  };
+  const orderRepeatNow = (r: Repeat) => {
+    if (qtyOf(r.itemId) === 0) {
+      const c = canteenForRepeat(r);
+      addToCart(
+        { itemId: r.itemId, name: r.name, price: r.price, icon: r.emoji, category: r.category, ...c },
+        1,
+      );
+    }
+    navigate("/app/payment");
   };
 
   return (
@@ -146,7 +164,7 @@ const Home = () => {
                   item={r}
                   qty={qtyOf(r.itemId) || 1}
                   onChange={(n) => setCount(r, n)}
-                  onOrder={() => navigate("/app/cart")}
+                  onOrder={() => orderRepeatNow(r)}
                 />
               ))}
             </div>

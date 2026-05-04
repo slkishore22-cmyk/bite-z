@@ -4,6 +4,14 @@ import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder } from "@/lib/sellerOrders";
 import { pinItem } from "@/lib/userPins";
 import { useOrderConfirmation } from "../../utils/useOrderConfirmation";
+import { supabase } from "@/integrations/supabase/client";
+import { getUserSession } from "@/utils/sessionManager";
+
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
 
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.05)",
@@ -46,7 +54,10 @@ const Payment = () => {
     }
     const firstCartItem = cart[0];
     setPlacing(true);
-    try {
+    const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const platformFee = cart.length ? 1.2 : 0;
+    const totalAmount = Math.round((subtotal + platformFee));
+    const finalize = async () => {
       const order = await createOrder({
         payment: method,
         sellerId: firstCartItem?.canteenId ?? null,
@@ -66,8 +77,55 @@ const Payment = () => {
       cart.forEach((c) => pinItem(c.itemId));
       confirm();
       navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
+    };
+    try {
+      if (method === "Cash") {
+        await finalize();
+        return;
+      }
+      // Online (UPI / Razorpay)
+      const { data, error } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount: totalAmount, receipt: `bitez_${Date.now()}` },
+      });
+      if (error || !data?.order_id) {
+        alert("Unable to start payment. Please try again.");
+        setPlacing(false);
+        return;
+      }
+      if (!window.Razorpay) {
+        alert("Payment SDK not loaded. Please refresh and try again.");
+        setPlacing(false);
+        return;
+      }
+      const session = getUserSession();
+      const rzp = new window.Razorpay({
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.order_id,
+        name: "Bitez",
+        description: firstCartItem?.canteenName ?? "Order",
+        method: { upi: true, card: true, netbanking: true, wallet: true },
+        prefill: {
+          name: session?.full_name ?? session?.name ?? "",
+          contact: session?.phone ?? "",
+        },
+        theme: { color: "#2563EB" },
+        handler: async () => {
+          await finalize();
+        },
+        modal: {
+          ondismiss: () => setPlacing(false),
+        },
+      });
+      rzp.on("payment.failed", () => {
+        alert("Payment failed. Please try again.");
+        setPlacing(false);
+      });
+      rzp.open();
     } finally {
-      setPlacing(false);
+      // setPlacing reset by handler/modal callbacks for online
+      if (method === "Cash") setPlacing(false);
     }
   };
 
