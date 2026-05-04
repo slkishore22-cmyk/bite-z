@@ -13,7 +13,7 @@ export type OrderItem = {
   canteenIcon?: string;
 };
 
-export type OrderStatus = "Pending" | "Completed" | "Cancelled";
+export type OrderStatus = "Pending" | "Completed" | "Cancelled" | "Expired";
 export type PaymentMethod = "Online" | "Cash";
 
 export type Order = {
@@ -21,6 +21,7 @@ export type Order = {
   uid: string;         // unique storage id
   createdAt: number;
   completedAt?: number;
+  expiresAt?: number | null; // COD only; null/undefined for Online
   payment: PaymentMethod;
   status: OrderStatus;
   items: OrderItem[];
@@ -32,13 +33,15 @@ export type Order = {
   appUserId?: string | null;
   paymentStatus?: "PENDING" | "SUCCESS" | "FAILED";
   isSoundPlayed?: boolean;
+  isSalesRecorded?: boolean;
 };
 
 const STORAGE_KEY = "bitez:orders";
 const EVENT_NAME = "bitez:orders:change";
 const ID_COUNTER_KEY = "bitez:orders:counter";
 
-// Cash orders auto-expire & delete after this duration.
+// COD orders soft-expire (status="Expired") after this duration.
+// They are NOT deleted from storage/backend — sales/audit data is preserved.
 export const CASH_ORDER_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,7 +93,7 @@ function nextShortId(): string {
 }
 
 export function getOrders(): Order[] {
-  pruneExpiredCashOrders();
+  expireStaleCashOrders();
   return read().sort((a, b) => b.createdAt - a.createdAt);
 }
 
@@ -103,10 +106,15 @@ function fromAnalytics(row: any): Order | null {
     uid: String(row.session_id ?? m.uid ?? row.id),
     createdAt: row.created_at ? new Date(row.created_at).getTime() : Number(m.createdAt ?? Date.now()),
     completedAt: m.completedAt ? Number(m.completedAt) : undefined,
+    expiresAt: m.expiresAt == null ? null : Number(m.expiresAt),
     payment: m.payment === "Online" ? "Online" : "Cash",
-    status: m.status === "Completed" || m.status === "Cancelled" ? m.status : "Pending",
+    status:
+      m.status === "Completed" || m.status === "Cancelled" || m.status === "Expired"
+        ? m.status
+        : "Pending",
     paymentStatus: m.paymentStatus === "SUCCESS" || m.paymentStatus === "FAILED" ? m.paymentStatus : "PENDING",
     isSoundPlayed: Boolean(m.isSoundPlayed),
+    isSalesRecorded: Boolean(m.isSalesRecorded),
     items: m.items,
     subtotal: Number(m.subtotal ?? 0),
     total: Number(m.total ?? m.subtotal ?? 0),
@@ -152,14 +160,19 @@ export async function createOrder(
   const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
   const sellerIcon = payload.items.find((i) => i.canteenIcon)?.canteenIcon ?? null;
   const userId = getCurrentUserId();
+  const now = Date.now();
+  const isOnlineSuccess = payload.payment === "Online" && payload.paymentStatus === "SUCCESS";
+  const expiresAt = payload.payment === "Cash" ? now + CASH_ORDER_TTL_MS : null;
   const order: Order = {
     id: nextShortId(),
     uid: uuid(),
-    createdAt: Date.now(),
+    createdAt: now,
     status: "Pending",
+    expiresAt,
     payment: payload.payment,
     paymentStatus: payload.paymentStatus ?? "PENDING",
     isSoundPlayed: Boolean(payload.isSoundPlayed),
+    isSalesRecorded: isOnlineSuccess,
     items: payload.items,
     subtotal,
     total,
@@ -183,19 +196,28 @@ export async function createOrder(
 export async function setOrderStatus(uidOrId: string, status: OrderStatus) {
   const target = read().find((o) => o.uid === uidOrId || o.id === uidOrId);
   const completedAt = status === "Completed" ? target?.completedAt ?? Date.now() : target?.completedAt;
+  // Mark sales recorded when an order completes (covers both COD-on-completion and online-already-recorded).
+  const isSalesRecorded =
+    status === "Completed"
+      ? true
+      : status === "Cancelled" || status === "Expired"
+      ? Boolean(target?.isSalesRecorded && target?.payment === "Online")
+      : target?.isSalesRecorded;
   const next = read().map((o) =>
     o.uid === uidOrId || o.id === uidOrId
       ? {
           ...o,
           status,
           completedAt,
+          isSalesRecorded: isSalesRecorded ?? o.isSalesRecorded,
         }
       : o,
   );
   if (target) {
+    const updated = { ...target, status, completedAt, isSalesRecorded: isSalesRecorded ?? target.isSalesRecorded };
     const { error } = await db
       .from("user_analytics")
-      .update({ metadata: { ...target, status, completedAt, sellerId: target.items.find((i) => i.canteenId)?.canteenId ?? null } })
+      .update({ metadata: { ...updated, sellerId: target.items.find((i) => i.canteenId)?.canteenId ?? null } })
       .eq("session_id", target.uid)
       .eq("event_type", "order");
     if (error) throw new Error(error.message);
@@ -267,29 +289,40 @@ export function markSoundPlayed(orderUidOrId: string) {
   }
 }
 
-export function pruneExpiredCashOrders(): Order[] {
+/**
+ * Soft-expire stale COD orders: set status to "Expired" instead of deleting.
+ * Online orders never expire. Sales/audit data is preserved.
+ */
+export function expireStaleCashOrders(): Order[] {
   if (typeof window === "undefined") return [];
   const now = Date.now();
   const all = read();
-  const expired = all.filter(
+  const stale = all.filter(
     (o) =>
       o.payment === "Cash" &&
       o.status === "Pending" &&
       now - o.createdAt >= CASH_ORDER_TTL_MS,
   );
-  if (expired.length === 0) return [];
-  const remaining = all.filter((o) => !expired.some((e) => e.uid === o.uid));
-  write(remaining);
-  // Best-effort backend delete; ignore failures (RLS, offline, etc.)
-  expired.forEach((o) => {
+  if (stale.length === 0) return [];
+  const staleIds = new Set(stale.map((o) => o.uid));
+  const next = all.map((o) =>
+    staleIds.has(o.uid) ? { ...o, status: "Expired" as const } : o,
+  );
+  write(next);
+  // Best-effort backend update — preserve the row, only flip status.
+  stale.forEach((o) => {
+    const updated = { ...o, status: "Expired" as const };
     db.from("user_analytics")
-      .delete()
+      .update({ metadata: { ...updated, sellerId: o.items.find((i) => i.canteenId)?.canteenId ?? null } })
       .eq("session_id", o.uid)
       .eq("event_type", "order")
       .then(() => undefined, () => undefined);
   });
-  return expired;
+  return stale;
 }
+
+/** @deprecated kept for backwards compatibility — now soft-expires. */
+export const pruneExpiredCashOrders = expireStaleCashOrders;
 
 // Returns ms until the next Cash order expires, or null if none pending.
 export function nextCashExpiryDelayMs(): number | null {
@@ -317,13 +350,13 @@ if (typeof window !== "undefined") {
       w.__bitezCashExpiryTimer = window.setTimeout(schedule, 60_000);
       return;
     }
-    w.__bitezCashExpiryTimer = window.setTimeout(() => {
-      pruneExpiredCashOrders();
+  w.__bitezCashExpiryTimer = window.setTimeout(() => {
+      expireStaleCashOrders();
       schedule();
     }, Math.min(delay + 250, 2 ** 31 - 1));
   };
   // Run once on load + whenever orders change.
-  pruneExpiredCashOrders();
+  expireStaleCashOrders();
   schedule();
   window.addEventListener(EVENT_NAME, schedule);
 }

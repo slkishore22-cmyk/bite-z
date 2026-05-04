@@ -29,8 +29,17 @@ export function rangeBounds(range: RangeKey, ref: Date = new Date()): { from: nu
 }
 
 export function ordersInRange(orders: Order[], from: number, to: number): Order[] {
+  // Sales aggregations include only orders that have been recorded as sales:
+  //  - Online: recorded immediately on payment success
+  //  - COD: recorded only when the order is completed
+  // Cancelled and Expired orders are excluded.
   return orders.filter(
-    (o) => o.createdAt >= from && o.createdAt <= to && o.status !== "Cancelled",
+    (o) =>
+      o.createdAt >= from &&
+      o.createdAt <= to &&
+      o.status !== "Cancelled" &&
+      o.status !== "Expired" &&
+      o.isSalesRecorded === true,
   );
 }
 

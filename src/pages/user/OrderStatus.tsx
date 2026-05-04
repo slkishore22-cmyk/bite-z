@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getOrderById, getOrders } from "@/lib/sellerOrders";
 import OrderConfirmedAnimation from "../../components/OrderConfirmedAnimation";
 
@@ -26,6 +26,25 @@ const OrderStatus = () => {
 
   const paymentLabel = method === "upi" ? "Paid via UPI" : "Cash on Delivery";
   const paymentSub = method === "upi" ? "Transaction Successful" : "Pay at pickup";
+
+  // COD countdown — order is valid for 2h from creation.
+  const isCod = order?.payment === "Cash";
+  const expiresAt = order?.expiresAt ?? null;
+  const [now, setNow] = useState<number>(() => Date.now());
+  useEffect(() => {
+    if (!isCod || !expiresAt) return;
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
+  }, [isCod, expiresAt]);
+  const remainingMs = expiresAt ? Math.max(0, expiresAt - now) : 0;
+  const formatRemaining = (ms: number) => {
+    const s = Math.floor(ms / 1000);
+    const hh = String(Math.floor(s / 3600)).padStart(2, "0");
+    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
+  };
+  const showCodTimer = isCod && expiresAt != null && order?.status === "Pending";
 
   return (
     <div
@@ -133,6 +152,21 @@ const OrderStatus = () => {
                   {paymentLabel}
                 </p>
                 <p style={{ fontSize: 12, color: "#64748B" }}>{paymentSub}</p>
+                {showCodTimer && (
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: remainingMs < 10 * 60 * 1000 ? "#DC2626" : "#0F172A",
+                      marginTop: 2,
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    {remainingMs > 0
+                      ? `${formatRemaining(remainingMs)} remaining`
+                      : "Order expired"}
+                  </p>
+                )}
               </div>
             </div>
             <span
