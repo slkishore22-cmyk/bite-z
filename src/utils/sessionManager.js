@@ -68,6 +68,13 @@ export function clearAdminSession() {
   localStorage.removeItem(KEYS.admin);
 }
 
+export function getUserName() {
+  const s = getUserSession();
+  if (!s) return 'there';
+  const name = s.full_name || s.name || '';
+  return name ? name.split(' ')[0] : 'there';
+}
+
 export function getActiveSession() {
   if (getAdminSession()) return { role: 'master_admin' };
   if (getSellerSession()) return { role: 'seller' };
