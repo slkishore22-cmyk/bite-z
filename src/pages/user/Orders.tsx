@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
+import { OrderListSkeleton } from "@/components/user/Skeletons";
 import {
   getOrders,
   loadOrdersFromBackend,
@@ -34,10 +35,13 @@ const toOrderRow = (o: Order): OrderRow => ({
 const Orders = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
+  const [loading, setLoading] = useState(() => getOrders().length === 0);
 
   useEffect(() => {
     const unsub = subscribeOrders(() => setOrders(getOrders()));
-    loadOrdersFromBackend(null, getUserSession()?.id).then(setOrders).catch(() => setOrders([]));
+    loadOrdersFromBackend(null, getUserSession()?.id)
+      .then((rows) => { setOrders(rows); setLoading(false); })
+      .catch(() => { setOrders([]); setLoading(false); });
     return unsub;
   }, []);
 
@@ -103,7 +107,9 @@ const Orders = () => {
 
           {/* Pending Pickup */}
           <Section title="Pending Pickup">
-            {pendingGroups.length === 0 ? (
+            {loading && pendingGroups.length === 0 && completedGroups.length === 0 ? (
+              <OrderListSkeleton rows={3} />
+            ) : pendingGroups.length === 0 ? (
               <EmptyHint text="No pending orders. Place an order to see it here." />
             ) : (
               pendingGroups.map((g) => (

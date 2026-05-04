@@ -55,6 +55,47 @@ html, body {
   80% { transform: translateX(4px); }
 }
 
+/* Native-app-feel tap micro-interaction.
+   Apply globally to interactive elements + any element with data-tappable.
+   Honors prefers-reduced-motion. */
+button, a, [role="button"], [role="link"], [data-tappable="true"] {
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: center;
+}
+button:active, a:active, [role="button"]:active, [role="link"]:active,
+[data-tappable="true"]:active {
+  transform: scale(0.97);
+}
+button:disabled, a[aria-disabled="true"], [role="button"][aria-disabled="true"] {
+  transform: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  button, a, [role="button"], [role="link"], [data-tappable="true"] {
+    transition: none;
+  }
+  button:active, a:active, [role="button"]:active, [role="link"]:active,
+  [data-tappable="true"]:active {
+    transform: none;
+  }
+}
+
+/* Skeleton shimmer used by loading placeholders. */
+@keyframes bitez-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.bitez-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 0%,
+    rgba(0,0,0,0.12) 50%,
+    rgba(0,0,0,0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: bitez-shimmer 1.4s ease-in-out infinite;
+  border-radius: 12px;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
+import { CanteenListSkeleton } from "@/components/user/Skeletons";
 import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
@@ -37,6 +38,8 @@ const Home = () => {
   const [cart, setCart] = useState(() => getCart());
   const [liveOffers, setLiveOffers] = useState<SellerOffer[]>(() => getActiveOffers());
   const [canteens, setCanteens] = useState<SellerProfile[]>(() => getRegisteredCanteens());
+  // Show skeleton ONLY on a true first-time visit (cache empty + fetch in flight).
+  const [canteensLoading, setCanteensLoading] = useState(() => getRegisteredCanteens().length === 0);
   useEffect(() => {
     const unsub = subscribeOrders(() => setOrders(getOrders()));
     loadOrdersFromBackend().then(setOrders).catch(() => null);
@@ -45,7 +48,10 @@ const Home = () => {
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
   useEffect(() => subscribeOffers(() => setLiveOffers(getActiveOffers())), []);
   useEffect(() => {
-    const refresh = () => getRegisteredCanteensFromBackend().then(setCanteens).catch(() => setCanteens(getRegisteredCanteens()));
+    const refresh = () =>
+      getRegisteredCanteensFromBackend()
+        .then((rows) => { setCanteens(rows); setCanteensLoading(false); })
+        .catch(() => { setCanteens(getRegisteredCanteens()); setCanteensLoading(false); });
     refresh();
     return subscribeProfile(refresh);
   }, []);
@@ -229,6 +235,8 @@ const Home = () => {
               <CanteenCard key={i} spot={s} onClick={() => navigate(`/app/menu/${s.id}`)} />
             ))}
           </div>
+        ) : canteensLoading ? (
+          <CanteenListSkeleton rows={3} />
         ) : (
           <div style={{ paddingLeft: 24, paddingRight: 24 }}>
             <div
