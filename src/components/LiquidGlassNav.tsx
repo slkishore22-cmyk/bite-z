@@ -142,13 +142,13 @@ export const LiquidGlassNav = ({
   const handleNavSwipeEnd = (event: React.PointerEvent<HTMLElement>) => {
     const start = navSwipeStart.current;
     navSwipeStart.current = null;
-    if (!start || start.pointerId !== event.pointerId) return;
+    if (!start || start.pointerId !== event.pointerId) return false;
 
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
     const absX = Math.abs(dx);
     const absY = Math.abs(dy);
-    if (absX < SWIPE_DISTANCE || absX < absY * SWIPE_AXIS_RATIO) return;
+    if (absX < SWIPE_DISTANCE || absX < absY * SWIPE_AXIS_RATIO) return false;
 
     const currentIndex = indexById[active];
     const next = items[currentIndex + (dx < 0 ? 1 : -1)];
@@ -156,7 +156,9 @@ export const LiquidGlassNav = ({
       event.preventDefault();
       event.stopPropagation();
       setActiveById(next.id);
+      return true;
     }
+    return false;
   };
 
   return (
@@ -267,6 +269,7 @@ export const LiquidGlassNav = ({
               onPointerUp={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
+                if (handleNavSwipeEnd(event)) return;
                 handleTabPointerUp(item.id);
               }}
               onClick={(event) => {
