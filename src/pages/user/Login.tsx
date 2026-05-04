@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { getStoredUserId, loginWithPin } from "@/lib/userAuth";
 import { getUserSession } from "@/utils/sessionManager";
 
@@ -47,7 +46,6 @@ const UserLogin = () => {
     if (shakeTimer.current) window.clearTimeout(shakeTimer.current);
     shakeTimer.current = window.setTimeout(() => setShake(false), 500);
   };
-  void toast; // keep import optional usage; toasts disabled in favour of inline error
 
   return (
     <main
