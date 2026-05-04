@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder, hasSoundPlayed, markSoundPlayed } from "@/lib/sellerOrders";
 import { pinItem } from "@/lib/userPins";
-import { useOrderConfirmation } from "../../utils/useOrderConfirmation";
+import { playOrderConfirmation } from "../../utils/orderConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserSession } from "@/utils/sessionManager";
 
@@ -43,8 +43,16 @@ const HERO_IMG =
 
 const Payment = () => {
   const navigate = useNavigate();
-  const { confirm } = useOrderConfirmation();
   const [placing, setPlacing] = useState(false);
+
+  const playOnlineSuccessOnce = useCallback((orderUid: string) => {
+    if (hasSoundPlayed(orderUid)) return;
+    markSoundPlayed(orderUid);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate?.(35);
+    }
+    void playOrderConfirmation();
+  }, []);
 
   const placeOrder = async (method: "Online" | "Cash") => {
     const cart = getCart();
@@ -56,9 +64,11 @@ const Payment = () => {
     setPlacing(true);
     const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
     const totalAmount = Math.round(subtotal);
-    const finalize = async (opts: { playSound: boolean } = { playSound: false }) => {
+    const finalize = async (paymentStatus: "PENDING" | "SUCCESS" | "FAILED" = "PENDING") => {
       const order = await createOrder({
         payment: method,
+        paymentStatus,
+        isSoundPlayed: false,
         sellerId: firstCartItem?.canteenId ?? null,
         sellerName: firstCartItem?.canteenName ?? null,
         items: cart.map((c) => ({
@@ -74,17 +84,15 @@ const Payment = () => {
       });
       clearCart();
       cart.forEach((c) => pinItem(c.itemId));
-      // STRICT: sound only on successful Online payment, only once per order.
-      if (opts.playSound && !hasSoundPlayed(order.uid)) {
-        markSoundPlayed(order.uid);
-        confirm();
+      if (method === "Online" && paymentStatus === "SUCCESS") {
+        playOnlineSuccessOnce(order.uid);
       }
       navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
     };
     try {
       if (method === "Cash") {
         // Cash on Delivery: NO sound, ever.
-        await finalize({ playSound: false });
+        await finalize("PENDING");
         return;
       }
       // Online (UPI / Razorpay)
@@ -117,7 +125,7 @@ const Payment = () => {
         theme: { color: "#2563EB" },
         handler: async () => {
           // Razorpay success callback => Online payment SUCCESS => play once.
-          await finalize({ playSound: true });
+          await finalize("SUCCESS");
         },
         modal: {
           ondismiss: () => setPlacing(false),
