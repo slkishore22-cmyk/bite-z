@@ -45,8 +45,7 @@ const Cart = () => {
   const remove = (id: string) => removeCartItem(id);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const platformFee = items.length ? 1.2 : 0;
-  const total = subtotal + platformFee;
+  const total = subtotal;
   const totalQty = items.reduce((s, i) => s + i.qty, 0);
   const canteenName = items.find((i) => i.canteenName)?.canteenName ?? "Your Order";
   const canteenIcon = items.find((i) => i.canteenIcon)?.canteenIcon ?? "🍽️";
@@ -255,15 +254,6 @@ const Cart = () => {
               {expanded && (
               <section className="space-y-3" style={{ paddingTop: 8, paddingLeft: 4, paddingRight: 4 }}>
                 <Row label="Subtotal" value={`₹${subtotal.toFixed(0)}`} />
-                <Row label="Platform Fee" value={`₹${platformFee.toFixed(0)}`} />
-                <div className="flex justify-between items-center">
-                  <span style={{ color: "#6E6E73", fontSize: 13, fontWeight: 500 }}>
-                    Delivery
-                  </span>
-                  <span style={{ color: "#10B981", fontWeight: 700, fontSize: 13 }}>
-                    FREE
-                  </span>
-                </div>
                 <div style={{ height: 1, background: "rgba(0,0,0,0.08)", margin: "12px 0" }} />
                 <div className="flex justify-between items-center">
                   <span className="font-bold" style={{ color: "#1D1D1F", fontSize: 15 }}>
