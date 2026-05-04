@@ -13,7 +13,7 @@ export type OrderItem = {
   canteenIcon?: string;
 };
 
-export type OrderStatus = "Pending" | "Completed" | "Cancelled";
+export type OrderStatus = "Pending" | "Completed" | "Cancelled" | "Expired";
 export type PaymentMethod = "Online" | "Cash";
 
 export type Order = {
@@ -21,6 +21,7 @@ export type Order = {
   uid: string;         // unique storage id
   createdAt: number;
   completedAt?: number;
+  expiresAt?: number | null; // COD only; null/undefined for Online
   payment: PaymentMethod;
   status: OrderStatus;
   items: OrderItem[];
@@ -32,13 +33,15 @@ export type Order = {
   appUserId?: string | null;
   paymentStatus?: "PENDING" | "SUCCESS" | "FAILED";
   isSoundPlayed?: boolean;
+  isSalesRecorded?: boolean;
 };
 
 const STORAGE_KEY = "bitez:orders";
 const EVENT_NAME = "bitez:orders:change";
 const ID_COUNTER_KEY = "bitez:orders:counter";
 
-// Cash orders auto-expire & delete after this duration.
+// COD orders soft-expire (status="Expired") after this duration.
+// They are NOT deleted from storage/backend — sales/audit data is preserved.
 export const CASH_ORDER_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
