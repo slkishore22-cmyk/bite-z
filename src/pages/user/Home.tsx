@@ -8,7 +8,19 @@ import { getRegisteredCanteens, getRegisteredCanteensFromBackend, subscribeProfi
 import { getUserName } from "@/utils/sessionManager";
 
 type Offer = { canteen: string; title: string; discount: string; active: boolean };
-type Repeat = { itemId: string; emoji: string; name: string; price: number; category: "Food" | "Snacks" | "Drinks"; tag: string | null };
+type Repeat = {
+  itemId: string;
+  emoji: string;
+  name: string;
+  price: number;
+  category: "Food" | "Snacks" | "Drinks";
+  tag: string | null;
+  canteenId?: string;
+  canteenName?: string;
+  orderCount: number;
+  quantityCount: number;
+  latestAt: number;
+};
 type Spot = { id: string; icon: string; name: string; sub: string };
 
 const toDisplayOffer = (o: SellerOffer): Offer => ({
@@ -43,39 +55,44 @@ const Home = () => {
     [canteens],
   );
 
-  // Derive "On Repeat" from the user's most-ordered items in the last 30 days.
+  // Derive "On Repeat" only from real orders: first order appears immediately,
+  // then the list naturally becomes the user's most frequently ordered items.
   const repeats: Repeat[] = useMemo(() => {
-    const counts = new Map<string, Repeat & { count: number }>();
-    const fallbackIcon = canteens[0]?.icon ?? null;
+    const counts = new Map<string, Repeat>();
     for (const o of orders) {
       for (const i of o.items) {
-        const cur = counts.get(i.itemId);
+        const key = `${i.canteenId ?? "unknown"}:${i.itemId}`;
+        const canteenIcon = i.canteenIcon ?? canteens.find((c) => c.id === i.canteenId)?.icon ?? null;
+        const cur = counts.get(key);
         if (cur) {
-          cur.count += i.qty;
+          cur.orderCount += 1;
+          cur.quantityCount += i.qty;
+          cur.latestAt = Math.max(cur.latestAt, o.createdAt);
         } else {
-          counts.set(i.itemId, {
+          counts.set(key, {
             itemId: i.itemId,
             emoji: i.icon,
             name: i.name,
             price: i.price,
             category: i.category,
-            tag: i.canteenIcon ?? fallbackIcon,
-            count: i.qty,
+            tag: canteenIcon,
+            canteenId: i.canteenId,
+            canteenName: o.sellerName ?? undefined,
+            orderCount: 1,
+            quantityCount: i.qty,
+            latestAt: o.createdAt,
           });
         }
       }
     }
-    const arr = Array.from(counts.values()).sort((a, b) => b.count - a.count);
-    return arr.slice(0, 6);
+    return Array.from(counts.values())
+      .sort((a, b) => b.orderCount - a.orderCount || b.quantityCount - a.quantityCount || b.latestAt - a.latestAt)
+      .slice(0, 8);
   }, [orders, canteens]);
 
   const qtyOf = (id: string) => cart.find((c) => c.itemId === id)?.qty ?? 0;
   const canteenForRepeat = (r: Repeat) => {
-    for (const o of orders) {
-      const it = o.items.find((i) => i.itemId === r.itemId);
-      if (it) return { canteenId: it.canteenId, canteenIcon: it.canteenIcon, canteenName: o.sellerName ?? undefined };
-    }
-    return { canteenId: undefined, canteenIcon: undefined, canteenName: undefined };
+    return { canteenId: r.canteenId, canteenIcon: r.tag ?? undefined, canteenName: r.canteenName };
   };
   const setCount = (r: Repeat, n: number) => {
     const cur = qtyOf(r.itemId);
@@ -155,8 +172,15 @@ const Home = () => {
               On Repeat!
             </h2>
             <div
-              className="no-scrollbar flex gap-4 overflow-x-auto"
-              style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
+              className="grid gap-3"
+              style={{
+                paddingLeft: 24,
+                paddingRight: 24,
+                paddingBottom: 8,
+                marginBottom: 32,
+                gridTemplateColumns: "repeat(auto-fit, minmax(152px, 1fr))",
+                maxWidth: 720,
+              }}
             >
               {repeats.map((r) => (
                 <RepeatCard
@@ -336,47 +360,63 @@ const RepeatCard = ({
   onOrder?: () => void;
 }) => (
   <div
-    className="cb-glass shrink-0 flex flex-col"
-    style={{ width: 240, padding: 16, gap: 14 }}
+    className="cb-glass flex flex-col min-w-0"
+    style={{ width: "100%", minHeight: 168, padding: 14, gap: 12 }}
   >
-    <div className="relative z-10 flex items-center gap-3">
+    <div className="relative z-10 flex items-start" style={{ gap: 10 }}>
       <div
         className="flex items-center justify-center shrink-0"
         style={{
-          width: 48,
-          height: 48,
+          width: 44,
+          height: 44,
           borderRadius: 999,
           background: "rgba(255,255,255,0.6)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
-          fontSize: 26,
+          fontSize: 24,
           lineHeight: 1,
         }}
       >
         {item.emoji}
       </div>
-      <div className="flex items-center min-w-0" style={{ gap: 12 }}>
-        <span
+      <div className="min-w-0 flex-1">
+        <div
           style={{
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: 700,
-            letterSpacing: "-0.01em",
             color: "#1D1D1F",
+            lineHeight: 1.25,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
           }}
         >
           {item.name}
-        </span>
-        {item.tag && (
-          <span style={{ fontSize: 24, lineHeight: 1, marginLeft: 8 }}>
-            {item.tag}
-          </span>
-        )}
+        </div>
+        <div className="flex items-center min-w-0" style={{ gap: 6, marginTop: 6 }}>
+          {item.tag && <span style={{ fontSize: 17, lineHeight: 1 }}>{item.tag}</span>}
+          {item.canteenName && (
+            <span
+              style={{
+                fontSize: 11,
+                color: "#6E6E73",
+                fontWeight: 700,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {item.canteenName}
+            </span>
+          )}
+        </div>
       </div>
     </div>
 
-    <div className="relative z-10 flex items-center justify-between">
+    <div className="relative z-10 flex items-center justify-between mt-auto" style={{ gap: 8 }}>
       <div
-        className="flex items-center"
+        className="flex items-center shrink-0"
         style={{
           background: "rgba(255,255,255,0.6)",
           backdropFilter: "blur(12px)",
@@ -429,12 +469,13 @@ const RepeatCard = ({
       <button
         type="button"
         onClick={onOrder}
+        className="shrink-0"
         style={{
           background: "#2563EB",
           color: "#FFFFFF",
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 700,
-          padding: "8px 14px",
+          padding: "8px 12px",
           borderRadius: 999,
           boxShadow: "0 8px 18px -6px rgba(37,99,235,0.45)",
         }}

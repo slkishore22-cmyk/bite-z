@@ -28,6 +28,7 @@ export type Order = {
   total: number;
   sellerId?: string | null;
   sellerName?: string | null;
+  sellerIcon?: string | null;
   appUserId?: string | null;
 };
 
@@ -103,6 +104,7 @@ function fromAnalytics(row: any): Order | null {
     total: Number(m.total ?? m.subtotal ?? 0),
     sellerId: m.sellerId ?? null,
     sellerName: m.sellerName ?? null,
+    sellerIcon: m.sellerIcon ?? null,
     appUserId: m.appUserId ?? null,
   };
 }
@@ -140,6 +142,7 @@ export async function createOrder(
   const total = payload.total ?? subtotal;
 
   const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
+  const sellerIcon = payload.items.find((i) => i.canteenIcon)?.canteenIcon ?? null;
   const userId = getCurrentUserId();
   const order: Order = {
     id: nextShortId(),
@@ -152,6 +155,7 @@ export async function createOrder(
     total,
     sellerId,
     sellerName: payload.sellerName ?? null,
+    sellerIcon,
     appUserId: userId,
   };
   const { error } = await db.from("user_analytics").insert({
@@ -159,7 +163,7 @@ export async function createOrder(
     session_id: order.uid,
     screen_name: "order",
     event_type: "order",
-    metadata: { ...order, sellerId, sellerName: payload.sellerName ?? null, appUserId: userId },
+    metadata: { ...order, sellerId, sellerName: payload.sellerName ?? null, sellerIcon, appUserId: userId },
   });
   if (error) throw new Error(error.message);
   write([order, ...read()]);
