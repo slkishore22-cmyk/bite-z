@@ -235,6 +235,8 @@ const Home = () => {
               <CanteenCard key={i} spot={s} onClick={() => navigate(`/app/menu/${s.id}`)} />
             ))}
           </div>
+        ) : canteensLoading ? (
+          <CanteenListSkeleton rows={3} />
         ) : (
           <div style={{ paddingLeft: 24, paddingRight: 24 }}>
             <div
