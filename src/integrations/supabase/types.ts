@@ -476,26 +476,35 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          college_name: string | null
           created_at: string
           full_name: string | null
           id: string
           phone: string | null
+          pin_hash: string | null
+          razorpay_customer_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          college_name?: string | null
           created_at?: string
           full_name?: string | null
           id: string
           phone?: string | null
+          pin_hash?: string | null
+          razorpay_customer_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          college_name?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
+          pin_hash?: string | null
+          razorpay_customer_id?: string | null
           updated_at?: string
         }
         Relationships: []
