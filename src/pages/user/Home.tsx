@@ -172,14 +172,18 @@ const Home = () => {
               On Repeat!
             </h2>
             <div
-              className="grid gap-3"
+              className="no-scrollbar flex overflow-x-auto"
               style={{
+                marginLeft: -24,
+                marginRight: -24,
                 paddingLeft: 24,
                 paddingRight: 24,
                 paddingBottom: 8,
                 marginBottom: 32,
-                gridTemplateColumns: "repeat(auto-fit, minmax(152px, 1fr))",
-                maxWidth: 720,
+                gap: 24,
+                WebkitOverflowScrolling: "touch",
+                scrollSnapType: "x proximity",
+                overscrollBehaviorX: "contain",
               }}
             >
               {repeats.map((r) => (
@@ -360,70 +364,81 @@ const RepeatCard = ({
   onOrder?: () => void;
 }) => (
   <div
-    className="cb-glass flex flex-col min-w-0"
-    style={{ width: "100%", minHeight: 168, padding: 14, gap: 12 }}
+    className="cb-glass flex flex-col shrink-0"
+    style={{
+      width: 240,
+      minWidth: 240,
+      padding: 16,
+      justifyContent: "center",
+      scrollSnapAlign: "start",
+    }}
   >
-    <div className="relative z-10 flex items-start" style={{ gap: 10 }}>
+    <div className="relative z-10 flex flex-col" style={{ gap: 12 }}>
+      <div className="flex items-center" style={{ gap: 12 }}>
       <div
         className="flex items-center justify-center shrink-0"
         style={{
-          width: 44,
-          height: 44,
+          width: 48,
+          height: 48,
           borderRadius: 999,
-          background: "rgba(255,255,255,0.6)",
+          background: "rgba(255,255,255,0.4)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
-          fontSize: 24,
+          boxShadow: "inset 0 2px 8px rgba(0,0,0,0.04)",
+          fontSize: 30,
           lineHeight: 1,
         }}
       >
         {item.emoji}
       </div>
       <div className="min-w-0 flex-1">
-        <div
-          style={{
-            fontSize: 15,
-            fontWeight: 700,
-            color: "#1D1D1F",
-            lineHeight: 1.25,
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {item.name}
-        </div>
-        <div className="flex items-center min-w-0" style={{ gap: 6, marginTop: 6 }}>
-          {item.tag && <span style={{ fontSize: 17, lineHeight: 1 }}>{item.tag}</span>}
-          {item.canteenName && (
+        <div className="flex items-center min-w-0" style={{ gap: 8 }}>
+          <h3
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: "#1D1D1F",
+              lineHeight: 1.2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            {item.name}
+          </h3>
+          {item.tag && (
             <span
+              className="shrink-0"
               style={{
-                fontSize: 11,
-                color: "#6E6E73",
-                fontWeight: 700,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                fontSize: 12,
+                fontWeight: 800,
+                padding: "2px 6px",
+                borderRadius: 999,
+                background: "rgba(255,149,0,0.1)",
+                color: "#BC4800",
+                lineHeight: 1.25,
               }}
             >
-              {item.canteenName}
+              {item.tag}
             </span>
           )}
         </div>
       </div>
-    </div>
+      </div>
 
-    <div className="relative z-10 flex items-center justify-between mt-auto" style={{ gap: 8 }}>
+      <div className="flex items-center justify-between" style={{ gap: 8, marginTop: 4 }}>
       <div
         className="flex items-center shrink-0"
         style={{
-          background: "rgba(255,255,255,0.6)",
+          background: "rgba(255,255,255,0.4)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           borderRadius: 999,
           padding: "2px 6px",
-          gap: 6,
+          gap: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         }}
       >
         <button
@@ -431,8 +446,8 @@ const RepeatCard = ({
           onClick={() => onChange(qty - 1)}
           aria-label="decrease"
           style={{
-            width: 26,
-            height: 26,
+            width: 28,
+            height: 28,
             fontSize: 18,
             fontWeight: 700,
             color: "#6E6E73",
@@ -456,8 +471,8 @@ const RepeatCard = ({
           onClick={() => onChange(qty + 1)}
           aria-label="increase"
           style={{
-            width: 26,
-            height: 26,
+            width: 28,
+            height: 28,
             fontSize: 18,
             fontWeight: 700,
             color: "#2563EB",
@@ -473,7 +488,7 @@ const RepeatCard = ({
         style={{
           background: "#2563EB",
           color: "#FFFFFF",
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: 700,
           padding: "8px 12px",
           borderRadius: 999,
@@ -482,6 +497,7 @@ const RepeatCard = ({
       >
         Order Now
       </button>
+      </div>
     </div>
   </div>
 );
