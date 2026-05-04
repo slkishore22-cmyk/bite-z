@@ -30,6 +30,8 @@ export type Order = {
   sellerName?: string | null;
   sellerIcon?: string | null;
   appUserId?: string | null;
+  paymentStatus?: "PENDING" | "SUCCESS" | "FAILED";
+  isSoundPlayed?: boolean;
 };
 
 const STORAGE_KEY = "bitez:orders";
@@ -215,6 +217,44 @@ export function subscribeOrders(cb: () => void): () => void {
 // Cash-order expiry: any Pending Cash order older than CASH_ORDER_TTL_MS
 // is deleted (locally + backend). Online orders never expire here.
 // ------------------------------------------------------------------
+
+// ------------------------------------------------------------------
+// One-time sound playback flag for Online orders. Persisted in
+// localStorage so it survives reloads / re-opens of order pages.
+// ------------------------------------------------------------------
+const SOUND_PLAYED_KEY = "bitez:orders:soundPlayed";
+
+function readSoundPlayedSet(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.localStorage.getItem(SOUND_PLAYED_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function hasSoundPlayed(orderUidOrId: string): boolean {
+  return readSoundPlayedSet().has(orderUidOrId);
+}
+
+export function markSoundPlayed(orderUidOrId: string) {
+  if (typeof window === "undefined") return;
+  const set = readSoundPlayedSet();
+  if (set.has(orderUidOrId)) return;
+  set.add(orderUidOrId);
+  window.localStorage.setItem(SOUND_PLAYED_KEY, JSON.stringify([...set]));
+  // Also flag the order record itself.
+  const all = read().map((o) =>
+    o.uid === orderUidOrId || o.id === orderUidOrId
+      ? { ...o, isSoundPlayed: true, paymentStatus: "SUCCESS" as const }
+      : o,
+  );
+  write(all);
+}
+
 export function pruneExpiredCashOrders(): Order[] {
   if (typeof window === "undefined") return [];
   const now = Date.now();
