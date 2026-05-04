@@ -1,50 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  getStoredEmail,
-  hydrateSessionFromAuth,
-  loginWithPin,
-} from "@/lib/userAuth";
+import { getStoredUserId, loginWithPin } from "@/lib/userAuth";
+import { getUserSession } from "@/utils/sessionManager";
 
 const UserLogin = () => {
   const navigate = useNavigate();
   const [pin, setPin] = useState("");
-  const [email, setEmail] = useState(() => getStoredEmail());
+  const [userId, setUserId] = useState(() => getStoredUserId());
   const [loading, setLoading] = useState(false);
-  const showEmailField = !getStoredEmail();
+  const [errorMsg, setErrorMsg] = useState("");
+  const [shake, setShake] = useState(false);
+  const shakeTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        hydrateSessionFromAuth().then(() =>
-          navigate("/app/home", { replace: true }),
-        );
-      }
-    });
+    if (getUserSession()) navigate("/app/home", { replace: true });
   }, [navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\d{4}$/.test(pin)) {
-      toast.error("Enter your 4-digit PIN");
+    setErrorMsg("");
+    if (!/^[a-z0-9_]{3,30}$/.test(userId.trim().toLowerCase())) {
+      setErrorMsg("Enter your User ID");
+      triggerShake();
       return;
     }
-    if (showEmailField && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
-      toast.error("Enter a valid email");
+    if (!/^\d{4}$/.test(pin)) {
+      setErrorMsg("Enter your 4-digit PIN");
+      triggerShake();
       return;
     }
     setLoading(true);
     try {
-      await loginWithPin(pin, showEmailField ? email : undefined);
+      await loginWithPin(userId.trim().toLowerCase(), pin);
       navigate("/app/home", { replace: true });
     } catch (err) {
-      toast.error((err as Error).message || "Sign in failed");
+      setErrorMsg((err as Error).message || "Incorrect User ID or PIN");
+      triggerShake();
     } finally {
       setLoading(false);
     }
   };
+
+  const triggerShake = () => {
+    setShake(true);
+    if (shakeTimer.current) window.clearTimeout(shakeTimer.current);
+    shakeTimer.current = window.setTimeout(() => setShake(false), 500);
+  };
+  void toast; // keep import optional usage; toasts disabled in favour of inline error
 
   return (
     <main
@@ -93,34 +96,43 @@ const UserLogin = () => {
         </p>
 
         <form onSubmit={submit} className="space-y-8">
-          {showEmailField && (
-            <div>
-              <label
-                className="block ml-1 mb-2 uppercase font-semibold tracking-wider"
-                style={{ fontSize: 13, color: "#86868B" }}
+          <div>
+            <label
+              className="block ml-1 mb-2 uppercase font-semibold tracking-wider"
+              style={{ fontSize: 13, color: "#86868B" }}
+            >
+              ENTER USER ID
+            </label>
+            <div
+              className="lg-input flex items-center px-5"
+              style={{
+                ...lgStyle,
+                animation: shake ? "bitez-shake 0.5s" : undefined,
+              }}
+            >
+              <span
+                className="material-symbols-outlined mr-4"
+                style={{ color: "#8E8E93", fontSize: 22 }}
               >
-                EMAIL
-              </label>
-              <div className="lg-input flex items-center px-5" style={lgStyle}>
-                <span
-                  className="material-symbols-outlined mr-4"
-                  style={{ color: "#8E8E93", fontSize: 22 }}
-                >
-                  mail
-                </span>
-                <input
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@campus.edu"
-                  className="flex-1 bg-transparent outline-none border-none"
-                  style={{ fontSize: 17, color: "#1D1D1F" }}
-                />
-              </div>
+                badge
+              </span>
+              <input
+                type="text"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                value={userId}
+                onChange={(e) =>
+                  setUserId(
+                    e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""),
+                  )
+                }
+                placeholder="your_user_id"
+                className="flex-1 bg-transparent outline-none border-none font-medium"
+                style={{ fontSize: 17, color: "#1D1D1F" }}
+              />
             </div>
-          )}
+          </div>
 
           <div>
             <label
@@ -129,7 +141,13 @@ const UserLogin = () => {
             >
               ENTER LOGIN PIN
             </label>
-            <div className="lg-input flex items-center px-5" style={lgStyle}>
+            <div
+              className="lg-input flex items-center px-5"
+              style={{
+                ...lgStyle,
+                animation: shake ? "bitez-shake 0.5s" : undefined,
+              }}
+            >
               <span
                 className="material-symbols-outlined mr-4"
                 style={{ color: "#8E8E93", fontSize: 22 }}
@@ -155,6 +173,14 @@ const UserLogin = () => {
                 autoFocus
               />
             </div>
+            {errorMsg && (
+              <div
+                className="ml-1 mt-2"
+                style={{ fontSize: 13, color: "#EF4444" }}
+              >
+                {errorMsg}
+              </div>
+            )}
             <div className="text-right pr-1 mt-3">
               <Link
                 to="/app/forgot-pin"
