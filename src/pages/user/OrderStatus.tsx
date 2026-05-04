@@ -21,6 +21,8 @@ const OrderStatus = () => {
   const items = order?.items ?? [];
   const itemCount = items.reduce((s, i) => s + i.qty, 0);
   const total = order?.total ?? 0;
+  const sellerName = order?.sellerName ?? "Canteen";
+  const sellerIcon = order?.sellerIcon ?? items.find((i) => i.canteenIcon)?.canteenIcon ?? "🍽️";
 
   const paymentLabel = method === "upi" ? "Paid via UPI" : "Cash on Delivery";
   const paymentSub = method === "upi" ? "Transaction Successful" : "Pay at pickup";
@@ -172,16 +174,24 @@ const OrderStatus = () => {
               }}
             />
             <div className="flex justify-between items-start mb-6 relative z-10">
-              <div>
-                <h3
-                  className="font-bold mb-1"
-                  style={{ fontSize: 18, color: "#0F172A" }}
+              <div className="flex items-center min-w-0" style={{ gap: 10 }}>
+                <div
+                  className="flex items-center justify-center shrink-0"
+                  style={{ width: 40, height: 40, borderRadius: 9999, background: "#EFF6FF", fontSize: 22 }}
                 >
-                  Canteen Central
-                </h3>
-                <p style={{ color: "#64748B", fontSize: 13 }}>
-                  Main Block, Floor 2
-                </p>
+                  {sellerIcon}
+                </div>
+                <div className="min-w-0">
+                  <h3
+                    className="font-bold mb-1"
+                    style={{ fontSize: 18, color: "#0F172A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                  >
+                    {sellerName}
+                  </h3>
+                  <p style={{ color: "#64748B", fontSize: 13 }}>
+                    Order details
+                  </p>
+                </div>
               </div>
               <div
                 className="font-bold uppercase"
