@@ -18,6 +18,8 @@ const items: NavItem[] = [
 ];
 
 const iconSpring = { type: "spring" as const, stiffness: 500, damping: 18, mass: 0.7 };
+const SWIPE_DISTANCE = 42;
+const SWIPE_AXIS_RATIO = 1.15;
 
 const getDistanceSpring = (distance: number) => {
   const d = Math.max(1, Math.abs(distance));
@@ -45,6 +47,7 @@ export const LiquidGlassNav = ({
 
   const navRef = useRef<HTMLElement | null>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const navSwipeStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
 
   const x = useMotionValue(0);
   const width = useMotionValue(0);
@@ -131,6 +134,33 @@ export const LiquidGlassNav = ({
     setActiveById(items[nearest].id);
   };
 
+  const handleTabPointerUp = (id: string) => {
+    if (dragging) return;
+    setActiveById(id);
+  };
+
+  const handleNavSwipeEnd = (event: React.PointerEvent<HTMLElement>) => {
+    const start = navSwipeStart.current;
+    navSwipeStart.current = null;
+    if (!start || start.pointerId !== event.pointerId) return false;
+
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    if (absX < SWIPE_DISTANCE || absX < absY * SWIPE_AXIS_RATIO) return false;
+
+    const currentIndex = indexById[active];
+    const next = items[currentIndex + (dx < 0 ? 1 : -1)];
+    if (next) {
+      event.preventDefault();
+      event.stopPropagation();
+      setActiveById(next.id);
+      return true;
+    }
+    return false;
+  };
+
   return (
     <div
       className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-md"
@@ -138,6 +168,14 @@ export const LiquidGlassNav = ({
     >
       <motion.nav
         ref={navRef}
+        onPointerDown={(event) => {
+          if (!event.isPrimary) return;
+          navSwipeStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+        }}
+        onPointerUp={handleNavSwipeEnd}
+        onPointerCancel={() => {
+          navSwipeStart.current = null;
+        }}
         style={{
           WebkitBackdropFilter: "blur(36px) saturate(200%)",
           backdropFilter: "blur(36px) saturate(200%)",
@@ -213,6 +251,7 @@ export const LiquidGlassNav = ({
                 "0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(0,0,0,0.05) inset, 0 8px 22px rgba(37,99,235,0.10)",
               touchAction: "none",
               cursor: dragging ? "grabbing" : "grab",
+              pointerEvents: "none",
             }}
             className="absolute left-0 rounded-full border border-white/70"
             whileTap={{ scale: 0.97 }}
@@ -224,9 +263,20 @@ export const LiquidGlassNav = ({
           const isActive = active === item.id;
           return (
             <button
+              type="button"
               key={item.id}
               ref={(el) => (tabRefs.current[i] = el)}
-              onClick={() => setActiveById(item.id)}
+              onPointerUp={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (handleNavSwipeEnd(event)) return;
+                handleTabPointerUp(item.id);
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.detail === 0) handleTabPointerUp(item.id);
+              }}
               className="relative flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 rounded-full outline-none"
               aria-label={item.label}
             >
