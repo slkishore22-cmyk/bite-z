@@ -93,7 +93,7 @@ function nextShortId(): string {
 }
 
 export function getOrders(): Order[] {
-  pruneExpiredCashOrders();
+  expireStaleCashOrders();
   return read().sort((a, b) => b.createdAt - a.createdAt);
 }
 
@@ -106,10 +106,15 @@ function fromAnalytics(row: any): Order | null {
     uid: String(row.session_id ?? m.uid ?? row.id),
     createdAt: row.created_at ? new Date(row.created_at).getTime() : Number(m.createdAt ?? Date.now()),
     completedAt: m.completedAt ? Number(m.completedAt) : undefined,
+    expiresAt: m.expiresAt == null ? null : Number(m.expiresAt),
     payment: m.payment === "Online" ? "Online" : "Cash",
-    status: m.status === "Completed" || m.status === "Cancelled" ? m.status : "Pending",
+    status:
+      m.status === "Completed" || m.status === "Cancelled" || m.status === "Expired"
+        ? m.status
+        : "Pending",
     paymentStatus: m.paymentStatus === "SUCCESS" || m.paymentStatus === "FAILED" ? m.paymentStatus : "PENDING",
     isSoundPlayed: Boolean(m.isSoundPlayed),
+    isSalesRecorded: Boolean(m.isSalesRecorded),
     items: m.items,
     subtotal: Number(m.subtotal ?? 0),
     total: Number(m.total ?? m.subtotal ?? 0),
