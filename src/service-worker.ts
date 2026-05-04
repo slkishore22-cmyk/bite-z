@@ -1,0 +1,136 @@
+/// <reference lib="webworker" />
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
+import { registerRoute, NavigationRoute } from "workbox-routing";
+import { NetworkFirst, StaleWhileRevalidate, CacheFirst } from "workbox-strategies";
+import { ExpirationPlugin } from "workbox-expiration";
+import { CacheableResponsePlugin } from "workbox-cacheable-response";
+
+declare const self: ServiceWorkerGlobalScope & {
+  __WB_MANIFEST: Array<{ url: string; revision: string | null }>;
+};
+
+self.skipWaiting();
+cleanupOutdatedCaches();
+precacheAndRoute(self.__WB_MANIFEST);
+
+/* ---------------- Runtime caching ---------------- */
+
+// HTML navigations — network first, cached fallback when offline.
+registerRoute(
+  new NavigationRoute(
+    new NetworkFirst({
+      cacheName: "bitez-html",
+      networkTimeoutSeconds: 3,
+      plugins: [
+        new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 }),
+      ],
+    }),
+    {
+      denylist: [/^\/~oauth/, /^\/functions\//, /^\/auth\//, /^\/sw\.js$/],
+    },
+  ),
+);
+
+// Google fonts CSS
+registerRoute(
+  ({ url }) => url.origin === "https://fonts.googleapis.com",
+  new StaleWhileRevalidate({ cacheName: "google-fonts-css" }),
+);
+
+// Google fonts files
+registerRoute(
+  ({ url }) => url.origin === "https://fonts.gstatic.com",
+  new CacheFirst({
+    cacheName: "google-fonts-files",
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 }),
+    ],
+  }),
+);
+
+// Images — stale while revalidate.
+registerRoute(
+  ({ request }) => request.destination === "image",
+  new StaleWhileRevalidate({
+    cacheName: "bitez-images",
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 14 }),
+    ],
+  }),
+);
+
+// Supabase GET — network first, short cache for offline reads.
+registerRoute(
+  ({ url, request }) =>
+    url.hostname.endsWith(".supabase.co") && request.method === "GET",
+  new NetworkFirst({
+    cacheName: "bitez-api",
+    networkTimeoutSeconds: 4,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 60 * 5 }),
+    ],
+  }),
+);
+
+/* ---------------- Push notifications ---------------- */
+
+self.addEventListener("push", (event) => {
+  let data: { title?: string; body?: string; url?: string; tag?: string } = {};
+  try {
+    if (event.data) data = event.data.json();
+  } catch {
+    if (event.data) data = { body: event.data.text() };
+  }
+
+  const title = data.title ?? "Bitez";
+  const options: NotificationOptions = {
+    body: data.body ?? "",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: data.tag,
+    data: { url: data.url ?? "/app/home" },
+    // @ts-ignore
+    vibrate: [40, 30, 40],
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = (event.notification.data as any)?.url ?? "/app/home";
+  event.waitUntil(
+    (async () => {
+      const all = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      const existing = all.find((c) => c.url.includes(target));
+      if (existing) {
+        await existing.focus();
+        return;
+      }
+      await self.clients.openWindow(target);
+    })(),
+  );
+});
+
+/* ---------------- Background sync (placeholder) ----------------
+ * Background Sync requires registering a 'sync' tag from a page when the
+ * order request fails offline. We expose a 'queue-order' tag here; the
+ * client side that actually queues failed POSTs lives in the order code.
+ * (Phase 2.5 — wire IndexedDB queue when needed.)
+ */
+self.addEventListener("sync", (event: any) => {
+  if (event.tag === "bitez-orders") {
+    // Future: replay queued orders from IndexedDB.
+  }
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
