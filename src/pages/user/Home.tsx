@@ -360,47 +360,63 @@ const RepeatCard = ({
   onOrder?: () => void;
 }) => (
   <div
-    className="cb-glass shrink-0 flex flex-col"
-    style={{ width: 240, padding: 16, gap: 14 }}
+    className="cb-glass flex flex-col min-w-0"
+    style={{ width: "100%", minHeight: 168, padding: 14, gap: 12 }}
   >
-    <div className="relative z-10 flex items-center gap-3">
+    <div className="relative z-10 flex items-start" style={{ gap: 10 }}>
       <div
         className="flex items-center justify-center shrink-0"
         style={{
-          width: 48,
-          height: 48,
+          width: 44,
+          height: 44,
           borderRadius: 999,
           background: "rgba(255,255,255,0.6)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
-          fontSize: 26,
+          fontSize: 24,
           lineHeight: 1,
         }}
       >
         {item.emoji}
       </div>
-      <div className="flex items-center min-w-0" style={{ gap: 12 }}>
-        <span
+      <div className="min-w-0 flex-1">
+        <div
           style={{
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: 700,
-            letterSpacing: "-0.01em",
             color: "#1D1D1F",
+            lineHeight: 1.25,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
           }}
         >
           {item.name}
-        </span>
-        {item.tag && (
-          <span style={{ fontSize: 24, lineHeight: 1, marginLeft: 8 }}>
-            {item.tag}
-          </span>
-        )}
+        </div>
+        <div className="flex items-center min-w-0" style={{ gap: 6, marginTop: 6 }}>
+          {item.tag && <span style={{ fontSize: 17, lineHeight: 1 }}>{item.tag}</span>}
+          {item.canteenName && (
+            <span
+              style={{
+                fontSize: 11,
+                color: "#6E6E73",
+                fontWeight: 700,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {item.canteenName}
+            </span>
+          )}
+        </div>
       </div>
     </div>
 
-    <div className="relative z-10 flex items-center justify-between">
+    <div className="relative z-10 flex items-center justify-between mt-auto" style={{ gap: 8 }}>
       <div
-        className="flex items-center"
+        className="flex items-center shrink-0"
         style={{
           background: "rgba(255,255,255,0.6)",
           backdropFilter: "blur(12px)",
@@ -453,12 +469,13 @@ const RepeatCard = ({
       <button
         type="button"
         onClick={onOrder}
+        className="shrink-0"
         style={{
           background: "#2563EB",
           color: "#FFFFFF",
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 700,
-          padding: "8px 14px",
+          padding: "8px 12px",
           borderRadius: 999,
           boxShadow: "0 8px 18px -6px rgba(37,99,235,0.45)",
         }}
