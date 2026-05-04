@@ -107,7 +107,9 @@ const Orders = () => {
 
           {/* Pending Pickup */}
           <Section title="Pending Pickup">
-            {pendingGroups.length === 0 ? (
+            {loading && pendingGroups.length === 0 && completedGroups.length === 0 ? (
+              <OrderListSkeleton rows={3} />
+            ) : pendingGroups.length === 0 ? (
               <EmptyHint text="No pending orders. Place an order to see it here." />
             ) : (
               pendingGroups.map((g) => (
