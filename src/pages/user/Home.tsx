@@ -172,18 +172,20 @@ const Home = () => {
               On Repeat!
             </h2>
             <div
-              className="no-scrollbar flex overflow-x-auto"
+              data-swipe-lock="true"
+              className="flex overflow-x-auto"
               style={{
-                marginLeft: -24,
-                marginRight: -24,
                 paddingLeft: 24,
                 paddingRight: 24,
-                paddingBottom: 8,
+                paddingBottom: 14,
                 marginBottom: 32,
-                gap: 24,
+                gap: 16,
                 WebkitOverflowScrolling: "touch",
-                scrollSnapType: "x proximity",
+                scrollSnapType: "x mandatory",
                 overscrollBehaviorX: "contain",
+                touchAction: "pan-x",
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(37,99,235,0.35) rgba(255,255,255,0.65)",
               }}
             >
               {repeats.map((r) => (
