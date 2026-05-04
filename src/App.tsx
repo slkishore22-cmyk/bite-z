@@ -25,6 +25,10 @@ import UserMenu from "./pages/user/Menu.tsx";
 import UserPayment from "./pages/user/Payment.tsx";
 import UserOrderStatus from "./pages/user/OrderStatus.tsx";
 import UserLogin from "./pages/user/Login.tsx";
+import UserSignup from "./pages/user/Signup.tsx";
+import UserVerifyPending from "./pages/user/VerifyPending.tsx";
+import UserForgotPin from "./pages/user/ForgotPin.tsx";
+import UserResetPin from "./pages/user/ResetPin.tsx";
 import MaLogin from "./master-admin/pages/Login.tsx";
 import MaOverview from "./master-admin/pages/Overview.tsx";
 import MaSellers from "./master-admin/pages/Sellers.tsx";
@@ -92,6 +96,10 @@ const App = () => (
 
           {/* USER APP */}
           <Route path="/app/login" element={<UserLogin />} />
+          <Route path="/app/signup" element={<UserSignup />} />
+          <Route path="/app/verify-pending" element={<UserVerifyPending />} />
+          <Route path="/app/forgot-pin" element={<UserForgotPin />} />
+          <Route path="/app/reset-pin" element={<UserResetPin />} />
           <Route path="/app/home" element={<UserRoute><UserHome /></UserRoute>} />
           <Route path="/app/cart" element={<UserRoute><UserCart /></UserRoute>} />
           <Route path="/app/orders" element={<UserRoute><UserOrders /></UserRoute>} />
