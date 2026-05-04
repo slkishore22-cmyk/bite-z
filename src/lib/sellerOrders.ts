@@ -160,14 +160,19 @@ export async function createOrder(
   const sellerId = payload.items.find((i) => i.canteenId)?.canteenId ?? null;
   const sellerIcon = payload.items.find((i) => i.canteenIcon)?.canteenIcon ?? null;
   const userId = getCurrentUserId();
+  const now = Date.now();
+  const isOnlineSuccess = payload.payment === "Online" && payload.paymentStatus === "SUCCESS";
+  const expiresAt = payload.payment === "Cash" ? now + CASH_ORDER_TTL_MS : null;
   const order: Order = {
     id: nextShortId(),
     uid: uuid(),
-    createdAt: Date.now(),
+    createdAt: now,
     status: "Pending",
+    expiresAt,
     payment: payload.payment,
     paymentStatus: payload.paymentStatus ?? "PENDING",
     isSoundPlayed: Boolean(payload.isSoundPlayed),
+    isSalesRecorded: isOnlineSuccess,
     items: payload.items,
     subtotal,
     total,
