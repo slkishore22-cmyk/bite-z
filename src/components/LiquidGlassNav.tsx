@@ -1,6 +1,8 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { motion, useMotionValue, animate, type PanInfo } from "framer-motion";
 import { Home, ReceiptText, ShoppingCart, type LucideIcon } from "lucide-react";
+import { getCart, subscribeCart } from "@/lib/userCart";
+import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
 
 type NavItem = {
   id: string;
@@ -38,6 +40,8 @@ export const LiquidGlassNav = ({
   const [distance, setDistance] = useState(0);
   const [rects, setRects] = useState<{ x: number; width: number }[]>([]);
   const [dragging, setDragging] = useState(false);
+  const [hasActiveCart, setHasActiveCart] = useState(() => getCart().length > 0);
+  const [hasActiveOrder, setHasActiveOrder] = useState(() => getOrders().some((o) => o.status === "Pending"));
 
   const navRef = useRef<HTMLElement | null>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -95,6 +99,19 @@ export const LiquidGlassNav = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId]);
+
+  useEffect(() => {
+    const refreshCart = () => setHasActiveCart(getCart().length > 0);
+    const refreshOrders = () => setHasActiveOrder(getOrders().some((o) => o.status === "Pending"));
+    const unsubCart = subscribeCart(refreshCart);
+    const unsubOrders = subscribeOrders(refreshOrders);
+    refreshCart();
+    refreshOrders();
+    return () => {
+      unsubCart();
+      unsubOrders();
+    };
+  }, []);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     setDragging(false);
@@ -228,7 +245,7 @@ export const LiquidGlassNav = ({
                     size={18}
                     strokeWidth={isActive ? 2.6 : 2.1}
                   />
-                  {item.badge && (
+                  {((item.id === "cart" && hasActiveCart) || (item.id === "orders" && hasActiveOrder)) && (
                     <span
                       className="absolute -top-1 -right-1 h-2 w-2 rounded-full"
                       style={{ background: "#FF3B30", boxShadow: "0 0 0 2px rgba(255,255,255,0.9)" }}
