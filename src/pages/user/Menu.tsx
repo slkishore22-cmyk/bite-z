@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
+import { MenuItemsSkeleton } from "@/components/user/Skeletons";
 import {
   getInventory,
   loadInventoryFromBackend,
@@ -47,6 +48,7 @@ const Menu = () => {
   const [active, setActive] = useState<CategoryKey>("Food");
   const [query, setQuery] = useState("");
   const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory(id));
+  const [inventoryLoading, setInventoryLoading] = useState(() => getInventory(id).length === 0);
   const [cart, setCart] = useState(() => getCart());
   // Frozen snapshots: order is captured on entry to this canteen and does NOT
   // shuffle while the user browses. It refreshes on next visit (id change).
@@ -59,7 +61,9 @@ const Menu = () => {
   useEffect(() => {
     const refreshLocal = () => setInventory(getInventory(id));
     const unsub = subscribeInventory(refreshLocal);
-    loadInventoryFromBackend(id).then(setInventory).catch(() => setInventory([]));
+    loadInventoryFromBackend(id)
+      .then((rows) => { setInventory(rows); setInventoryLoading(false); })
+      .catch(() => { setInventory([]); setInventoryLoading(false); });
     getRegisteredCanteensFromBackend().then((rows) => setCanteen(rows.find((c) => c.id === id) ?? null)).catch(() => setCanteen(getRegisteredCanteens().find((c) => c.id === id) ?? null));
     // Re-snapshot pin/favorite order only when the canteen changes
     setPinned(getPinned());
