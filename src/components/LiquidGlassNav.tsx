@@ -218,6 +218,7 @@ export const LiquidGlassNav = ({
                 "0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(0,0,0,0.05) inset, 0 8px 22px rgba(37,99,235,0.10)",
               touchAction: "none",
               cursor: dragging ? "grabbing" : "grab",
+              pointerEvents: "none",
             }}
             className="absolute left-0 rounded-full border border-white/70"
             whileTap={{ scale: 0.97 }}
@@ -240,6 +241,7 @@ export const LiquidGlassNav = ({
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
+                if (event.detail === 0) handleTabPointerUp(item.id);
               }}
               className="relative flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 rounded-full outline-none"
               aria-label={item.label}
