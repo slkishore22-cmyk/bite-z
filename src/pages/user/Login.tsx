@@ -1,87 +1,231 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getUserSession, saveUserSession } from "@/utils/sessionManager";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  getStoredEmail,
+  hydrateSessionFromAuth,
+  loginWithPin,
+} from "@/lib/userAuth";
 
 const UserLogin = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [pin, setPin] = useState("");
+  const [email, setEmail] = useState(() => getStoredEmail());
   const [loading, setLoading] = useState(false);
+  const showEmailField = !getStoredEmail();
 
   useEffect(() => {
-    if (getUserSession()) navigate("/app/home", { replace: true });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        hydrateSessionFromAuth().then(() =>
+          navigate("/app/home", { replace: true }),
+        );
+      }
+    });
   }, [navigate]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const n = name.trim();
-    const em = email.trim();
-    if (!n || !em) {
-      toast.error("Enter your name and email");
+    if (!/^\d{4}$/.test(pin)) {
+      toast.error("Enter your 4-digit PIN");
+      return;
+    }
+    if (showEmailField && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
+      toast.error("Enter a valid email");
       return;
     }
     setLoading(true);
     try {
-      const id = `u_${Date.now().toString(36)}`;
-      saveUserSession({ id, name: n, email: em });
-      toast.success(`Welcome, ${n.split(" ")[0]}`);
+      await loginWithPin(pin, showEmailField ? email : undefined);
       navigate("/app/home", { replace: true });
+    } catch (err) {
+      toast.error((err as Error).message || "Sign in failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
-      <form
-        onSubmit={submit}
-        className="w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-xl space-y-6"
-      >
-        <div className="text-center space-y-2">
-          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-            <span className="material-symbols-outlined text-primary-foreground" style={{ fontSize: 28 }}>
-              person
-            </span>
-          </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Welcome to Bitez</h1>
-          <p className="text-sm text-muted-foreground">Sign in to start ordering.</p>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Name</label>
-          <input
-            autoFocus
-            autoComplete="name"
-            className="flex h-11 w-full rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Email</label>
-          <input
-            type="email"
-            autoComplete="email"
-            className="flex h-11 w-full rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@campus.edu"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full h-11 rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow disabled:opacity-60"
+    <main
+      className="min-h-screen relative flex flex-col items-center justify-center antialiased overflow-hidden"
+      style={{ background: "#F5F5F7", color: "#1D1D1F" }}
+    >
+      <BitezBloom />
+      <div className="h-[280px] flex flex-col items-center justify-center">
+        <h1
+          className="font-extrabold tracking-tight leading-none mb-4 bitez-glow"
+          style={{ fontSize: 44, color: "#1D1D1F" }}
         >
-          {loading ? "Signing in…" : "Continue"}
-        </button>
-      </form>
+          Bitez
+        </h1>
+        <div className="flex items-center gap-2">
+          <span
+            className="font-semibold uppercase"
+            style={{ fontSize: 13, color: "#86868B", letterSpacing: "0.05em" }}
+          >
+            FRESH. FAST. YOURS.
+          </span>
+          <span
+            className="rounded-full"
+            style={{
+              width: 6,
+              height: 6,
+              background: "#0071E3",
+              animation: "bitez-pulse 3s infinite ease-in-out",
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="w-full" style={{ maxWidth: 390, paddingLeft: 24, paddingRight: 24 }}>
+        <h2
+          className="text-center mb-2"
+          style={{ fontSize: 24, fontWeight: 700, color: "#1D1D1F" }}
+        >
+          Welcome back
+        </h2>
+        <p
+          className="text-center mb-10"
+          style={{ fontSize: 15, color: "#86868B" }}
+        >
+          Sign in to continue
+        </p>
+
+        <form onSubmit={submit} className="space-y-8">
+          {showEmailField && (
+            <div>
+              <label
+                className="block ml-1 mb-2 uppercase font-semibold tracking-wider"
+                style={{ fontSize: 13, color: "#86868B" }}
+              >
+                EMAIL
+              </label>
+              <div className="lg-input flex items-center px-5" style={lgStyle}>
+                <span
+                  className="material-symbols-outlined mr-4"
+                  style={{ color: "#8E8E93", fontSize: 22 }}
+                >
+                  mail
+                </span>
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@campus.edu"
+                  className="flex-1 bg-transparent outline-none border-none"
+                  style={{ fontSize: 17, color: "#1D1D1F" }}
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label
+              className="block ml-1 mb-2 uppercase font-semibold tracking-wider"
+              style={{ fontSize: 13, color: "#86868B" }}
+            >
+              ENTER LOGIN PIN
+            </label>
+            <div className="lg-input flex items-center px-5" style={lgStyle}>
+              <span
+                className="material-symbols-outlined mr-4"
+                style={{ color: "#8E8E93", fontSize: 22 }}
+              >
+                dialpad
+              </span>
+              <input
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                value={pin}
+                onChange={(e) =>
+                  setPin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                }
+                placeholder="••••"
+                className="flex-1 bg-transparent outline-none border-none font-medium"
+                style={{
+                  fontSize: 20,
+                  letterSpacing: "0.5em",
+                  color: "#1D1D1F",
+                }}
+                autoFocus
+              />
+            </div>
+            <div className="text-right pr-1 mt-3">
+              <Link
+                to="/app/forgot-pin"
+                className="font-medium"
+                style={{ color: "#0071E3", fontSize: 14 }}
+              >
+                Forgot PIN?
+              </Link>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-60"
+            style={btnStyle}
+          >
+            {loading ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
+
+        <div className="mt-16 text-center">
+          <span style={{ fontSize: 15, color: "#86868B" }}>
+            Don't have an account?
+          </span>{" "}
+          <Link
+            to="/app/signup"
+            className="font-bold ml-1"
+            style={{ color: "#0071E3", fontSize: 15 }}
+          >
+            Sign Up
+          </Link>
+        </div>
+      </div>
     </main>
   );
 };
+
+export const lgStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,0.4)",
+  backdropFilter: "blur(20px) saturate(180%)",
+  WebkitBackdropFilter: "blur(20px) saturate(180%)",
+  border: "1px solid rgba(255,255,255,0.5)",
+  boxShadow:
+    "inset 0 1px 1px rgba(255,255,255,0.6), 0 4px 24px -1px rgba(0,0,0,0.04)",
+  height: 64,
+  borderRadius: 12,
+};
+
+export const btnStyle: React.CSSProperties = {
+  background: "#0071E3",
+  borderRadius: 9999,
+  height: 54,
+  fontSize: 17,
+  color: "#FFFFFF",
+  boxShadow: "0 4px 14px 0 rgba(0,113,227,0.3)",
+};
+
+export const BitezBloom = () => (
+  <div
+    aria-hidden
+    className="absolute -translate-x-1/2 rounded-full pointer-events-none"
+    style={{
+      top: "-10%",
+      left: "50%",
+      width: 600,
+      height: 600,
+      background: "rgba(0,113,227,0.05)",
+      filter: "blur(100px)",
+    }}
+  />
+);
 
 export default UserLogin;
