@@ -80,7 +80,11 @@ const OrderStatus = () => {
               {revealed ? `#${orderId}` : "XXXX"}
             </div>
             <button
-              onClick={() => setRevealed(true)}
+              onClick={() => {
+                if (revealed) return;
+                setRevealed(true);
+                window.setTimeout(() => setRevealed(false), 5000);
+              }}
               disabled={revealed}
               className="font-bold transition-all"
               style={{
