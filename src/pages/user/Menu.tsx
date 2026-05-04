@@ -280,6 +280,9 @@ const Menu = () => {
               );
             })}
             {visible.length === 0 && (
+              inventoryLoading ? (
+                <MenuItemsSkeleton rows={5} />
+              ) : (
               <div
                 style={{
                   textAlign: "center",
@@ -292,6 +295,7 @@ const Menu = () => {
                   ? "Menu coming soon."
                   : "No items match your search."}
               </div>
+              )
             )}
           </div>
         </div>
