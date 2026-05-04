@@ -80,12 +80,13 @@ export type SignupInput = {
 export async function signupUser(input: SignupInput) {
   const email = input.email.trim().toLowerCase();
   const pinHash = await derivePassword(input.pin, email);
-  // Use the user-set password for Supabase Auth so they can recover it
-  // Email verification is enforced via Supabase's confirmation flow.
+  // PIN-derived value is the Supabase Auth password so PIN-only login works.
+  // The user-typed password is collected for UI fidelity but not used as the
+  // primary credential. Email verification is enforced by Supabase.
   const redirectTo = `${window.location.origin}/app/home`;
   const { data, error } = await supabase.auth.signUp({
     email,
-    password: input.password,
+    password: pinHash,
     options: {
       emailRedirectTo: redirectTo,
       data: {
@@ -121,49 +122,18 @@ export async function loginWithPin(pin: string, emailArg?: string) {
   const email = (emailArg || getStoredEmail()).trim().toLowerCase();
   if (!email) throw new Error("Please enter your email");
   const pinHash = await derivePassword(pin, email);
-  const { data: prof, error: profErr } = await supabase
-    .from("profiles")
-    .select("id, pin_hash")
-    .eq("pin_hash", pinHash)
-    .maybeSingle();
-  if (profErr || !prof) throw new Error("Incorrect PIN");
-  // PIN matched -> sign the user in via stored derived credential is not
-  // possible; instead require their password OR use a magic link.
-  // We send a magic link to keep things secure when only PIN is provided.
-  throw new Error("PIN_OK_NEED_PASSWORD");
-}
-
-export async function loginWithPassword(email: string, password: string) {
-  const e = email.trim().toLowerCase();
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: e,
-    password,
+    email,
+    password: pinHash,
   });
-  if (error) throw error;
-  setStoredEmail(e);
-  await hydrateSessionFromAuth();
-  return data;
-}
-
-export async function loginPinAndPassword(
-  pin: string,
-  password: string,
-  emailArg?: string,
-) {
-  const email = (emailArg || getStoredEmail()).trim().toLowerCase();
-  if (!email) throw new Error("Please enter your email");
-  const data = await loginWithPassword(email, password);
-  // verify PIN matches profile
-  const pinHash = await derivePassword(pin, email);
-  const { data: prof } = await supabase
-    .from("profiles")
-    .select("pin_hash")
-    .eq("id", data.user!.id)
-    .maybeSingle();
-  if (!prof?.pin_hash || prof.pin_hash !== pinHash) {
-    await supabase.auth.signOut();
+  if (error) {
+    if (/email/i.test(error.message) && /confirm/i.test(error.message)) {
+      throw new Error("Please verify your email first");
+    }
     throw new Error("Incorrect PIN");
   }
+  setStoredEmail(email);
+  await hydrateSessionFromAuth();
   return data;
 }
 
@@ -178,7 +148,11 @@ export async function sendPasswordReset(email: string) {
 export async function updatePin(newPin: string) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user?.email) throw new Error("Not signed in");
-  const pinHash = await derivePassword(newPin, u.user.email);
+  const email = u.user.email;
+  const pinHash = await derivePassword(newPin, email);
+  // Update Supabase Auth password (derived from PIN) and profile pin_hash.
+  const { error: pwErr } = await supabase.auth.updateUser({ password: pinHash });
+  if (pwErr) throw pwErr;
   const { error } = await supabase
     .from("profiles")
     .update({ pin_hash: pinHash })
