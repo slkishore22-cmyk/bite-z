@@ -20,8 +20,6 @@ type CanteenGroup = {
   id: string;
   name: string;
   icon: string;
-  iconBg: string;
-  iconColor: string;
   status: "pending" | "completed";
   orders: OrderRow[];
 };
@@ -53,9 +51,7 @@ const Orders = () => {
         const existing = map.get(id) ?? {
           id: `${status}-${id}`,
           name: order.sellerName ?? "Canteen",
-          icon: status === "pending" ? "restaurant" : "local_cafe",
-          iconBg: status === "pending" ? "#D6E3FF" : "#F5F5F7",
-          iconColor: status === "pending" ? "#2563EB" : "#984061",
+          icon: order.sellerIcon ?? order.items.find((i) => i.canteenIcon)?.canteenIcon ?? "🍽️",
           status,
           orders: [],
         };
@@ -292,20 +288,11 @@ const GroupCard = ({
               width: 44,
               height: 44,
               borderRadius: 9999,
-              background: group.iconBg,
-              color: group.iconColor,
+              background: isPending ? "#D6E3FF" : "#F5F5F7",
+              fontSize: 24,
             }}
           >
-            <span
-              className="material-symbols-outlined"
-              style={{
-                fontSize: 22,
-                fontVariationSettings: "'FILL' 1",
-                color: group.iconColor,
-              }}
-            >
-              {group.icon}
-            </span>
+            <span style={{ lineHeight: 1 }}>{group.icon}</span>
           </div>
           <div className="text-left">
             <h3 className="font-bold" style={{ fontSize: 15, color: "#1D1D1F" }}>
