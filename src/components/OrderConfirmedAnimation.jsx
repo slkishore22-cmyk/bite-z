@@ -29,7 +29,6 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { playOrderConfirmation, preloadOrderSound } from '../utils/orderConfirmation';
 
 // ── CSS keyframes injected once into <head> ──────────────────────
 const STYLES = `
@@ -115,15 +114,11 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
 
   useEffect(() => {
     injectStyles();
-    preloadOrderSound();
   }, []);
 
   useEffect(() => {
     if (hasPlayed.current) return;
     hasPlayed.current = true;
-
-    // Start sound + animation sequence together
-    playOrderConfirmation(); // fire and forget — fade-in/out handled inside
 
     // Animation timeline
     const t = (delay, fn) => setTimeout(fn, delay);

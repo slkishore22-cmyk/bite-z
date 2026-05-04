@@ -105,6 +105,8 @@ function fromAnalytics(row: any): Order | null {
     completedAt: m.completedAt ? Number(m.completedAt) : undefined,
     payment: m.payment === "Online" ? "Online" : "Cash",
     status: m.status === "Completed" || m.status === "Cancelled" ? m.status : "Pending",
+    paymentStatus: m.paymentStatus === "SUCCESS" || m.paymentStatus === "FAILED" ? m.paymentStatus : "PENDING",
+    isSoundPlayed: Boolean(m.isSoundPlayed),
     items: m.items,
     subtotal: Number(m.subtotal ?? 0),
     total: Number(m.total ?? m.subtotal ?? 0),
@@ -156,6 +158,8 @@ export async function createOrder(
     createdAt: Date.now(),
     status: "Pending",
     payment: payload.payment,
+    paymentStatus: payload.paymentStatus ?? "PENDING",
+    isSoundPlayed: Boolean(payload.isSoundPlayed),
     items: payload.items,
     subtotal,
     total,
@@ -237,22 +241,30 @@ function readSoundPlayedSet(): Set<string> {
 }
 
 export function hasSoundPlayed(orderUidOrId: string): boolean {
-  return readSoundPlayedSet().has(orderUidOrId);
+  if (readSoundPlayedSet().has(orderUidOrId)) return true;
+  return read().some((o) => (o.uid === orderUidOrId || o.id === orderUidOrId) && o.isSoundPlayed === true);
 }
 
 export function markSoundPlayed(orderUidOrId: string) {
   if (typeof window === "undefined") return;
   const set = readSoundPlayedSet();
-  if (set.has(orderUidOrId)) return;
   set.add(orderUidOrId);
   window.localStorage.setItem(SOUND_PLAYED_KEY, JSON.stringify([...set]));
   // Also flag the order record itself.
-  const all = read().map((o) =>
-    o.uid === orderUidOrId || o.id === orderUidOrId
-      ? { ...o, isSoundPlayed: true, paymentStatus: "SUCCESS" as const }
-      : o,
-  );
+  let updatedOrder: Order | undefined;
+  const all = read().map((o) => {
+    if (o.uid !== orderUidOrId && o.id !== orderUidOrId) return o;
+    updatedOrder = { ...o, isSoundPlayed: true, paymentStatus: "SUCCESS" as const };
+    return updatedOrder;
+  });
   write(all);
+  if (updatedOrder) {
+    db.from("user_analytics")
+      .update({ metadata: updatedOrder })
+      .eq("session_id", updatedOrder.uid)
+      .eq("event_type", "order")
+      .then(() => undefined, () => undefined);
+  }
 }
 
 export function pruneExpiredCashOrders(): Order[] {
