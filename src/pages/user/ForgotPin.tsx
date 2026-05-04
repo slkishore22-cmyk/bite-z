@@ -1,0 +1,111 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { resetPin } from "@/lib/userAuth";
+import { BitezBloom, btnStyle, lgStyle } from "./Login";
+
+const ForgotPin = () => {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState("");
+  const [pin, setPin] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^[a-z0-9_]{3,30}$/.test(userId)) return toast.error("Enter your User ID");
+    if (!/^\d{4}$/.test(pin)) return toast.error("PIN must be 4 digits");
+    if (pin !== confirm) return toast.error("PINs don't match");
+    setLoading(true);
+    try {
+      await resetPin(userId, pin);
+      toast.success("PIN reset successfully");
+      setTimeout(() => navigate("/app/login", { replace: true }), 1500);
+    } catch (err) {
+      toast.error((err as Error).message || "Could not reset PIN");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main
+      className="min-h-screen relative antialiased"
+      style={{ background: "#F5F5F7", color: "#1D1D1F" }}
+    >
+      <BitezBloom />
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        aria-label="Back"
+        className="fixed top-4 left-4 z-20 inline-flex items-center justify-center rounded-full"
+        style={{
+          width: 40, height: 40,
+          background: "rgba(255,255,255,0.8)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+        }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 22, color: "#1D1D1F" }}>arrow_back</span>
+      </button>
+
+      <div className="mx-auto px-6 pt-32 pb-12" style={{ maxWidth: 390 }}>
+        <h1 className="font-semibold leading-tight mb-1"
+          style={{ fontSize: 34, color: "#1D1D1F", letterSpacing: "-0.022em" }}>
+          Reset PIN
+        </h1>
+        <p className="mb-10" style={{ fontSize: 17, color: "#6E6E73" }}>
+          Enter your User ID to reset
+        </p>
+
+        <form onSubmit={submit} className="space-y-5">
+          <Row icon="badge">
+            <input
+              type="text" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+              value={userId}
+              onChange={(e) => setUserId(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+              placeholder="Your User ID"
+              className="flex-1 bg-transparent outline-none border-none"
+              style={{ fontSize: 17, color: "#1D1D1F" }}
+            />
+          </Row>
+          <Row icon="lock">
+            <input
+              type="password" inputMode="numeric" maxLength={4}
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="New PIN"
+              className="flex-1 bg-transparent outline-none border-none font-medium"
+              style={{ fontSize: 17, letterSpacing: "0.5em", color: "#1D1D1F" }}
+            />
+          </Row>
+          <Row icon="lock">
+            <input
+              type="password" inputMode="numeric" maxLength={4}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="Confirm PIN"
+              className="flex-1 bg-transparent outline-none border-none font-medium"
+              style={{ fontSize: 17, letterSpacing: "0.5em", color: "#1D1D1F" }}
+            />
+          </Row>
+          <button type="submit" disabled={loading}
+            className="w-full font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-60"
+            style={btnStyle}>
+            {loading ? "Resetting…" : "Reset PIN"}
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+};
+
+const Row = ({ icon, children }: { icon: string; children: React.ReactNode }) => (
+  <div className="lg-input flex items-center px-5" style={lgStyle}>
+    <span className="material-symbols-outlined mr-4"
+      style={{ color: "#6E6E73", fontSize: 22 }}>{icon}</span>
+    {children}
+  </div>
+);
+
+export default ForgotPin;
