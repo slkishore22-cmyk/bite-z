@@ -16,6 +16,13 @@ export default function Users() {
   const [reveal, setReveal] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
 
+  const revealFor = (id: string) => {
+    setReveal((s) => ({ ...s, [id]: true }));
+    window.setTimeout(() => {
+      setReveal((s) => ({ ...s, [id]: false }));
+    }, 5000);
+  };
+
   useEffect(() => {
     (async () => {
       const [{ data: sp }, { data: ua }, usersRes] = await Promise.all([
@@ -87,11 +94,11 @@ export default function Users() {
                       <tr key={u.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/master-admin/users/${u.id}`)}>
                         <td style={{ color: "white" }}>{u.full_name}</td>
                         <td style={{ fontFamily: "monospace" }}>{u.user_id}</td>
-                        <td onClick={(e) => { e.stopPropagation(); setReveal((s) => ({ ...s, [u.id]: !s[u.id] })); }}>
+                        <td onClick={(e) => { e.stopPropagation(); if (!r) revealFor(u.id); }}>
                           {r ? u.phone : "•••• ••••"}
                         </td>
                         <td>{u.college_name}</td>
-                        <td onClick={(e) => { e.stopPropagation(); setReveal((s) => ({ ...s, [u.id]: !s[u.id] })); }} style={{ fontFamily: "monospace", color: "var(--ma-text-2)" }}>
+                        <td onClick={(e) => { e.stopPropagation(); if (!r) revealFor(u.id); }} style={{ fontFamily: "monospace", color: "var(--ma-text-2)" }}>
                           {r ? (u.razorpay_customer_id ?? "—") : "••••••"}
                         </td>
                         <td style={{ color: "var(--ma-text-2)" }}>{new Date(u.created_at).toLocaleDateString()}</td>
