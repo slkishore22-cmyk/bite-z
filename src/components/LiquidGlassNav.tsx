@@ -131,6 +131,11 @@ export const LiquidGlassNav = ({
     setActiveById(items[nearest].id);
   };
 
+  const handleTabPointerUp = (id: string) => {
+    if (dragging) return;
+    setActiveById(id);
+  };
+
   return (
     <div
       className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-md"
@@ -224,9 +229,18 @@ export const LiquidGlassNav = ({
           const isActive = active === item.id;
           return (
             <button
+              type="button"
               key={item.id}
               ref={(el) => (tabRefs.current[i] = el)}
-              onClick={() => setActiveById(item.id)}
+              onPointerUp={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                handleTabPointerUp(item.id);
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
               className="relative flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 rounded-full outline-none"
               aria-label={item.label}
             >
