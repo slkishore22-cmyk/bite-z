@@ -3,29 +3,41 @@ import { useNavigate } from "react-router-dom";
 import Shell from "../components/Shell";
 import { db } from "../db";
 import { inr, todayISO } from "../format";
+import { supabase } from "@/integrations/supabase/client";
 
 type Spend = { user_id: string; amount: number; product_names: string[] | null; created_at: string; payment_method: string | null };
+type AppUser = { id: string; full_name: string; user_id: string; phone: string; college_name: string; razorpay_customer_id: string | null; created_at: string };
 
 export default function Users() {
   const navigate = useNavigate();
   const [spends, setSpends] = useState<Spend[]>([]);
   const [analyticsToday, setAnalyticsToday] = useState<{ user_id: string | null }[]>([]);
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [reveal, setReveal] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [{ data: sp }, { data: ua }] = await Promise.all([
+      const [{ data: sp }, { data: ua }, usersRes] = await Promise.all([
         db.from("user_spend").select("user_id, amount, product_names, created_at, payment_method"),
         db.from("user_analytics").select("user_id").gte("created_at", todayISO()),
+        supabase.functions.invoke("get-all-users"),
       ]);
       setSpends(sp ?? []);
       setAnalyticsToday(ua ?? []);
+      setUsers(((usersRes.data as { users?: AppUser[] })?.users) ?? []);
       setLoading(false);
     })();
   }, []);
 
   const today = todayISO();
   const month = today.slice(0,7);
+
+  const spendByUser = useMemo(() => {
+    const m = new Map<string, number>();
+    spends.forEach((s) => m.set(s.user_id, (m.get(s.user_id) ?? 0) + Number(s.amount)));
+    return m;
+  }, [spends]);
 
   const rows = useMemo(() => {
     const map = new Map<string, { user_id: string; today: number; mo: number; orders: number; total: number; fav: Record<string, number>; last: string }>();
@@ -60,6 +72,36 @@ export default function Users() {
         <Stat label="Highest spending user today" value={topUserToday ? inr(topUserToday[1]) : "—"} sub={topUserToday ? topUserToday[0].slice(0,8) : ""} />
         <Stat label="Users who ordered today" value={String(totalUsersToday)} />
         <Stat label="Browsed only" value={String(onlyBrowsed)} />
+      </div>
+
+      <div className="ma-card" style={{ padding: 0, marginBottom: 16 }}>
+        <div style={{ padding: "14px 18px", color: "white", fontWeight: 700 }}>All Users</div>
+        {users.length === 0 ? <div className="ma-empty">No users registered yet</div>
+          : <div style={{ overflowX: "auto" }}>
+              <table className="ma-table">
+                <thead><tr><th>Full Name</th><th>User ID</th><th>Phone</th><th>College</th><th>Razorpay ID</th><th>Joined</th><th>Total Spend</th></tr></thead>
+                <tbody>
+                  {users.map((u) => {
+                    const r = reveal[u.id];
+                    return (
+                      <tr key={u.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/master-admin/users/${u.id}`)}>
+                        <td style={{ color: "white" }}>{u.full_name}</td>
+                        <td style={{ fontFamily: "monospace" }}>{u.user_id}</td>
+                        <td onClick={(e) => { e.stopPropagation(); setReveal((s) => ({ ...s, [u.id]: !s[u.id] })); }}>
+                          {r ? u.phone : "•••• ••••"}
+                        </td>
+                        <td>{u.college_name}</td>
+                        <td onClick={(e) => { e.stopPropagation(); setReveal((s) => ({ ...s, [u.id]: !s[u.id] })); }} style={{ fontFamily: "monospace", color: "var(--ma-text-2)" }}>
+                          {r ? (u.razorpay_customer_id ?? "—") : "••••••"}
+                        </td>
+                        <td style={{ color: "var(--ma-text-2)" }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                        <td style={{ color: "#93C5FD" }}>{inr(spendByUser.get(u.id) ?? 0)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>}
       </div>
 
       <div className="ma-card" style={{ padding: 0 }}>

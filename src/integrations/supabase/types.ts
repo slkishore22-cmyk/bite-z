@@ -476,35 +476,26 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          college_name: string | null
           created_at: string
           full_name: string | null
           id: string
           phone: string | null
-          pin_hash: string | null
-          razorpay_customer_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
-          college_name?: string | null
           created_at?: string
           full_name?: string | null
           id: string
           phone?: string | null
-          pin_hash?: string | null
-          razorpay_customer_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
-          college_name?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
-          pin_hash?: string | null
-          razorpay_customer_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -846,6 +837,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      users: {
+        Row: {
+          college_name: string
+          created_at: string
+          full_name: string
+          id: string
+          phone: string
+          pin_hash: string
+          razorpay_customer_id: string | null
+          user_id: string
+        }
+        Insert: {
+          college_name: string
+          created_at?: string
+          full_name: string
+          id?: string
+          phone: string
+          pin_hash: string
+          razorpay_customer_id?: string | null
+          user_id: string
+        }
+        Update: {
+          college_name?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          pin_hash?: string
+          razorpay_customer_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
