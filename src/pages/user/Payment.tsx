@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
-import { createOrder } from "@/lib/sellerOrders";
+import { createOrder, hasSoundPlayed, markSoundPlayed } from "@/lib/sellerOrders";
 import { pinItem } from "@/lib/userPins";
 import { useOrderConfirmation } from "../../utils/useOrderConfirmation";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,7 +56,7 @@ const Payment = () => {
     setPlacing(true);
     const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
     const totalAmount = Math.round(subtotal);
-    const finalize = async () => {
+    const finalize = async (opts: { playSound: boolean } = { playSound: false }) => {
       const order = await createOrder({
         payment: method,
         sellerId: firstCartItem?.canteenId ?? null,
@@ -74,12 +74,17 @@ const Payment = () => {
       });
       clearCart();
       cart.forEach((c) => pinItem(c.itemId));
-      confirm();
+      // STRICT: sound only on successful Online payment, only once per order.
+      if (opts.playSound && !hasSoundPlayed(order.uid)) {
+        markSoundPlayed(order.uid);
+        confirm();
+      }
       navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
     };
     try {
       if (method === "Cash") {
-        await finalize();
+        // Cash on Delivery: NO sound, ever.
+        await finalize({ playSound: false });
         return;
       }
       // Online (UPI / Razorpay)
@@ -111,7 +116,8 @@ const Payment = () => {
         },
         theme: { color: "#2563EB" },
         handler: async () => {
-          await finalize();
+          // Razorpay success callback => Online payment SUCCESS => play once.
+          await finalize({ playSound: true });
         },
         modal: {
           ondismiss: () => setPlacing(false),
