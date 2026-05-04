@@ -172,14 +172,14 @@ const Home = () => {
               On Repeat!
             </h2>
             <div
-              className="flex gap-3 overflow-x-auto no-scrollbar"
+              className="grid gap-3"
               style={{
                 paddingLeft: 24,
                 paddingRight: 24,
                 paddingBottom: 8,
                 marginBottom: 32,
-                scrollSnapType: "x mandatory",
-                WebkitOverflowScrolling: "touch",
+                gridTemplateColumns: "repeat(auto-fit, minmax(152px, 1fr))",
+                maxWidth: 720,
               }}
             >
               {repeats.map((r) => (
