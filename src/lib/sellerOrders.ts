@@ -88,6 +88,7 @@ function nextShortId(): string {
 }
 
 export function getOrders(): Order[] {
+  pruneExpiredCashOrders();
   return read().sort((a, b) => b.createdAt - a.createdAt);
 }
 
@@ -208,4 +209,69 @@ export function subscribeOrders(cb: () => void): () => void {
     window.removeEventListener(EVENT_NAME, onLocal as EventListener);
     window.removeEventListener("storage", onStorage);
   };
+}
+
+// ------------------------------------------------------------------
+// Cash-order expiry: any Pending Cash order older than CASH_ORDER_TTL_MS
+// is deleted (locally + backend). Online orders never expire here.
+// ------------------------------------------------------------------
+export function pruneExpiredCashOrders(): Order[] {
+  if (typeof window === "undefined") return [];
+  const now = Date.now();
+  const all = read();
+  const expired = all.filter(
+    (o) =>
+      o.payment === "Cash" &&
+      o.status === "Pending" &&
+      now - o.createdAt >= CASH_ORDER_TTL_MS,
+  );
+  if (expired.length === 0) return [];
+  const remaining = all.filter((o) => !expired.some((e) => e.uid === o.uid));
+  write(remaining);
+  // Best-effort backend delete; ignore failures (RLS, offline, etc.)
+  expired.forEach((o) => {
+    db.from("user_analytics")
+      .delete()
+      .eq("session_id", o.uid)
+      .eq("event_type", "order")
+      .then(() => undefined, () => undefined);
+  });
+  return expired;
+}
+
+// Returns ms until the next Cash order expires, or null if none pending.
+export function nextCashExpiryDelayMs(): number | null {
+  const now = Date.now();
+  const pending = read().filter(
+    (o) => o.payment === "Cash" && o.status === "Pending",
+  );
+  if (pending.length === 0) return null;
+  const soonest = Math.min(
+    ...pending.map((o) => o.createdAt + CASH_ORDER_TTL_MS - now),
+  );
+  return Math.max(0, soonest);
+}
+
+// Auto-start a global pruning timer in the browser. Re-arms after each run.
+if (typeof window !== "undefined") {
+  const w = window as unknown as { __bitezCashExpiryTimer?: number };
+  const schedule = () => {
+    if (w.__bitezCashExpiryTimer) {
+      window.clearTimeout(w.__bitezCashExpiryTimer);
+    }
+    const delay = nextCashExpiryDelayMs();
+    if (delay == null) {
+      // Re-check periodically in case new orders are added.
+      w.__bitezCashExpiryTimer = window.setTimeout(schedule, 60_000);
+      return;
+    }
+    w.__bitezCashExpiryTimer = window.setTimeout(() => {
+      pruneExpiredCashOrders();
+      schedule();
+    }, Math.min(delay + 250, 2 ** 31 - 1));
+  };
+  // Run once on load + whenever orders change.
+  pruneExpiredCashOrders();
+  schedule();
+  window.addEventListener(EVENT_NAME, schedule);
 }
