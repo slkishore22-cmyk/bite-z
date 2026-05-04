@@ -373,30 +373,30 @@ const RepeatCard = ({
   <div
     className="cb-glass flex flex-col shrink-0"
     style={{
-      width: "min(320px, calc(100% - 28px))",
-      flexBasis: "min(320px, calc(100% - 28px))",
+      width: "min(236px, calc(100% - 44px))",
+      flexBasis: "min(236px, calc(100% - 44px))",
       minWidth: 0,
-      minHeight: 156,
+      minHeight: 118,
       boxSizing: "border-box",
-      padding: 16,
+      padding: 12,
       justifyContent: "center",
       scrollSnapAlign: "start",
       scrollSnapStop: "always",
     }}
   >
-    <div className="relative z-10 flex flex-col" style={{ gap: 12 }}>
-      <div className="flex items-center" style={{ gap: 12 }}>
+    <div className="relative z-10 flex flex-col" style={{ gap: 10 }}>
+      <div className="flex items-center" style={{ gap: 10 }}>
       <div
         className="flex items-center justify-center shrink-0"
         style={{
-          width: 48,
-          height: 48,
+          width: 40,
+          height: 40,
           borderRadius: 999,
           background: "rgba(255,255,255,0.4)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           boxShadow: "inset 0 2px 8px rgba(0,0,0,0.04)",
-          fontSize: 30,
+          fontSize: 24,
           lineHeight: 1,
         }}
       >
@@ -406,7 +406,7 @@ const RepeatCard = ({
         <div className="flex items-center min-w-0" style={{ gap: 8 }}>
           <h3
             style={{
-              fontSize: 18,
+              fontSize: 15,
               fontWeight: 700,
               color: "#1D1D1F",
               lineHeight: 1.2,
@@ -423,9 +423,9 @@ const RepeatCard = ({
             <span
               className="shrink-0"
               style={{
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: 800,
-                padding: "2px 6px",
+                padding: "2px 5px",
                 borderRadius: 999,
                 background: "rgba(255,149,0,0.1)",
                 color: "#BC4800",
@@ -447,8 +447,8 @@ const RepeatCard = ({
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           borderRadius: 999,
-          padding: "2px 6px",
-          gap: 8,
+          padding: "1px 5px",
+          gap: 6,
           boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         }}
       >
@@ -457,9 +457,9 @@ const RepeatCard = ({
           onClick={() => onChange(qty - 1)}
           aria-label="decrease"
           style={{
-            width: 28,
-            height: 28,
-            fontSize: 18,
+            width: 24,
+            height: 24,
+            fontSize: 16,
             fontWeight: 700,
             color: "#6E6E73",
           }}
@@ -468,9 +468,9 @@ const RepeatCard = ({
         </button>
         <span
           style={{
-            minWidth: 14,
+            minWidth: 12,
             textAlign: "center",
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: 800,
             color: "#1D1D1F",
           }}
@@ -482,9 +482,9 @@ const RepeatCard = ({
           onClick={() => onChange(qty + 1)}
           aria-label="increase"
           style={{
-            width: 28,
-            height: 28,
-            fontSize: 18,
+            width: 24,
+            height: 24,
+            fontSize: 16,
             fontWeight: 700,
             color: "#2563EB",
           }}
@@ -499,9 +499,9 @@ const RepeatCard = ({
         style={{
           background: "#2563EB",
           color: "#FFFFFF",
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 700,
-          padding: "8px 12px",
+          padding: "7px 10px",
           borderRadius: 999,
           boxShadow: "0 8px 18px -6px rgba(37,99,235,0.45)",
         }}
