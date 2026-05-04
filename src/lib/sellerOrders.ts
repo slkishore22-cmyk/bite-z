@@ -289,29 +289,40 @@ export function markSoundPlayed(orderUidOrId: string) {
   }
 }
 
-export function pruneExpiredCashOrders(): Order[] {
+/**
+ * Soft-expire stale COD orders: set status to "Expired" instead of deleting.
+ * Online orders never expire. Sales/audit data is preserved.
+ */
+export function expireStaleCashOrders(): Order[] {
   if (typeof window === "undefined") return [];
   const now = Date.now();
   const all = read();
-  const expired = all.filter(
+  const stale = all.filter(
     (o) =>
       o.payment === "Cash" &&
       o.status === "Pending" &&
       now - o.createdAt >= CASH_ORDER_TTL_MS,
   );
-  if (expired.length === 0) return [];
-  const remaining = all.filter((o) => !expired.some((e) => e.uid === o.uid));
-  write(remaining);
-  // Best-effort backend delete; ignore failures (RLS, offline, etc.)
-  expired.forEach((o) => {
+  if (stale.length === 0) return [];
+  const staleIds = new Set(stale.map((o) => o.uid));
+  const next = all.map((o) =>
+    staleIds.has(o.uid) ? { ...o, status: "Expired" as const } : o,
+  );
+  write(next);
+  // Best-effort backend update — preserve the row, only flip status.
+  stale.forEach((o) => {
+    const updated = { ...o, status: "Expired" as const };
     db.from("user_analytics")
-      .delete()
+      .update({ metadata: { ...updated, sellerId: o.items.find((i) => i.canteenId)?.canteenId ?? null } })
       .eq("session_id", o.uid)
       .eq("event_type", "order")
       .then(() => undefined, () => undefined);
   });
-  return expired;
+  return stale;
 }
+
+/** @deprecated kept for backwards compatibility — now soft-expires. */
+export const pruneExpiredCashOrders = expireStaleCashOrders;
 
 // Returns ms until the next Cash order expires, or null if none pending.
 export function nextCashExpiryDelayMs(): number | null {
@@ -339,13 +350,13 @@ if (typeof window !== "undefined") {
       w.__bitezCashExpiryTimer = window.setTimeout(schedule, 60_000);
       return;
     }
-    w.__bitezCashExpiryTimer = window.setTimeout(() => {
-      pruneExpiredCashOrders();
+  w.__bitezCashExpiryTimer = window.setTimeout(() => {
+      expireStaleCashOrders();
       schedule();
     }, Math.min(delay + 250, 2 ** 31 - 1));
   };
   // Run once on load + whenever orders change.
-  pruneExpiredCashOrders();
+  expireStaleCashOrders();
   schedule();
   window.addEventListener(EVENT_NAME, schedule);
 }
