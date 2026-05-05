@@ -76,6 +76,18 @@ export function clearCart(canteenId?: string) {
   write(read().filter((i) => (i.canteenId ?? UNKNOWN_CANTEEN_KEY) !== (canteenId ?? UNKNOWN_CANTEEN_KEY)));
 }
 
+/**
+ * Remove cart items whose canteen no longer exists. Call this after the list
+ * of registered canteens is refreshed from the backend so orphaned lines
+ * (from deleted/suspended sellers) disappear from the cart automatically.
+ */
+export function pruneCartByCanteens(validCanteenIds: string[]) {
+  const valid = new Set(validCanteenIds);
+  const items = read();
+  const filtered = items.filter((i) => i.canteenId && valid.has(i.canteenId));
+  if (filtered.length !== items.length) write(filtered);
+}
+
 export function subscribeCart(cb: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   const onLocal = () => cb();
