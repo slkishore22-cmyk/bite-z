@@ -96,12 +96,14 @@ const Home = () => {
       .slice(0, 8);
   }, [orders, canteens]);
 
-  const qtyOf = (id: string) => cart.find((c) => c.itemId === id)?.qty ?? 0;
+  const cartCanteenKey = (canteenId?: string) => canteenId ?? "__unknown__";
+  const qtyOf = (itemId: string, canteenId?: string) =>
+    cart.find((c) => c.itemId === itemId && cartCanteenKey(c.canteenId) === cartCanteenKey(canteenId))?.qty ?? 0;
   const canteenForRepeat = (r: Repeat) => {
     return { canteenId: r.canteenId, canteenIcon: r.tag ?? undefined, canteenName: r.canteenName };
   };
   const setCount = (r: Repeat, n: number) => {
-    const cur = qtyOf(r.itemId);
+    const cur = qtyOf(r.itemId, r.canteenId);
     if (cur === 0 && n > 0) {
       const c = canteenForRepeat(r);
       addToCart(
@@ -109,18 +111,18 @@ const Home = () => {
         n,
       );
     } else {
-      setCartQty(r.itemId, Math.max(0, n));
+      setCartQty(r.itemId, Math.max(0, n), r.canteenId);
     }
   };
   const orderRepeatNow = (r: Repeat) => {
-    if (qtyOf(r.itemId) === 0) {
+    if (qtyOf(r.itemId, r.canteenId) === 0) {
       const c = canteenForRepeat(r);
       addToCart(
         { itemId: r.itemId, name: r.name, price: r.price, icon: r.emoji, category: r.category, ...c },
         1,
       );
     }
-    navigate("/app/payment");
+    navigate(`/app/payment?canteenId=${encodeURIComponent(cartCanteenKey(r.canteenId))}`);
   };
 
   return (
@@ -200,9 +202,9 @@ const Home = () => {
               >
                 {repeats.map((r) => (
                   <RepeatCard
-                    key={r.itemId}
+                    key={`${cartCanteenKey(r.canteenId)}:${r.itemId}`}
                     item={r}
-                    qty={qtyOf(r.itemId) || 1}
+                    qty={qtyOf(r.itemId, r.canteenId) || 1}
                     onChange={(n) => setCount(r, n)}
                     onOrder={() => orderRepeatNow(r)}
                   />
