@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { queryWithTimeout } from "@/utils/networkStatus";
 
 export type SellerProfile = {
   id: string;
@@ -105,13 +106,19 @@ function fromSeller(row: any): SellerProfile {
 }
 
 export async function getRegisteredCanteensFromBackend(): Promise<SellerProfile[]> {
-  const { data, error } = await db
-    .from("sellers")
-    .select("id, canteen_name, canteen_location, canteen_type, phone, bank_account_number, bank_ifsc, upi_id, is_active, is_suspended")
-    .eq("is_active", true)
-    .eq("is_suspended", false)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  const { data, error } = await queryWithTimeout(
+    db
+      .from("sellers")
+      .select("id, canteen_name, canteen_location, canteen_type, phone, bank_account_number, bank_ifsc, upi_id, is_active, is_suspended")
+      .eq("is_active", true)
+      .eq("is_suspended", false)
+      .order("created_at", { ascending: false }),
+    8000,
+  );
+  if (error) {
+    // Slow / offline — keep showing whatever we have locally instead of crashing.
+    return getRegisteredCanteens();
+  }
   const rows = (data ?? []).map(fromSeller);
   writeCanteens(rows);
   return rows;
