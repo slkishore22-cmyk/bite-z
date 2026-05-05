@@ -40,12 +40,9 @@ const Cart = () => {
 
   useEffect(() => subscribeCart(() => setItems(getCart())), []);
 
-  const update = (id: string, delta: number) =>
-    setCartQty(id, (items.find((i) => i.itemId === id)?.qty ?? 0) + delta);
-  const remove = (id: string) => removeCartItem(id);
-
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const total = subtotal;
+  const update = (item: CartItem, delta: number) =>
+    setCartQty(item.itemId, item.qty + delta, item.canteenId);
+  const remove = (item: CartItem) => removeCartItem(item.itemId, item.canteenId);
 
   // Group cart items by canteen (seller). Each canteen is a different seller
   // and must be presented as its own section.
@@ -218,7 +215,7 @@ const Cart = () => {
                             {it.name}
                           </h3>
                           <button
-                            onClick={() => remove(it.itemId)}
+                            onClick={() => remove(it)}
                             className="active:scale-90 transition-transform"
                             style={{ color: "#9CA3AF" }}
                           >
@@ -249,7 +246,7 @@ const Cart = () => {
                             }}
                           >
                             <button
-                              onClick={() => update(it.itemId, -1)}
+                              onClick={() => update(it, -1)}
                               className="active:scale-90 transition-transform font-bold"
                               style={{ color: "#6E6E73", fontSize: 14, width: 16 }}
                             >
@@ -262,7 +259,7 @@ const Cart = () => {
                               {it.qty}
                             </span>
                             <button
-                              onClick={() => update(it.itemId, 1)}
+                              onClick={() => update(it, 1)}
                               className="active:scale-90 transition-transform font-bold"
                               style={{ color: "#6E6E73", fontSize: 14, width: 16 }}
                             >
