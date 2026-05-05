@@ -60,34 +60,52 @@ const Payment = () => {
       navigate("/app/cart");
       return;
     }
-    const firstCartItem = cart[0];
     setPlacing(true);
     const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
     const totalAmount = Math.round(subtotal);
+
+    // Split cart into one order per canteen (seller). Each canteen is a
+    // different seller and must receive its own order.
+    const groupsMap = new Map<string, typeof cart>();
+    for (const c of cart) {
+      const key = c.canteenId ?? "__unknown__";
+      const arr = groupsMap.get(key) ?? [];
+      arr.push(c);
+      groupsMap.set(key, arr);
+    }
+    const groups = Array.from(groupsMap.values());
+    const firstCartItem = cart[0];
+
     const finalize = async (paymentStatus: "PENDING" | "SUCCESS" | "FAILED" = "PENDING") => {
-      const order = await createOrder({
-        payment: method,
-        paymentStatus,
-        isSoundPlayed: false,
-        sellerId: firstCartItem?.canteenId ?? null,
-        sellerName: firstCartItem?.canteenName ?? null,
-        items: cart.map((c) => ({
-          itemId: c.itemId,
-          name: c.name,
-          icon: c.icon,
-          category: c.category,
-          price: c.price,
-          qty: c.qty,
-          canteenId: c.canteenId,
-          canteenIcon: c.canteenIcon,
-        })),
-      });
+      const orders = [];
+      for (const groupItems of groups) {
+        const head = groupItems[0];
+        const order = await createOrder({
+          payment: method,
+          paymentStatus,
+          isSoundPlayed: false,
+          sellerId: head?.canteenId ?? null,
+          sellerName: head?.canteenName ?? null,
+          items: groupItems.map((c) => ({
+            itemId: c.itemId,
+            name: c.name,
+            icon: c.icon,
+            category: c.category,
+            price: c.price,
+            qty: c.qty,
+            canteenId: c.canteenId,
+            canteenIcon: c.canteenIcon,
+          })),
+        });
+        orders.push(order);
+      }
       clearCart();
       cart.forEach((c) => pinItem(c.itemId));
+      const firstOrder = orders[0];
       if (method === "Online" && paymentStatus === "SUCCESS") {
-        playOnlineSuccessOnce(order.uid);
+        if (firstOrder) playOnlineSuccessOnce(firstOrder.uid);
       }
-      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
+      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${firstOrder?.id ?? ""}`);
     };
     try {
       if (method === "Cash") {

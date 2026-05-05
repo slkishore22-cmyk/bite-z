@@ -36,7 +36,7 @@ const glassHighlight: React.CSSProperties = {
 const Cart = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<CartItem[]>(() => getCart());
-  const [expanded, setExpanded] = useState(true);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   useEffect(() => subscribeCart(() => setItems(getCart())), []);
 
@@ -46,9 +46,30 @@ const Cart = () => {
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const total = subtotal;
-  const totalQty = items.reduce((s, i) => s + i.qty, 0);
-  const canteenName = items.find((i) => i.canteenName)?.canteenName ?? "Your Order";
-  const canteenIcon = items.find((i) => i.canteenIcon)?.canteenIcon ?? "🍽️";
+
+  // Group cart items by canteen (seller). Each canteen is a different seller
+  // and must be presented as its own section.
+  const groups = (() => {
+    const map = new Map<
+      string,
+      { canteenId: string; canteenName: string; canteenIcon: string; items: CartItem[] }
+    >();
+    for (const it of items) {
+      const key = it.canteenId ?? "__unknown__";
+      const existing = map.get(key);
+      if (existing) {
+        existing.items.push(it);
+      } else {
+        map.set(key, {
+          canteenId: key,
+          canteenName: it.canteenName ?? "Your Order",
+          canteenIcon: it.canteenIcon ?? "🍽️",
+          items: [it],
+        });
+      }
+    }
+    return Array.from(map.values());
+  })();
 
   return (
     <UserLayout>
@@ -105,12 +126,18 @@ const Cart = () => {
             </section>
           ) : (
             <>
-              {/* Canteen group */}
-              <section style={{ ...liquidGlass }}>
+              {groups.map((group) => {
+                const groupQty = group.items.reduce((s, i) => s + i.qty, 0);
+                const groupSubtotal = group.items.reduce((s, i) => s + i.price * i.qty, 0);
+                const expanded = !collapsed[group.canteenId];
+                return (
+              <section key={group.canteenId} style={{ ...liquidGlass }}>
                 <span style={glassHighlight} aria-hidden />
                 {/* Header */}
                 <button
-                  onClick={() => setExpanded((v) => !v)}
+                  onClick={() =>
+                    setCollapsed((c) => ({ ...c, [group.canteenId]: !c[group.canteenId] }))
+                  }
                   className="w-full flex items-center justify-between relative z-10 active:scale-[0.99] transition-transform"
                   style={{ padding: "16px 20px" }}
                 >
@@ -125,17 +152,17 @@ const Cart = () => {
                         fontSize: 22,
                       }}
                     >
-                      <span>{canteenIcon}</span>
+                      <span>{group.canteenIcon}</span>
                     </div>
                     <div className="text-left">
                       <h2 className="font-bold" style={{ fontSize: 15, color: "#1D1D1F" }}>
-                        {canteenName}
+                        {group.canteenName}
                       </h2>
                       <p
                         className="font-medium"
                         style={{ fontSize: 12, color: "#6E6E73", marginTop: 1 }}
                       >
-                        {totalQty} Item{totalQty > 1 ? "s" : ""}
+                        {groupQty} Item{groupQty > 1 ? "s" : ""} · ₹{groupSubtotal.toFixed(0)}
                       </p>
                     </div>
                   </div>
@@ -158,7 +185,7 @@ const Cart = () => {
                   className="relative z-10 space-y-3"
                   style={{ padding: 12, paddingTop: 4 }}
                 >
-                  {items.map((it) => (
+                  {group.items.map((it) => (
                     <div
                       key={it.itemId}
                       className="flex gap-3 items-center transition-all duration-[400ms]"
@@ -249,9 +276,10 @@ const Cart = () => {
                 </div>
                 )}
               </section>
+                );
+              })}
 
               {/* Price Summary */}
-              {expanded && (
               <section className="space-y-3" style={{ paddingTop: 8, paddingLeft: 4, paddingRight: 4 }}>
                 <Row label="Subtotal" value={`₹${subtotal.toFixed(0)}`} />
                 <div style={{ height: 1, background: "rgba(0,0,0,0.08)", margin: "12px 0" }} />
@@ -264,7 +292,6 @@ const Cart = () => {
                   </span>
                 </div>
               </section>
-              )}
             </>
           )}
         </main>
