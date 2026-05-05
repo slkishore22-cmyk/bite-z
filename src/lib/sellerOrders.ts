@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { queryWithTimeout } from "@/utils/networkStatus";
 
 import type { SellerCategory } from "./sellerInventory";
 
@@ -135,8 +136,11 @@ export async function loadOrdersFromBackend(sellerId?: string | null, userId = g
   if (sellerId) query = query.eq("metadata->>sellerId", sellerId);
   else if (userId && String(userId).includes("-")) query = query.eq("user_id", userId);
   else if (userId) query = query.eq("metadata->>appUserId", userId);
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
+  const { data, error } = await queryWithTimeout(query, 8000);
+  if (error) {
+    // Network slow or offline — return locally cached orders instead of throwing.
+    return getOrders();
+  }
   const orders = (data ?? []).map(fromAnalytics).filter(Boolean) as Order[];
   write(orders);
   return orders;
