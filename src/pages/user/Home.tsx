@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import { CanteenListSkeleton } from "@/components/user/Skeletons";
 import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
-import { addToCart, getCart, setCartQty, subscribeCart } from "@/lib/userCart";
+import { addToCart, getCart, pruneCartByCanteens, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
 import { getRegisteredCanteens, getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
 import { getUserName } from "@/utils/sessionManager";
@@ -50,7 +50,11 @@ const Home = () => {
   useEffect(() => {
     const refresh = () =>
       getRegisteredCanteensFromBackend()
-        .then((rows) => { setCanteens(rows); setCanteensLoading(false); })
+        .then((rows) => {
+          setCanteens(rows);
+          setCanteensLoading(false);
+          pruneCartByCanteens(rows.map((r) => r.id));
+        })
         .catch(() => { setCanteens(getRegisteredCanteens()); setCanteensLoading(false); });
     refresh();
     return subscribeProfile(refresh);
