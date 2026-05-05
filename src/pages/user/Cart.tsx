@@ -270,37 +270,48 @@ const Cart = () => {
                       </div>
                     </div>
                   ))}
+                  <button
+                    onClick={() => navigate(`/app/payment?canteenId=${encodeURIComponent(group.canteenId)}`)}
+                    className="w-full flex items-center justify-between relative overflow-hidden active:scale-[0.98] transition-all duration-[400ms]"
+                    style={{
+                      height: 52,
+                      borderRadius: 18,
+                      padding: "0 20px",
+                      color: "#FFFFFF",
+                      background: "linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)",
+                      boxShadow: "0 10px 30px rgba(37,99,235,0.28)",
+                    }}
+                  >
+                    <span className="font-bold relative z-20" style={{ fontSize: 15 }}>
+                      Pay {group.canteenName}
+                    </span>
+                    <div className="flex items-center gap-2 relative z-20">
+                      <span className="font-bold" style={{ fontSize: 15 }}>
+                        ₹{groupSubtotal.toFixed(0)}
+                      </span>
+                      <span className="material-symbols-outlined" style={{ fontSize: 21 }}>
+                        arrow_forward
+                      </span>
+                    </div>
+                  </button>
                 </div>
                 )}
               </section>
                 );
               })}
 
-              {/* Price Summary */}
-              <section className="space-y-3" style={{ paddingTop: 8, paddingLeft: 4, paddingRight: 4 }}>
-                <Row label="Subtotal" value={`₹${subtotal.toFixed(0)}`} />
-                <div style={{ height: 1, background: "rgba(0,0,0,0.08)", margin: "12px 0" }} />
-                <div className="flex justify-between items-center">
-                  <span className="font-bold" style={{ color: "#1D1D1F", fontSize: 15 }}>
-                    Total Amount
-                  </span>
-                  <span className="font-extrabold" style={{ color: "#1D1D1F", fontSize: 18 }}>
-                    ₹{total.toFixed(0)}
-                  </span>
-                </div>
-              </section>
             </>
           )}
         </main>
 
         {/* Sticky Pay Now */}
-        {items.length > 0 && (
+        {groups.length === 1 && (
           <div
             className="fixed left-1/2 -translate-x-1/2 z-30 px-6 w-full max-w-md"
             style={{ bottom: 96 }}
           >
             <button
-              onClick={() => navigate("/app/payment")}
+              onClick={() => navigate(`/app/payment?canteenId=${encodeURIComponent(groups[0].canteenId)}`)}
               className="w-full flex items-center justify-between relative overflow-hidden active:scale-[0.98] transition-all duration-[400ms]"
               style={{
                 height: 56,
@@ -331,7 +342,7 @@ const Cart = () => {
               </span>
               <div className="flex items-center gap-2 relative z-20">
                 <span className="font-bold" style={{ fontSize: 16 }}>
-                  ₹{total.toFixed(0)}
+                  ₹{groups[0].items.reduce((s, i) => s + i.price * i.qty, 0).toFixed(0)}
                 </span>
                 <span
                   className="material-symbols-outlined"
