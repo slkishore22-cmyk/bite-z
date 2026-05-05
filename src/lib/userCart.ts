@@ -18,6 +18,11 @@ export type CartItem = {
 
 const STORAGE_KEY = "bitez:user:cart";
 const EVENT_NAME = "bitez:user:cart:change";
+const UNKNOWN_CANTEEN_KEY = "__unknown__";
+
+function sameCartLine(item: Pick<CartItem, "itemId" | "canteenId">, itemId: string, canteenId?: string) {
+  return item.itemId === itemId && (item.canteenId ?? UNKNOWN_CANTEEN_KEY) === (canteenId ?? UNKNOWN_CANTEEN_KEY);
+}
 
 function read(): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -43,7 +48,7 @@ export function getCart(): CartItem[] {
 
 export function addToCart(item: Omit<CartItem, "qty">, qty = 1) {
   const items = read();
-  const existing = items.find((i) => i.itemId === item.itemId);
+  const existing = items.find((i) => sameCartLine(i, item.itemId, item.canteenId));
   if (existing) {
     existing.qty += qty;
   } else {
@@ -52,19 +57,23 @@ export function addToCart(item: Omit<CartItem, "qty">, qty = 1) {
   write(items.filter((i) => i.qty > 0));
 }
 
-export function setCartQty(itemId: string, qty: number) {
+export function setCartQty(itemId: string, qty: number, canteenId?: string) {
   const items = read()
-    .map((i) => (i.itemId === itemId ? { ...i, qty: Math.max(0, qty) } : i))
+    .map((i) => (sameCartLine(i, itemId, canteenId) ? { ...i, qty: Math.max(0, qty) } : i))
     .filter((i) => i.qty > 0);
   write(items);
 }
 
-export function removeCartItem(itemId: string) {
-  write(read().filter((i) => i.itemId !== itemId));
+export function removeCartItem(itemId: string, canteenId?: string) {
+  write(read().filter((i) => !sameCartLine(i, itemId, canteenId)));
 }
 
-export function clearCart() {
-  write([]);
+export function clearCart(canteenId?: string) {
+  if (canteenId === undefined) {
+    write([]);
+    return;
+  }
+  write(read().filter((i) => (i.canteenId ?? UNKNOWN_CANTEEN_KEY) !== (canteenId ?? UNKNOWN_CANTEEN_KEY)));
 }
 
 export function subscribeCart(cb: () => void): () => void {
