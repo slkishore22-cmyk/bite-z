@@ -359,11 +359,4 @@ const Cart = () => {
   );
 };
 
-const Row = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between items-center">
-    <span style={{ color: "#6E6E73", fontSize: 13, fontWeight: 500 }}>{label}</span>
-    <span style={{ color: "#1D1D1F", fontSize: 13, fontWeight: 600 }}>{value}</span>
-  </div>
-);
-
 export default Cart;
