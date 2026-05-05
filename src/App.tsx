@@ -47,6 +47,7 @@ import { preloadInventoryForSellers } from "@/lib/sellerInventory";
 import { loadOrdersFromBackend } from "@/lib/sellerOrders";
 import { getRegisteredCanteensFromBackend } from "@/lib/sellerProfile";
 import { getUserSession } from "@/utils/sessionManager";
+import { pruneCartByCanteens } from "@/lib/userCart";
 
 // Aggressive caching tuned for low-bandwidth campus networks.
 // Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
@@ -71,7 +72,12 @@ const AppDataPreloader = () => {
   useEffect(() => {
     let alive = true;
     getRegisteredCanteensFromBackend()
-      .then((canteens) => alive && preloadInventoryForSellers(canteens.map((c) => c.id)))
+      .then((canteens) => {
+        if (!alive) return;
+        const ids = canteens.map((c) => c.id);
+        pruneCartByCanteens(ids);
+        preloadInventoryForSellers(ids);
+      })
       .catch(() => null);
     const userId = getUserSession()?.id;
     if (userId) loadOrdersFromBackend(null, userId).catch(() => null);
