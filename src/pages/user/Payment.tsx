@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder, hasSoundPlayed, markSoundPlayed } from "@/lib/sellerOrders";
 import { pinItem } from "@/lib/userPins";
@@ -43,7 +43,9 @@ const HERO_IMG =
 
 const Payment = () => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const [placing, setPlacing] = useState(false);
+  const selectedCanteenId = params.get("canteenId");
 
   const playOnlineSuccessOnce = useCallback((orderUid: string) => {
     if (hasSoundPlayed(orderUid)) return;
@@ -56,56 +58,46 @@ const Payment = () => {
 
   const placeOrder = async (method: "Online" | "Cash") => {
     const cart = getCart();
-    if (cart.length === 0) {
+    const canteenKeys = new Set(cart.map((c) => c.canteenId ?? "__unknown__"));
+    const activeCart = selectedCanteenId
+      ? cart.filter((c) => (c.canteenId ?? "__unknown__") === selectedCanteenId)
+      : canteenKeys.size <= 1
+      ? cart
+      : [];
+    if (activeCart.length === 0) {
       navigate("/app/cart");
       return;
     }
     setPlacing(true);
-    const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const subtotal = activeCart.reduce((s, c) => s + c.price * c.qty, 0);
     const totalAmount = Math.round(subtotal);
 
-    // Split cart into one order per canteen (seller). Each canteen is a
-    // different seller and must receive its own order.
-    const groupsMap = new Map<string, typeof cart>();
-    for (const c of cart) {
-      const key = c.canteenId ?? "__unknown__";
-      const arr = groupsMap.get(key) ?? [];
-      arr.push(c);
-      groupsMap.set(key, arr);
-    }
-    const groups = Array.from(groupsMap.values());
-    const firstCartItem = cart[0];
+    const firstCartItem = activeCart[0];
 
     const finalize = async (paymentStatus: "PENDING" | "SUCCESS" | "FAILED" = "PENDING") => {
-      const orders = [];
-      for (const groupItems of groups) {
-        const head = groupItems[0];
-        const order = await createOrder({
-          payment: method,
-          paymentStatus,
-          isSoundPlayed: false,
-          sellerId: head?.canteenId ?? null,
-          sellerName: head?.canteenName ?? null,
-          items: groupItems.map((c) => ({
-            itemId: c.itemId,
-            name: c.name,
-            icon: c.icon,
-            category: c.category,
-            price: c.price,
-            qty: c.qty,
-            canteenId: c.canteenId,
-            canteenIcon: c.canteenIcon,
-          })),
-        });
-        orders.push(order);
-      }
-      clearCart();
-      cart.forEach((c) => pinItem(c.itemId));
-      const firstOrder = orders[0];
+      const order = await createOrder({
+        payment: method,
+        paymentStatus,
+        isSoundPlayed: false,
+        sellerId: firstCartItem?.canteenId ?? null,
+        sellerName: firstCartItem?.canteenName ?? null,
+        items: activeCart.map((c) => ({
+          itemId: c.itemId,
+          name: c.name,
+          icon: c.icon,
+          category: c.category,
+          price: c.price,
+          qty: c.qty,
+          canteenId: c.canteenId,
+          canteenIcon: c.canteenIcon,
+        })),
+      });
+      clearCart(firstCartItem?.canteenId ?? "__unknown__");
+      activeCart.forEach((c) => pinItem(c.itemId));
       if (method === "Online" && paymentStatus === "SUCCESS") {
-        if (firstOrder) playOnlineSuccessOnce(firstOrder.uid);
+        playOnlineSuccessOnce(order.uid);
       }
-      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${firstOrder?.id ?? ""}`);
+      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
     };
     try {
       if (method === "Cash") {
