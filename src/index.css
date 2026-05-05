@@ -3,6 +3,36 @@ html {
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
+
+/* Perf: kill iOS 300ms tap delay on interactive elements globally. */
+button, a, [role="button"], [role="link"], [data-tappable="true"] {
+  touch-action: manipulation;
+}
+
+/* Optional keep-alive tab containers (CSS visibility toggle). */
+.tab-content {
+  transition: opacity 160ms ease;
+}
+.tab-content[data-active="false"] {
+  opacity: 0;
+  pointer-events: none;
+  /* Keep mounted but visually hidden + non-interactive. */
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+.tab-content[data-active="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Reduce scroll jank during tab transitions. */
+.tab-scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 html, body, #root {
   width: 100%;
   height: 100%;
