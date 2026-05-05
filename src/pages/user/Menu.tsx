@@ -81,7 +81,9 @@ const Menu = () => {
     [],
   );
 
-  const qtyOf = (itemId: string) => cart.find((c) => c.itemId === itemId)?.qty ?? 0;
+  const currentCanteenId = id ?? "__unknown__";
+  const qtyOf = (itemId: string) =>
+    cart.find((c) => c.itemId === itemId && (c.canteenId ?? "__unknown__") === currentCanteenId)?.qty ?? 0;
 
   const handleAdd = (it: SellerInventoryItem, n: number) => {
     const current = qtyOf(it.id);
@@ -96,7 +98,7 @@ const Menu = () => {
       );
     } else {
       if (n > current) pinItem(it.id);
-      setCartQty(it.id, n);
+      setCartQty(it.id, n, it.sellerId ?? id);
     }
   };
 
@@ -121,10 +123,11 @@ const Menu = () => {
   }, [inventory, active, query, pinned, favorites]);
 
   const { totalItems, totalPrice } = useMemo(() => {
-    const totalItems = cart.reduce((s, i) => s + i.qty, 0);
-    const totalPrice = cart.reduce((s, i) => s + i.qty * i.price, 0);
+    const currentCanteenItems = cart.filter((i) => (i.canteenId ?? "__unknown__") === currentCanteenId);
+    const totalItems = currentCanteenItems.reduce((s, i) => s + i.qty, 0);
+    const totalPrice = currentCanteenItems.reduce((s, i) => s + i.qty * i.price, 0);
     return { totalItems, totalPrice };
-  }, [cart]);
+  }, [cart, currentCanteenId]);
 
   return (
     <UserLayout>
@@ -340,7 +343,7 @@ const Menu = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/app/payment")}
+                onClick={() => navigate(`/app/payment?canteenId=${encodeURIComponent(currentCanteenId)}`)}
                 style={{
                   background: "linear-gradient(135deg, #2563eb, #3b82f6)",
                   color: "#FFFFFF",
