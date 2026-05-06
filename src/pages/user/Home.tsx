@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import { CanteenListSkeleton } from "@/components/user/Skeletons";
+import OfflineFallback from "@/components/OfflineFallback";
 import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, pruneCartByCanteens, setCartQty, subscribeCart } from "@/lib/userCart";
 import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
