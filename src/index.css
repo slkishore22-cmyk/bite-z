@@ -44,10 +44,14 @@ html, body, #root {
   overflow-x: hidden;
 }
 #root {
-  /* Lock the app shell to the dynamic viewport so the bottom nav and top
-     header never get pushed out when the on-screen keyboard or browser
-     chrome resizes the visual viewport. */
-  min-height: 100dvh;
+  /* Use VisualViewport-driven --app-vh (set in main.tsx) as the most
+     reliable mobile shell height. iOS Safari does NOT update 100dvh while
+     the on-screen keyboard is open, which causes the bottom nav to drift
+     above the keyboard or the header to scroll off. --app-vh tracks the
+     visualViewport.height in real time, so the shell stays pinned. */
+  min-height: 100vh;            /* baseline for old browsers */
+  min-height: 100dvh;            /* modern fallback */
+  min-height: var(--app-vh, 100dvh);
   isolation: isolate;
 }
 /* Native-feel momentum scroll on every scrollable region. */
@@ -57,6 +61,10 @@ main,
 .scrollable {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+}
+/* Body is the primary scroll surface for user pages — give it momentum too. */
+body {
+  -webkit-overflow-scrolling: touch;
 }
 * {
   -webkit-user-select: none;

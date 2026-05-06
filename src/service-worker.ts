@@ -15,22 +15,85 @@ self.skipWaiting();
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
+/* ---------------- App-shell warm cache ----------------
+ * On install, prime the cache with the root document and key icons so the
+ * very first cold launch after install paints the shell instantly with no
+ * white flash, even on a slow / lossy campus network.
+ */
+const APP_SHELL_CACHE = "bitez-shell-v1";
+const APP_SHELL_URLS = [
+  "/",
+  "/app/home",
+  "/manifest.webmanifest",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png",
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const cache = await caches.open(APP_SHELL_CACHE);
+        await Promise.all(
+          APP_SHELL_URLS.map((u) =>
+            cache.add(new Request(u, { cache: "reload" })).catch(() => null),
+          ),
+        );
+      } catch {
+        /* non-fatal — runtime caching will still work */
+      }
+    })(),
+  );
+});
+
 /* ---------------- Runtime caching ---------------- */
 
-// HTML navigations — network first, cached fallback when offline.
+// HTML navigations — network first with a short timeout, then fall back to
+// the warm app-shell cache so cold launches paint instantly even when the
+// network is slow or offline. This eliminates the launch white flash.
 registerRoute(
   new NavigationRoute(
     new NetworkFirst({
       cacheName: "bitez-html",
-      networkTimeoutSeconds: 3,
+      networkTimeoutSeconds: 2,
       plugins: [
         new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 }),
+        {
+          // If the network and runtime cache both miss, fall back to the
+          // warm app-shell copy of "/" so the user always sees the shell.
+          handlerDidError: async () => {
+            const shell = await caches.open(APP_SHELL_CACHE);
+            return (
+              (await shell.match("/app/home")) ||
+              (await shell.match("/")) ||
+              Response.error()
+            );
+          },
+        },
       ],
     }),
     {
       denylist: [/^\/~oauth/, /^\/functions\//, /^\/auth\//, /^\/sw\.js$/],
     },
   ),
+);
+
+// Hashed build assets (JS/CSS/fonts emitted by Vite under /assets/) are
+// content-hashed and immutable — serve them cache-first for instant launches.
+registerRoute(
+  ({ url, request }) =>
+    url.pathname.startsWith("/assets/") &&
+    (request.destination === "script" ||
+      request.destination === "style" ||
+      request.destination === "font"),
+  new CacheFirst({
+    cacheName: "bitez-static",
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 }),
+    ],
+  }),
 );
 
 // Google fonts CSS
