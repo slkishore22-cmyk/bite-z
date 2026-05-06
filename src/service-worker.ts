@@ -28,6 +28,7 @@ const APP_SHELL_URLS = [
   "/icon-192.png",
   "/icon-512.png",
   "/apple-touch-icon.png",
+  "/offline.html",
 ];
 
 self.addEventListener("install", (event) => {
@@ -60,13 +61,22 @@ registerRoute(
       plugins: [
         new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 }),
         {
-          // If the network and runtime cache both miss, fall back to the
-          // warm app-shell copy of "/" so the user always sees the shell.
-          handlerDidError: async () => {
+          // Navigation fallback chain: try the last-good cached copy of the
+          // requested URL, then the warm app-shell (/, /app/home), then the
+          // dedicated friendly offline page so the user NEVER sees a blank
+          // screen when navigation fails.
+          handlerDidError: async ({ request }) => {
+            const html = await caches.open("bitez-html");
+            const lastGood =
+              (await html.match(request, { ignoreSearch: true })) ||
+              (await html.match("/app/home")) ||
+              (await html.match("/"));
+            if (lastGood) return lastGood;
             const shell = await caches.open(APP_SHELL_CACHE);
             return (
               (await shell.match("/app/home")) ||
               (await shell.match("/")) ||
+              (await shell.match("/offline.html")) ||
               Response.error()
             );
           },
