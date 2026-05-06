@@ -132,6 +132,9 @@ const Home = () => {
 
   return (
     <UserLayout>
+      {/* Friendly offline overlay shown only when we have nothing cached
+          to render — prevents the blank-screen state on cold offline launch. */}
+      <OfflineFallback show={canteens.length === 0 && !canteensLoading} />
       <div
         className="min-h-screen antialiased"
         style={{
