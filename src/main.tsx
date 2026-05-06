@@ -11,3 +11,26 @@ installGlobalTapHaptics();
 
 // Register the production service worker (no-op in Lovable preview / iframes).
 registerServiceWorker();
+
+/* ---------- VisualViewport-driven app height ----------
+ * iOS Safari doesn't shrink 100dvh when the keyboard opens, so the bottom
+ * nav can end up under the keyboard. We expose --app-vh that always equals
+ * the *visible* viewport, computed from window.visualViewport when present
+ * and falling back to window.innerHeight. This is the most reliable strategy
+ * across iOS Safari, Chrome Android, and standalone PWAs.
+ */
+(function installAppViewport() {
+  if (typeof window === "undefined") return;
+  const vv = window.visualViewport;
+  const apply = () => {
+    const h = vv?.height ?? window.innerHeight;
+    document.documentElement.style.setProperty("--app-vh", `${h}px`);
+  };
+  apply();
+  if (vv) {
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+  }
+  window.addEventListener("resize", apply);
+  window.addEventListener("orientationchange", apply);
+})();
