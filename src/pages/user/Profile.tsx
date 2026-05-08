@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import { getUserSession } from "@/utils/sessionManager";
 import { logoutUser } from "@/lib/userAuth";
+import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        <PushNotificationSettings />
         <button
           onClick={handleLogout}
           className="mt-6 w-full font-semibold transition-all duration-200 active:scale-[0.98]"
