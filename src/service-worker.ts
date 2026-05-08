@@ -150,47 +150,7 @@ registerRoute(
   }),
 );
 
-/* ---------------- Push notifications ---------------- */
-
-self.addEventListener("push", (event) => {
-  let data: { title?: string; body?: string; url?: string; tag?: string } = {};
-  try {
-    if (event.data) data = event.data.json();
-  } catch {
-    if (event.data) data = { body: event.data.text() };
-  }
-
-  const title = data.title ?? "Bitez";
-  const options: NotificationOptions = {
-    body: data.body ?? "",
-    icon: "/icon-192.png",
-    badge: "/icon-192.png",
-    tag: data.tag,
-    data: { url: data.url ?? "/app/home" },
-    // @ts-ignore
-    vibrate: [40, 30, 40],
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-  const target = (event.notification.data as any)?.url ?? "/app/home";
-  event.waitUntil(
-    (async () => {
-      const all = await self.clients.matchAll({
-        type: "window",
-        includeUncontrolled: true,
-      });
-      const existing = all.find((c) => c.url.includes(target));
-      if (existing) {
-        await existing.focus();
-        return;
-      }
-      await self.clients.openWindow(target);
-    })(),
-  );
-});
+/* Push notifications are handled by the dedicated /sw-push.js worker. */
 
 /* ---------------- Background sync (placeholder) ----------------
  * Background Sync requires registering a 'sync' tag from a page when the
