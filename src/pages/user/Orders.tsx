@@ -339,7 +339,7 @@ const GroupCard = ({
             <button
               key={o.id}
               onClick={() =>
-                isPending ? navigate("/app/order-status") : undefined
+                isPending ? navigate(`/app/order-status?id=${encodeURIComponent(o.id)}`) : undefined
               }
               className="w-full text-left active:scale-[0.99] transition-transform"
               style={{
