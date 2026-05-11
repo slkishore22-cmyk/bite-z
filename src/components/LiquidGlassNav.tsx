@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
-import { motion, useMotionValue, animate, type PanInfo } from "framer-motion";
+import { motion, useMotionValue, animate } from "framer-motion";
 import { Home, ReceiptText, ShoppingCart, type LucideIcon } from "lucide-react";
 import { getCart, subscribeCart } from "@/lib/userCart";
 import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
@@ -18,8 +18,6 @@ const items: NavItem[] = [
 ];
 
 const iconSpring = { type: "spring" as const, stiffness: 500, damping: 18, mass: 0.7 };
-const SWIPE_DISTANCE = 42;
-const SWIPE_AXIS_RATIO = 1.15;
 
 const getDistanceSpring = (distance: number) => {
   const d = Math.max(1, Math.abs(distance));
@@ -41,13 +39,11 @@ export const LiquidGlassNav = ({
   const [active, setActive] = useState(activeId);
   const [distance, setDistance] = useState(0);
   const [rects, setRects] = useState<{ x: number; width: number }[]>([]);
-  const [dragging, setDragging] = useState(false);
   const [hasActiveCart, setHasActiveCart] = useState(() => getCart().length > 0);
   const [hasActiveOrder, setHasActiveOrder] = useState(() => getOrders().some((o) => o.status === "Pending"));
 
   const navRef = useRef<HTMLElement | null>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const navSwipeStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
 
   const x = useMotionValue(0);
   const width = useMotionValue(0);
@@ -75,14 +71,13 @@ export const LiquidGlassNav = ({
   }, []);
 
   useEffect(() => {
-    if (dragging) return;
     const i = indexById[active];
     const r = rects[i];
     if (!r) return;
     const spring = getDistanceSpring(distance);
     animate(x, r.x, spring);
     animate(width, r.width, spring);
-  }, [active, rects, dragging, distance, indexById, x, width]);
+  }, [active, rects, distance, indexById, x, width]);
 
   const setActiveById = (id: string) => {
     if (id === active) return;
@@ -116,66 +111,13 @@ export const LiquidGlassNav = ({
     };
   }, []);
 
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    setDragging(false);
-    if (rects.length === 0) return;
-    const pillCenter = x.get() + width.get() / 2;
-    const bias = Math.max(-1, Math.min(1, info.velocity.x / 800));
-    let nearest = 0;
-    let best = Infinity;
-    rects.forEach((r, i) => {
-      const c = r.x + r.width / 2 + bias * 30;
-      const d = Math.abs(c - pillCenter);
-      if (d < best) {
-        best = d;
-        nearest = i;
-      }
-    });
-    setActiveById(items[nearest].id);
-  };
-
-  const handleTabPointerUp = (id: string) => {
-    if (dragging) return;
-    setActiveById(id);
-  };
-
-  const handleNavSwipeEnd = (event: React.PointerEvent<HTMLElement>) => {
-    const start = navSwipeStart.current;
-    navSwipeStart.current = null;
-    if (!start || start.pointerId !== event.pointerId) return false;
-
-    const dx = event.clientX - start.x;
-    const dy = event.clientY - start.y;
-    const absX = Math.abs(dx);
-    const absY = Math.abs(dy);
-    if (absX < SWIPE_DISTANCE || absX < absY * SWIPE_AXIS_RATIO) return false;
-
-    const currentIndex = indexById[active];
-    const next = items[currentIndex + (dx < 0 ? 1 : -1)];
-    if (next) {
-      event.preventDefault();
-      event.stopPropagation();
-      setActiveById(next.id);
-      return true;
-    }
-    return false;
-  };
-
   return (
     <div
       className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-md"
-      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
+      style={{ bottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <motion.nav
         ref={navRef}
-        onPointerDown={(event) => {
-          if (!event.isPrimary) return;
-          navSwipeStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
-        }}
-        onPointerUp={handleNavSwipeEnd}
-        onPointerCancel={() => {
-          navSwipeStart.current = null;
-        }}
         style={{
           WebkitBackdropFilter: "blur(36px) saturate(200%)",
           backdropFilter: "blur(36px) saturate(200%)",
@@ -183,7 +125,6 @@ export const LiquidGlassNav = ({
             "linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.45))",
           boxShadow:
             "0 22px 50px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(255,255,255,0.15) inset",
-          touchAction: "pan-y",
         }}
         className="relative flex w-full items-center gap-1 p-1.5 rounded-full border border-white/50"
       >
@@ -211,33 +152,6 @@ export const LiquidGlassNav = ({
 
         {rects.length > 0 && (
           <motion.div
-            drag="x"
-            dragConstraints={{
-              left: rects[0].x,
-              right: rects[rects.length - 1].x + rects[rects.length - 1].width - width.get(),
-            }}
-            dragElastic={0.15}
-            dragMomentum={false}
-            onDragStart={() => setDragging(true)}
-            onDrag={(_, info) => {
-              const pillCenter = x.get() + width.get() / 2 + info.delta.x;
-              let nearest = 0;
-              let best = Infinity;
-              rects.forEach((r, i) => {
-                const c = r.x + r.width / 2;
-                const d = Math.abs(c - pillCenter);
-                if (d < best) {
-                  best = d;
-                  nearest = i;
-                }
-              });
-              if (items[nearest].id !== active) {
-                setDistance(nearest - indexById[active]);
-                setActive(items[nearest].id);
-                onChange?.(items[nearest].id);
-              }
-            }}
-            onDragEnd={handleDragEnd}
             style={{
               x,
               width,
@@ -249,12 +163,9 @@ export const LiquidGlassNav = ({
                 "linear-gradient(135deg, rgba(37,99,235,0.18), rgba(255,255,255,0.55))",
               boxShadow:
                 "0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(0,0,0,0.05) inset, 0 8px 22px rgba(37,99,235,0.10)",
-              touchAction: "none",
-              cursor: dragging ? "grabbing" : "grab",
               pointerEvents: "none",
             }}
             className="absolute left-0 rounded-full border border-white/70"
-            whileTap={{ scale: 0.97 }}
           />
         )}
 
@@ -266,17 +177,7 @@ export const LiquidGlassNav = ({
               type="button"
               key={item.id}
               ref={(el) => (tabRefs.current[i] = el)}
-              onPointerUp={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                if (handleNavSwipeEnd(event)) return;
-                handleTabPointerUp(item.id);
-              }}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                if (event.detail === 0) handleTabPointerUp(item.id);
-              }}
+              onClick={() => setActiveById(item.id)}
               className="relative flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 rounded-full outline-none"
               aria-label={item.label}
             >
