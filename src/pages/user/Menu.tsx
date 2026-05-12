@@ -143,7 +143,10 @@ const Menu = () => {
         <div
           className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
           style={{
-            padding: "16px 24px",
+            paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
+            paddingBottom: 16,
+            paddingLeft: "calc(24px + env(safe-area-inset-left, 0px))",
+            paddingRight: "calc(24px + env(safe-area-inset-right, 0px))",
             background: "rgba(245,245,247,0.85)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -154,6 +157,7 @@ const Menu = () => {
             onClick={() => navigate("/app/home")}
             aria-label="Back"
             className="flex items-center gap-3"
+            style={{ minWidth: 0, maxWidth: "calc(100% - 56px)" }}
           >
             <span
               className="material-symbols-outlined"
@@ -167,6 +171,10 @@ const Menu = () => {
                 fontWeight: 600,
                 letterSpacing: "-0.02em",
                 color: "#111827",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: "calc(100vw - 96px)",
               }}
             >
               {title}
