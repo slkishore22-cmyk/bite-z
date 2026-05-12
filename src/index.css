@@ -1,74 +1,7 @@
-/* ── iOS PWA Safe Area Fix (must be first) ─────────────── */
-:root {
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
-  --safe-top: env(safe-area-inset-top, 44px);
-  --safe-bottom: env(safe-area-inset-bottom, 34px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-
-/* Force full screen on iOS PWA — no boxing */
-html,
-body,
-#root {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-height: 100dvh !important;
-  overflow-x: hidden !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* Hide scrollbars globally (iOS PWA polish) */
-::-webkit-scrollbar { display: none; }
-* {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
 html {
   touch-action: pan-x pan-y;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-}
-#root {
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
-}
-.page-scroll {
-  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-.app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding-top: max(env(safe-area-inset-top, 0px), 12px);
-  z-index: 50;
-}
-.app-main {
-  padding-top: calc(64px + env(safe-area-inset-top, 0px));
-  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
-}
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-.bottom-nav-pill {
-  position: fixed;
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 /* Perf: kill iOS 300ms tap delay on interactive elements globally. */
@@ -107,18 +40,10 @@ button, a, [role="button"], [role="link"], [data-tappable="true"] {
 html, body, #root {
   width: 100%;
   height: 100%;
-  min-height: 100dvh;
   overflow-x: hidden;
 }
 #root {
-  /* Use VisualViewport-driven --app-vh (set in main.tsx) as the most
-     reliable mobile shell height. iOS Safari does NOT update 100dvh while
-     the on-screen keyboard is open, which causes the bottom nav to drift
-     above the keyboard or the header to scroll off. --app-vh tracks the
-     visualViewport.height in real time, so the shell stays pinned. */
-  min-height: 100vh;            /* baseline for old browsers */
-  min-height: 100dvh;            /* modern fallback */
-  min-height: var(--app-vh, 100dvh);
+  min-height: 100vh;
   isolation: isolate;
 }
 /* Native-feel momentum scroll on every scrollable region. */
@@ -152,10 +77,6 @@ input, textarea {
 body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
 }
 /* Subtle native-app cross-fade between routes. Pure opacity — no layout
    shift, no transform that would affect fixed children (bottom nav). */
@@ -342,13 +263,11 @@ All colors MUST be HSL.
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
     min-height: 100vh;
-    min-height: 100dvh;
   }
 
   html {
     background: #F5F5F7;
     min-height: 100vh;
-    min-height: 100dvh;
   }
 
   .material-symbols-outlined {
