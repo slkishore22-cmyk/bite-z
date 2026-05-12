@@ -143,10 +143,10 @@ const Menu = () => {
         <div
           className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
           style={{
-            paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
+            paddingTop: 12,
             paddingBottom: 16,
-            paddingLeft: "calc(24px + env(safe-area-inset-left, 0px))",
-            paddingRight: "calc(24px + env(safe-area-inset-right, 0px))",
+            paddingLeft: 24,
+            paddingRight: 24,
             background: "rgba(245,245,247,0.85)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -190,7 +190,7 @@ const Menu = () => {
           className="mx-auto"
           style={{
             paddingTop: 96,
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)",
+            paddingBottom: 120,
             paddingLeft: 16,
             paddingRight: 16,
             maxWidth: 672,
@@ -200,7 +200,7 @@ const Menu = () => {
           <div
             className="sticky z-40"
             style={{
-              top: "calc(56px + env(safe-area-inset-top, 0px))",
+              top: 56,
               paddingTop: 8,
               paddingBottom: 8,
               marginLeft: -16,
@@ -321,7 +321,7 @@ const Menu = () => {
               ...liquidGlass,
               left: 16,
               right: 16,
-              bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
+              bottom: 24,
               padding: 16,
             }}
           >
