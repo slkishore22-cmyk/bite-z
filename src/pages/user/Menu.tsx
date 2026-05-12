@@ -157,11 +157,11 @@ const Menu = () => {
             onClick={() => navigate("/app/home")}
             aria-label="Back"
             className="flex items-center gap-3"
-            style={{ minWidth: 0, maxWidth: "calc(100% - 56px)" }}
+            style={{ minWidth: 0, flex: 1, overflow: "hidden" }}
           >
             <span
               className="material-symbols-outlined"
-              style={{ fontSize: 24, color: "#4B5563" }}
+              style={{ fontSize: 24, color: "#4B5563", flexShrink: 0 }}
             >
               arrow_back
             </span>
@@ -174,13 +174,15 @@ const Menu = () => {
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
-                maxWidth: "calc(100vw - 96px)",
+                flex: 1,
+                minWidth: 0,
+                paddingRight: 16,
               }}
             >
               {title}
             </span>
           </button>
-          <div style={{ width: 40, height: 40 }} />
+          <div style={{ width: 0, height: 40, flexShrink: 0 }} />
         </div>
 
         {/* Main content */}
@@ -198,7 +200,7 @@ const Menu = () => {
           <div
             className="sticky z-40"
             style={{
-              top: 64,
+              top: "calc(56px + env(safe-area-inset-top, 0px))",
               paddingTop: 8,
               paddingBottom: 8,
               marginLeft: -16,
