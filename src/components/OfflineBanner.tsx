@@ -21,7 +21,7 @@ const OfflineBanner = () => {
         left: 0,
         right: 0,
         zIndex: 9999,
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 6px)",
+        paddingTop: 6,
         paddingBottom: 6,
         paddingLeft: 12,
         paddingRight: 12,

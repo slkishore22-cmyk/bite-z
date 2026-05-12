@@ -27,7 +27,7 @@ const OfflineFallback = ({ show }: { show?: boolean }) => {
         justifyContent: "center",
         padding: 24,
         textAlign: "center",
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 24px)",
+        paddingTop: 24,
       }}
     >
       <div

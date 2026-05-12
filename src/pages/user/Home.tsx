@@ -140,14 +140,14 @@ const Home = () => {
         style={{
           background: "#F5F5F7",
           color: "#1D1D1F",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)",
+          paddingBottom: 120,
           fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
         }}
       >
         {/* Header */}
         <h1
           style={{
-            paddingTop: 48,
+            paddingTop: 16,
             paddingLeft: 24,
             paddingRight: 24,
             fontSize: 28,
