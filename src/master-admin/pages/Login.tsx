@@ -14,6 +14,10 @@ export default function Login() {
 
   useEffect(() => {
     if (getSession()) navigate("/master-admin/overview", { replace: true });
+    const t = setTimeout(() => {
+      if (getSession()) navigate("/master-admin/overview", { replace: true });
+    }, 100);
+    return () => clearTimeout(t);
   }, [navigate]);
 
   const submit = async (e: React.FormEvent) => {
