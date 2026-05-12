@@ -13,6 +13,10 @@ const SellerLogin = () => {
 
   useEffect(() => {
     if (getSellerSession()) navigate("/seller/dashboard", { replace: true });
+    const t = setTimeout(() => {
+      if (getSellerSession()) navigate("/seller/dashboard", { replace: true });
+    }, 100);
+    return () => clearTimeout(t);
   }, [navigate]);
 
   const submit = async (e: React.FormEvent) => {

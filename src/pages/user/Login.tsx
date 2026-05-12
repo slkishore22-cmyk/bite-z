@@ -14,6 +14,10 @@ const UserLogin = () => {
 
   useEffect(() => {
     if (getUserSession()) navigate("/app/home", { replace: true });
+    const t = setTimeout(() => {
+      if (getUserSession()) navigate("/app/home", { replace: true });
+    }, 100);
+    return () => clearTimeout(t);
   }, [navigate]);
 
   const submit = async (e: React.FormEvent) => {
