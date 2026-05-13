@@ -51,8 +51,16 @@ export const LiquidGlassNav = ({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-stretch border-t bg-background"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-stretch border-t border-white/40"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        WebkitBackdropFilter: "blur(36px) saturate(200%)",
+        backdropFilter: "blur(36px) saturate(200%)",
+        background:
+          "linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.45))",
+        boxShadow:
+          "0 -8px 30px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.7) inset",
+      }}
     >
       {items.map((item) => {
         const Icon = item.icon;
@@ -68,7 +76,7 @@ export const LiquidGlassNav = ({
             aria-label={item.label}
             aria-current={isActive ? "page" : undefined}
             className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 outline-none transition-colors"
-            style={{ color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+            style={{ color: "#1D1D1F", opacity: isActive ? 1 : 0.6 }}
           >
             <span className="relative">
               <Icon size={24} strokeWidth={isActive ? 2.4 : 2} />
@@ -77,7 +85,7 @@ export const LiquidGlassNav = ({
                   className="absolute -top-1 -right-1 h-2 w-2 rounded-full"
                   style={{
                     background: "#FF3B30",
-                    boxShadow: "0 0 0 2px hsl(var(--background))",
+                    boxShadow: "0 0 0 2px rgba(255,255,255,0.9)",
                   }}
                 />
               )}
