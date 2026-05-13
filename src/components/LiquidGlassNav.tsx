@@ -184,12 +184,9 @@ export const LiquidGlassNav = ({
           boxShadow:
             "0 22px 50px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(255,255,255,0.15) inset",
           touchAction: "pan-y",
+          pointerEvents: "auto",
         }}
         className="relative flex w-full items-center gap-1 p-1.5 rounded-full border border-white/50"
-        // re-enable interaction on the nav itself (wrapper is pointer-events-none
-        // so taps pass through outside the pill)
-        // @ts-ignore
-        data-floating-nav="true"
       >
         <span
           aria-hidden
