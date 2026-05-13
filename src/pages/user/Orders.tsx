@@ -91,7 +91,10 @@ const Orders = () => {
           fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
         }}
       >
-        <main className="px-6 mx-auto w-full max-w-md pt-8">
+        <main
+          className="px-6 mx-auto w-full max-w-md"
+          style={{ paddingTop: "calc(32px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
+        >
           {/* Editorial Header */}
           <section className="mb-8">
             <h2
