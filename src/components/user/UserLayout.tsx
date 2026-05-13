@@ -119,6 +119,8 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         {children}
+        {/* Spacer so floating nav doesn't cover page content */}
+        {!hideNav && <div aria-hidden style={{ height: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }} />}
       </div>
       {!hideNav && (
         <LiquidGlassNav activeId={active} onChange={(id) => navigateToTab(id as UserTab)} />

@@ -163,8 +163,8 @@ export const LiquidGlassNav = ({
 
   return (
     <div
-      className="mx-auto w-[calc(100%-24px)] max-w-md"
-      style={{ marginTop: 16, marginBottom: 16 }}
+      className="fixed left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-md z-50 pointer-events-none"
+      style={{ bottom: `calc(env(safe-area-inset-bottom, 0px) + 16px)` }}
     >
       <motion.nav
         ref={navRef}
@@ -184,6 +184,7 @@ export const LiquidGlassNav = ({
           boxShadow:
             "0 22px 50px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(255,255,255,0.15) inset",
           touchAction: "pan-y",
+          pointerEvents: "auto",
         }}
         className="relative flex w-full items-center gap-1 p-1.5 rounded-full border border-white/50"
       >

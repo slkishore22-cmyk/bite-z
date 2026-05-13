@@ -80,6 +80,12 @@ input, textarea {
   user-select: text;
   -webkit-touch-callout: default;
 }
+/* Prevent iOS Safari from auto-zooming when focusing inputs. iOS zooms any
+   input whose computed font-size is < 16px. Forcing 16px on all form fields
+   disables the zoom while keeping the visual design intact. */
+input, textarea, select {
+  font-size: 16px !important;
+}
 body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
