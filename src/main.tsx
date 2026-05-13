@@ -3,6 +3,19 @@ import App from "./App.tsx";
 import "./index.css";
 import { installGlobalTapHaptics } from "./lib/haptics";
 
+const markIosPwa = () => {
+  if (typeof window === "undefined") return;
+  const nav = window.navigator as Navigator & { standalone?: boolean };
+  const isAppleTouch = /iPad|iPhone|iPod/.test(nav.userAgent) ||
+    (nav.platform === "MacIntel" && nav.maxTouchPoints > 1);
+  const isStandalone = nav.standalone === true ||
+    window.matchMedia("(display-mode: standalone)").matches;
+
+  document.documentElement.classList.toggle("ios-pwa", isAppleTouch && isStandalone);
+};
+
+markIosPwa();
+
 createRoot(document.getElementById("root")!).render(<App />);
 
 // Native-app-feel: tiny vibration on every interactive tap (touch only).

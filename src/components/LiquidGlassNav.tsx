@@ -53,7 +53,8 @@ export const LiquidGlassNav = ({
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-stretch border-t border-white/40"
       style={{
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        height: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom))",
+        paddingBottom: "var(--ios-pwa-safe-bottom)",
         WebkitBackdropFilter: "blur(36px) saturate(200%)",
         backdropFilter: "blur(36px) saturate(200%)",
         background:
@@ -75,7 +76,7 @@ export const LiquidGlassNav = ({
             onClick={() => handleSelect(item.id)}
             aria-label={item.label}
             aria-current={isActive ? "page" : undefined}
-            className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 outline-none transition-colors"
+            className="relative flex flex-1 flex-col items-center justify-center gap-1 outline-none transition-colors"
             style={{ color: "#1D1D1F", opacity: isActive ? 1 : 0.6 }}
           >
             <span className="relative">

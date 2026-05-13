@@ -143,7 +143,7 @@ const Menu = () => {
         <div
           className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
           style={{
-            paddingTop: 12,
+            paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 16,
             paddingLeft: 24,
             paddingRight: 24,
@@ -189,7 +189,7 @@ const Menu = () => {
         <div
           className="mx-auto"
           style={{
-            paddingTop: 96,
+            paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 120,
             paddingLeft: 16,
             paddingRight: 16,
@@ -319,7 +319,7 @@ const Menu = () => {
               ...liquidGlass,
               left: 16,
               right: 16,
-              bottom: 24,
+              bottom: "calc(24px + var(--ios-pwa-safe-bottom))",
               padding: 16,
             }}
           >

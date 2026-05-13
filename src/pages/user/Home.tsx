@@ -148,6 +148,7 @@ const Home = () => {
         <h1
           style={{
             paddingTop: 16,
+            marginTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingLeft: 24,
             paddingRight: 24,
             fontSize: 28,
