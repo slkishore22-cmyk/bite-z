@@ -163,8 +163,8 @@ export const LiquidGlassNav = ({
 
   return (
     <div
-      className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-md"
-      style={{ bottom: 16 }}
+      className="mx-auto w-[calc(100%-24px)] max-w-md"
+      style={{ marginTop: 16, marginBottom: 16 }}
     >
       <motion.nav
         ref={navRef}
