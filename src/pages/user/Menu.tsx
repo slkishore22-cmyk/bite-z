@@ -196,11 +196,9 @@ const Menu = () => {
             maxWidth: 672,
           }}
         >
-          {/* Sticky: search + tabs */}
+          {/* Search + tabs (scrolls with page) */}
           <div
-            className="sticky z-40"
             style={{
-              top: 56,
               paddingTop: 8,
               paddingBottom: 8,
               marginLeft: -16,
