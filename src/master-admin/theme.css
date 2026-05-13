@@ -137,7 +137,6 @@
   background: var(--ma-sidebar);
   border-right: 1px solid var(--ma-border);
   padding: 20px 12px;
-  position: sticky; top: 0; height: 100vh; overflow-y: auto;
   flex-shrink: 0;
 }
 .ma-sidebar-brand {
@@ -176,7 +175,6 @@
   border-bottom: 1px solid var(--ma-border);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 24px;
-  position: sticky; top: 0; z-index: 10;
 }
 .ma-page { padding: 24px; flex: 1; }
 
@@ -192,7 +190,7 @@
 .ma-mobile-toggle { display: none; }
 @media (max-width: 768px) {
   .ma-sidebar {
-    position: fixed; left: 0; top: 0; z-index: 50;
+    position: absolute; left: 0; top: 0; z-index: 50; height: 100%;
     transform: translateX(-100%);
     transition: transform 250ms ease;
   }
