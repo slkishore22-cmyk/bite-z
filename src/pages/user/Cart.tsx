@@ -85,6 +85,7 @@ const Cart = () => {
             background: "rgba(248,250,252,0.8)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
+            paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
           }}
         >
           <div className="flex items-center gap-3 px-6 py-4 max-w-md mx-auto">
@@ -108,7 +109,10 @@ const Cart = () => {
           </div>
         </header>
 
-        <main className="pt-20 px-6 max-w-md mx-auto space-y-6">
+        <main
+          className="px-6 max-w-md mx-auto space-y-6"
+          style={{ paddingTop: "calc(80px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
+        >
           {items.length === 0 ? (
             <section style={{ ...liquidGlass, padding: 24 }}>
               <span style={glassHighlight} aria-hidden />
