@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { getProfile, loadCurrentSellerProfile, saveProfileToBackend, type SellerProfile } from "@/lib/sellerProfile";
 import { clearSellerSession as clearLegacySellerSession } from "@/lib/sellerAuth";
 import { clearSellerSession } from "@/utils/sessionManager";
+import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 
 const canteenIcons = ["🍽️", "🍛", "🍔", "🍕", "🏪", "🥗", "☕"];
 
@@ -156,6 +157,9 @@ const SellerSettings = () => {
             <p className="mt-2 max-w-xs text-sm font-medium italic text-muted-foreground">
               "{profile.slogan}"
             </p>
+            <div className="mt-8 w-full">
+              <PushNotificationSettings />
+            </div>
           </section>
         ) : (
           <form onSubmit={saveSettings} className="mt-7 space-y-5">
