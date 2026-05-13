@@ -59,6 +59,12 @@ html, body, #root {
       --ios-pwa-top-breathing: 14px;
     }
   }
+
+  html.ios-pwa {
+    --ios-pwa-safe-top: max(env(safe-area-inset-top, 0px), 18px);
+    --ios-pwa-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --ios-pwa-top-breathing: 14px;
+  }
 }
 
 .safe-area-top { padding-top: env(safe-area-inset-top, 0px); }
