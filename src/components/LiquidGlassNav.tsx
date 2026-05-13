@@ -1,5 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
-import { motion, useMotionValue, animate, type PanInfo } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Home, ReceiptText, ShoppingCart, type LucideIcon } from "lucide-react";
 import { getCart, subscribeCart } from "@/lib/userCart";
 import { getOrders, subscribeOrders } from "@/lib/sellerOrders";
@@ -8,28 +7,13 @@ type NavItem = {
   id: string;
   label: string;
   icon: LucideIcon;
-  badge?: boolean;
 };
 
 const items: NavItem[] = [
   { id: "home", label: "Home", icon: Home },
   { id: "orders", label: "Orders", icon: ReceiptText },
-  { id: "cart", label: "Cart", icon: ShoppingCart, badge: true },
+  { id: "cart", label: "Cart", icon: ShoppingCart },
 ];
-
-const iconSpring = { type: "spring" as const, stiffness: 500, damping: 18, mass: 0.7 };
-const SWIPE_DISTANCE = 42;
-const SWIPE_AXIS_RATIO = 1.15;
-
-const getDistanceSpring = (distance: number) => {
-  const d = Math.max(1, Math.abs(distance));
-  return {
-    type: "spring" as const,
-    stiffness: Math.max(220, 420 - d * 55),
-    damping: Math.max(14, 24 - d * 2.5),
-    mass: 0.85 + d * 0.08,
-  };
-};
 
 export const LiquidGlassNav = ({
   activeId = "home",
@@ -38,74 +22,15 @@ export const LiquidGlassNav = ({
   activeId?: string;
   onChange?: (id: string) => void;
 }) => {
-  const [active, setActive] = useState(activeId);
-  const [distance, setDistance] = useState(0);
-  const [rects, setRects] = useState<{ x: number; width: number }[]>([]);
-  const [dragging, setDragging] = useState(false);
   const [hasActiveCart, setHasActiveCart] = useState(() => getCart().length > 0);
-  const [hasActiveOrder, setHasActiveOrder] = useState(() => getOrders().some((o) => o.status === "Pending"));
-
-  const navRef = useRef<HTMLElement | null>(null);
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const navSwipeStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
-
-  const x = useMotionValue(0);
-  const width = useMotionValue(0);
-
-  const indexById = useMemo(
-    () => Object.fromEntries(items.map((it, i) => [it.id, i])),
-    []
+  const [hasActiveOrder, setHasActiveOrder] = useState(() =>
+    getOrders().some((o) => o.status === "Pending"),
   );
-
-  useLayoutEffect(() => {
-    const measure = () => {
-      const navEl = navRef.current;
-      if (!navEl) return;
-      const navRect = navEl.getBoundingClientRect();
-      const next = tabRefs.current.map((el) => {
-        if (!el) return { x: 0, width: 0 };
-        const r = el.getBoundingClientRect();
-        return { x: r.left - navRect.left, width: r.width };
-      });
-      setRects(next);
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  useEffect(() => {
-    if (dragging) return;
-    const i = indexById[active];
-    const r = rects[i];
-    if (!r) return;
-    const spring = getDistanceSpring(distance);
-    animate(x, r.x, spring);
-    animate(width, r.width, spring);
-  }, [active, rects, dragging, distance, indexById, x, width]);
-
-  const setActiveById = (id: string) => {
-    if (id === active) return;
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      navigator.vibrate?.([10]);
-    }
-    setDistance(indexById[id] - indexById[active]);
-    setActive(id);
-    onChange?.(id);
-  };
-
-  // Keep internal active in sync with external activeId (e.g. route changes)
-  useEffect(() => {
-    if (activeId && activeId !== active && indexById[activeId] != null) {
-      setDistance(indexById[activeId] - indexById[active]);
-      setActive(activeId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId]);
 
   useEffect(() => {
     const refreshCart = () => setHasActiveCart(getCart().length > 0);
-    const refreshOrders = () => setHasActiveOrder(getOrders().some((o) => o.status === "Pending"));
+    const refreshOrders = () =>
+      setHasActiveOrder(getOrders().some((o) => o.status === "Pending"));
     const unsubCart = subscribeCart(refreshCart);
     const unsubOrders = subscribeOrders(refreshOrders);
     refreshCart();
@@ -116,204 +41,52 @@ export const LiquidGlassNav = ({
     };
   }, []);
 
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    setDragging(false);
-    if (rects.length === 0) return;
-    const pillCenter = x.get() + width.get() / 2;
-    const bias = Math.max(-1, Math.min(1, info.velocity.x / 800));
-    let nearest = 0;
-    let best = Infinity;
-    rects.forEach((r, i) => {
-      const c = r.x + r.width / 2 + bias * 30;
-      const d = Math.abs(c - pillCenter);
-      if (d < best) {
-        best = d;
-        nearest = i;
-      }
-    });
-    setActiveById(items[nearest].id);
-  };
-
-  const handleTabPointerUp = (id: string) => {
-    if (dragging) return;
-    setActiveById(id);
-  };
-
-  const handleNavSwipeEnd = (event: React.PointerEvent<HTMLElement>) => {
-    const start = navSwipeStart.current;
-    navSwipeStart.current = null;
-    if (!start || start.pointerId !== event.pointerId) return false;
-
-    const dx = event.clientX - start.x;
-    const dy = event.clientY - start.y;
-    const absX = Math.abs(dx);
-    const absY = Math.abs(dy);
-    if (absX < SWIPE_DISTANCE || absX < absY * SWIPE_AXIS_RATIO) return false;
-
-    const currentIndex = indexById[active];
-    const next = items[currentIndex + (dx < 0 ? 1 : -1)];
-    if (next) {
-      event.preventDefault();
-      event.stopPropagation();
-      setActiveById(next.id);
-      return true;
+  const handleSelect = (id: string) => {
+    if (id === activeId) return;
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate?.([10]);
     }
-    return false;
+    onChange?.(id);
   };
 
   return (
-    <div
-      className="mx-auto w-[calc(100%-24px)] max-w-md"
-      style={{ marginTop: 16, marginBottom: 16 }}
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-stretch border-t bg-background"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <motion.nav
-        ref={navRef}
-        onPointerDown={(event) => {
-          if (!event.isPrimary) return;
-          navSwipeStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
-        }}
-        onPointerUp={handleNavSwipeEnd}
-        onPointerCancel={() => {
-          navSwipeStart.current = null;
-        }}
-        style={{
-          WebkitBackdropFilter: "blur(36px) saturate(200%)",
-          backdropFilter: "blur(36px) saturate(200%)",
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.45))",
-          boxShadow:
-            "0 22px 50px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(255,255,255,0.15) inset",
-          touchAction: "pan-y",
-        }}
-        className="relative flex w-full items-center gap-1 p-1.5 rounded-full border border-white/50"
-      >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-full"
-          style={{
-            padding: "1px",
-            background:
-              "conic-gradient(from 210deg at 50% 50%, rgba(255,255,255,0) 0deg, rgba(255,255,255,0.85) 60deg, rgba(255,255,255,0.15) 140deg, rgba(255,255,255,0) 200deg, rgba(255,255,255,0.5) 300deg, rgba(255,255,255,0) 360deg)",
-            WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-            WebkitMaskComposite: "xor",
-            maskComposite: "exclude",
-            mixBlendMode: "screen",
-          }}
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-x-6 top-0 h-px rounded-full"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)",
-          }}
-        />
-
-        {rects.length > 0 && (
-          <motion.div
-            drag="x"
-            dragConstraints={{
-              left: rects[0].x,
-              right: rects[rects.length - 1].x + rects[rects.length - 1].width - width.get(),
-            }}
-            dragElastic={0.15}
-            dragMomentum={false}
-            onDragStart={() => setDragging(true)}
-            onDrag={(_, info) => {
-              const pillCenter = x.get() + width.get() / 2 + info.delta.x;
-              let nearest = 0;
-              let best = Infinity;
-              rects.forEach((r, i) => {
-                const c = r.x + r.width / 2;
-                const d = Math.abs(c - pillCenter);
-                if (d < best) {
-                  best = d;
-                  nearest = i;
-                }
-              });
-              if (items[nearest].id !== active) {
-                setDistance(nearest - indexById[active]);
-                setActive(items[nearest].id);
-                onChange?.(items[nearest].id);
-              }
-            }}
-            onDragEnd={handleDragEnd}
-            style={{
-              x,
-              width,
-              top: 6,
-              bottom: 6,
-              WebkitBackdropFilter: "blur(20px) saturate(200%)",
-              backdropFilter: "blur(20px) saturate(200%)",
-              background:
-                "linear-gradient(135deg, rgba(37,99,235,0.18), rgba(255,255,255,0.55))",
-              boxShadow:
-                "0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(0,0,0,0.05) inset, 0 8px 22px rgba(37,99,235,0.10)",
-              touchAction: "none",
-              cursor: dragging ? "grabbing" : "grab",
-              pointerEvents: "none",
-            }}
-            className="absolute left-0 rounded-full border border-white/70"
-            whileTap={{ scale: 0.97 }}
-          />
-        )}
-
-        {items.map((item, i) => {
-          const Icon = item.icon;
-          const isActive = active === item.id;
-          return (
-            <button
-              type="button"
-              key={item.id}
-              ref={(el) => (tabRefs.current[i] = el)}
-              onPointerUp={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                if (handleNavSwipeEnd(event)) return;
-                handleTabPointerUp(item.id);
-              }}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                if (event.detail === 0) handleTabPointerUp(item.id);
-              }}
-              className="relative flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 rounded-full outline-none"
-              aria-label={item.label}
-            >
-              <motion.span
-                className="relative z-10 flex items-center gap-1.5 pointer-events-none"
-                animate={
-                  isActive
-                    ? { scale: [1, 1.2, 1], opacity: 1 }
-                    : { scale: 1, opacity: 0.7 }
-                }
-                transition={iconSpring}
-              >
-                <span className="relative">
-                  <Icon
-                    style={{ color: "#1D1D1F" }}
-                    size={18}
-                    strokeWidth={isActive ? 2.6 : 2.1}
-                  />
-                  {((item.id === "cart" && hasActiveCart) || (item.id === "orders" && hasActiveOrder)) && (
-                    <span
-                      className="absolute -top-1 -right-1 h-2 w-2 rounded-full"
-                      style={{ background: "#FF3B30", boxShadow: "0 0 0 2px rgba(255,255,255,0.9)" }}
-                    />
-                  )}
-                </span>
+      {items.map((item) => {
+        const Icon = item.icon;
+        const isActive = activeId === item.id;
+        const showBadge =
+          (item.id === "cart" && hasActiveCart) ||
+          (item.id === "orders" && hasActiveOrder);
+        return (
+          <button
+            type="button"
+            key={item.id}
+            onClick={() => handleSelect(item.id)}
+            aria-label={item.label}
+            aria-current={isActive ? "page" : undefined}
+            className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 outline-none transition-colors"
+            style={{ color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+          >
+            <span className="relative">
+              <Icon size={24} strokeWidth={isActive ? 2.4 : 2} />
+              {showBadge && (
                 <span
-                  className="text-[11px] font-bold uppercase tracking-[0.06em]"
-                  style={{ color: "#1D1D1F" }}
-                >
-                  {item.label}
-                </span>
-              </motion.span>
-            </button>
-          );
-        })}
-      </motion.nav>
-    </div>
+                  className="absolute -top-1 -right-1 h-2 w-2 rounded-full"
+                  style={{
+                    background: "#FF3B30",
+                    boxShadow: "0 0 0 2px hsl(var(--background))",
+                  }}
+                />
+              )}
+            </span>
+            <span className="text-[11px] font-medium">{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
   );
 };
 

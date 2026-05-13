@@ -81,6 +81,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div
+        style={{ paddingBottom: hideNav ? 0 : 72 }}
         onPointerDownCapture={(event) => {
           if (hideNav || !event.isPrimary || isSwipeLockedTarget(event.target)) {
             pointerStart.current = null;
