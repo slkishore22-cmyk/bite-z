@@ -97,7 +97,10 @@ const Payment = () => {
       if (method === "Online" && paymentStatus === "SUCCESS") {
         playOnlineSuccessOnce(order.uid);
       }
-      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`);
+      setPlacing(false);
+      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`, {
+        replace: true,
+      });
     };
     try {
       if (method === "Cash") {
