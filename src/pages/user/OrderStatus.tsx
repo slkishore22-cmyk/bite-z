@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { getOrderById, getOrders } from "@/lib/sellerOrders";
 import OrderConfirmedAnimation from "../../components/OrderConfirmedAnimation";
+import { QRCodeSVG } from "qrcode.react";
 
 const OrderStatus = () => {
   const navigate = useNavigate();
@@ -81,6 +82,72 @@ const OrderStatus = () => {
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-3 w-full">
+          {/* QR Code — for billing scan */}
+          <div
+            className="flex flex-col items-center justify-center"
+            style={{
+              animation: 'ob-card-slide-up 500ms 800ms ease both',
+              background: "#FFFFFF",
+              padding: 20,
+              borderRadius: 20,
+              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
+              border: "1px solid #F1F5F9",
+            }}
+          >
+            <span
+              className="uppercase mb-3"
+              style={{
+                color: "#64748B",
+                fontSize: 11,
+                letterSpacing: "0.12em",
+                fontWeight: 600,
+              }}
+            >
+              Scan at Counter
+            </span>
+            <div
+              style={{
+                padding: 14,
+                borderRadius: 18,
+                background: "#FFFFFF",
+                border: "1px solid #E2E8F0",
+                boxShadow: "0 2px 12px -4px rgba(15,23,42,0.08)",
+              }}
+            >
+              <QRCodeSVG
+                value={JSON.stringify({
+                  orderId,
+                  total,
+                  items: items.map((i) => ({ n: i.name, q: i.qty })),
+                  seller: sellerName,
+                  payment: order?.payment ?? method,
+                  ts: order?.createdAt ?? Date.now(),
+                })}
+                size={220}
+                level="H"
+                bgColor="#FFFFFF"
+                fgColor="#0F172A"
+                marginSize={0}
+              />
+            </div>
+            <div
+              className="mt-3 font-semibold"
+              style={{
+                color: "#0F172A",
+                fontSize: 13,
+                letterSpacing: "0.08em",
+              }}
+            >
+              #{orderId}
+            </div>
+            <p
+              className="mt-1"
+              style={{ color: "#64748B", fontSize: 11, textAlign: "center" }}
+            >
+              Show this to the billing counter for instant printing
+            </p>
+          </div>
+
           {/* Order ID */}
           <div
             className="flex flex-col items-center justify-center transition-all duration-400"
