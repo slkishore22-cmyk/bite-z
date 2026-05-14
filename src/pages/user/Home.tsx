@@ -155,7 +155,7 @@ const Home = () => {
             fontWeight: 800,
             letterSpacing: "-0.02em",
             color: "#1D1D1F",
-            marginBottom: "var(--ios-page-gap)",
+            marginBottom: "calc(var(--ios-page-gap) + 12px)",
           }}
         >
           Hey, {getUserName()} 👋
