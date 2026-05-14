@@ -113,7 +113,7 @@ export async function getRegisteredCanteensFromBackend(): Promise<SellerProfile[
       .eq("is_active", true)
       .eq("is_suspended", false)
       .order("created_at", { ascending: false }),
-    8000,
+    5000,
   );
   if (error) {
     // Slow / offline — keep showing whatever we have locally instead of crashing.
