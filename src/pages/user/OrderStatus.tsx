@@ -130,18 +130,8 @@ const OrderStatus = () => {
                 marginSize={0}
               />
             </div>
-            <div
-              className="mt-3 font-semibold"
-              style={{
-                color: "#0F172A",
-                fontSize: 13,
-                letterSpacing: "0.08em",
-              }}
-            >
-              #{orderId}
-            </div>
             <p
-              className="mt-1"
+              className="mt-3"
               style={{ color: "#64748B", fontSize: 11, textAlign: "center" }}
             >
               Show this to the billing counter for instant printing
