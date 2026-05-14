@@ -351,6 +351,26 @@ All colors MUST be HSL.
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+  .user-home-screen {
+    min-height: var(--app-vh, 100dvh);
+  }
+
+  html.pwa-standalone .user-home-greeting,
+  html.android-pwa .user-home-greeting,
+  html.ios-pwa .user-home-greeting {
+    padding-top: calc(max(72px, env(safe-area-inset-top, 0px)) + 28px) !important;
+    margin-bottom: 64px !important;
+  }
+
+  @media (max-height: 700px) {
+    html.pwa-standalone .user-home-greeting,
+    html.android-pwa .user-home-greeting,
+    html.ios-pwa .user-home-greeting {
+      padding-top: calc(max(60px, env(safe-area-inset-top, 0px)) + 24px) !important;
+      margin-bottom: 54px !important;
+    }
+  }
+
   .lg-card {
     border-radius: 22px;
     background: rgba(255, 255, 255, 0.55);
