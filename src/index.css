@@ -2,6 +2,14 @@ html {
   touch-action: pan-x pan-y;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-touch-callout: none;
+}
+
+/* Force-disable pinch-zoom and double-tap zoom on iOS Safari (browser + PWA). */
+html, body {
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
 }
 
 /* Perf: kill iOS 300ms tap delay on interactive elements globally. */
