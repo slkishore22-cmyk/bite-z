@@ -85,8 +85,18 @@ function writeProfile(p: SellerProfile) {
 
 function writeCanteens(rows: SellerProfile[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(CANTEENS_STORAGE_KEY, JSON.stringify(rows));
-  window.dispatchEvent(new CustomEvent(EVENT));
+  try {
+    const prev = window.localStorage.getItem(CANTEENS_STORAGE_KEY);
+    const next = JSON.stringify(rows);
+    if (prev === next) return; // no-op: avoids re-render / re-fetch loops
+    window.localStorage.setItem(CANTEENS_STORAGE_KEY, next);
+  } catch {
+    /* ignore */
+  }
+  // NOTE: intentionally do NOT dispatch the profile-change event here.
+  // That event is for the seller's own profile edits; firing it on every
+  // canteen list refresh causes an infinite fetch loop in subscribers
+  // (Home re-fetches → writes → event → re-fetches → ...).
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
