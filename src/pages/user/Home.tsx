@@ -136,7 +136,7 @@ const Home = () => {
           to render — prevents the blank-screen state on cold offline launch. */}
       <OfflineFallback show={canteens.length === 0 && !canteensLoading} />
       <div
-        className="min-h-screen antialiased"
+        className="user-home-screen min-h-screen antialiased"
         style={{
           background: "#F5F5F7",
           color: "#1D1D1F",
@@ -146,16 +146,17 @@ const Home = () => {
       >
         {/* Header */}
         <h1
+          className="user-home-greeting"
           style={{
-            paddingTop: "calc(16px + var(--ios-content-top))",
-            marginTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+            paddingTop: "calc(max(56px, env(safe-area-inset-top, 0px)) + 24px)",
+            marginTop: 0,
             paddingLeft: 24,
             paddingRight: 24,
             fontSize: 28,
             fontWeight: 800,
-            letterSpacing: "-0.02em",
+            letterSpacing: 0,
             color: "#1D1D1F",
-            marginBottom: "calc(var(--ios-page-gap) + 12px)",
+            marginBottom: 52,
           }}
         >
           Hey, {getUserName()} 👋
@@ -165,7 +166,7 @@ const Home = () => {
         {offers.length > 0 && (
           <div
             className="no-scrollbar flex gap-4 overflow-x-auto"
-              style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: "calc(var(--ios-page-gap) + 8px)" }}
+              style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 48 }}
           >
             {offers.map((o, i) => (
               <OfferCard key={i} offer={o} />
@@ -188,7 +189,7 @@ const Home = () => {
             >
               On Repeat!
             </h2>
-            <div style={{ paddingLeft: 24, paddingRight: 24, marginBottom: "calc(var(--ios-page-gap) + 6px)", overflow: "hidden" }}>
+            <div style={{ paddingLeft: 24, paddingRight: 24, marginBottom: 48, overflow: "hidden" }}>
               <div
                 data-swipe-lock="true"
                 className="no-scrollbar flex overflow-x-auto"
