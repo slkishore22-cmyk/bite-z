@@ -163,7 +163,8 @@ const Payment = () => {
           background: "rgba(245,245,247,0.8)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          height: 64,
+          height: "calc(64px + var(--ios-pwa-safe-top))",
+          paddingTop: "var(--ios-pwa-safe-top)",
         }}
       >
         <div className="flex items-center w-full">
@@ -187,7 +188,7 @@ const Payment = () => {
       {/* Main Content Canvas */}
       <main
         className="max-w-4xl mx-auto flex flex-col"
-        style={{ paddingTop: 96, paddingLeft: 24, paddingRight: 24, gap: 48 }}
+        style={{ paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))", paddingLeft: 24, paddingRight: 24, gap: 48 }}
       >
         {/* Branding Hero Moment */}
         <div
