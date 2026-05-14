@@ -148,7 +148,7 @@ const Home = () => {
         <h1
           className="user-home-greeting"
           style={{
-            paddingTop: "calc(max(56px, env(safe-area-inset-top, 0px)) + 24px)",
+            paddingTop: "var(--home-greeting-top, calc(max(56px, env(safe-area-inset-top, 0px)) + 24px))",
             marginTop: 0,
             paddingLeft: 24,
             paddingRight: 24,
@@ -156,7 +156,7 @@ const Home = () => {
             fontWeight: 800,
             letterSpacing: 0,
             color: "#1D1D1F",
-            marginBottom: 52,
+            marginBottom: "var(--home-greeting-gap, 52px)",
           }}
         >
           Hey, {getUserName()} 👋
@@ -166,7 +166,12 @@ const Home = () => {
         {offers.length > 0 && (
           <div
             className="no-scrollbar flex gap-4 overflow-x-auto"
-              style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 48 }}
+              style={{
+                paddingLeft: 24,
+                paddingRight: 24,
+                paddingBottom: 8,
+                marginBottom: "var(--home-section-gap, 48px)",
+              }}
           >
             {offers.map((o, i) => (
               <OfferCard key={i} offer={o} />
@@ -189,7 +194,14 @@ const Home = () => {
             >
               On Repeat!
             </h2>
-            <div style={{ paddingLeft: 24, paddingRight: 24, marginBottom: 48, overflow: "hidden" }}>
+            <div
+              style={{
+                paddingLeft: 24,
+                paddingRight: 24,
+                marginBottom: "var(--home-section-gap, 48px)",
+                overflow: "hidden",
+              }}
+            >
               <div
                 data-swipe-lock="true"
                 className="no-scrollbar flex overflow-x-auto"
