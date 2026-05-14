@@ -57,13 +57,19 @@ const OrderStatus = () => {
       }}
     >
       {/* Top AppBar */}
-      <header className="w-full max-w-md px-6 h-16 flex items-center justify-start">
+      <header
+        className="w-full max-w-md px-6 flex items-center justify-start"
+        style={{
+          height: "calc(64px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+          paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+        }}
+      >
         <h1 className="font-bold text-lg" style={{ color: "#0F172A" }}>
           Order Status
         </h1>
       </header>
 
-      <main className="flex-1 w-full max-w-md px-6 pt-6 flex flex-col items-center pb-12">
+      <main className="flex-1 w-full max-w-md px-6 flex flex-col items-center pb-12" style={{ paddingTop: 24 }}>
         <OrderConfirmedAnimation />
 
         {/* Bento Grid */}
