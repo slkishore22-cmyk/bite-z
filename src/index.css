@@ -79,6 +79,24 @@ html.ios-device:not(.ios-pwa) {
   --ios-page-gap: 32px;
 }
 
+/* Android (and other non-iOS) PWA standalone — give the home screen
+   the same generous breathing room so it feels like a native app and
+   uses the full screen instead of hugging the status bar. */
+html.pwa-standalone:not(.ios-pwa) {
+  --ios-pwa-safe-top: max(env(safe-area-inset-top, 0px), 24px);
+  --ios-pwa-safe-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
+  --ios-pwa-top-breathing: 22px;
+  --ios-content-top: 32px;
+  --ios-page-gap: 36px;
+}
+
+html.android-pwa {
+  --ios-pwa-safe-top: max(env(safe-area-inset-top, 0px), 28px);
+  --ios-pwa-top-breathing: 26px;
+  --ios-content-top: 36px;
+  --ios-page-gap: 40px;
+}
+
 .safe-area-top { padding-top: env(safe-area-inset-top, 0px); }
 .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .safe-area-left { padding-left: env(safe-area-inset-left, 0px); }
