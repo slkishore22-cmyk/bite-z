@@ -147,7 +147,7 @@ const Home = () => {
         {/* Header */}
         <h1
           style={{
-            paddingTop: 16,
+            paddingTop: "calc(16px + var(--ios-content-top))",
             marginTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingLeft: 24,
             paddingRight: 24,
@@ -155,7 +155,7 @@ const Home = () => {
             fontWeight: 800,
             letterSpacing: "-0.02em",
             color: "#1D1D1F",
-            marginBottom: 24,
+            marginBottom: "var(--ios-page-gap)",
           }}
         >
           Hey, {getUserName()} 👋
@@ -165,7 +165,7 @@ const Home = () => {
         {offers.length > 0 && (
           <div
             className="no-scrollbar flex gap-4 overflow-x-auto"
-            style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: 32 }}
+              style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 8, marginBottom: "calc(var(--ios-page-gap) + 8px)" }}
           >
             {offers.map((o, i) => (
               <OfferCard key={i} offer={o} />
@@ -188,7 +188,7 @@ const Home = () => {
             >
               On Repeat!
             </h2>
-            <div style={{ paddingLeft: 24, paddingRight: 24, marginBottom: 32, overflow: "hidden" }}>
+            <div style={{ paddingLeft: 24, paddingRight: 24, marginBottom: "calc(var(--ios-page-gap) + 6px)", overflow: "hidden" }}>
               <div
                 data-swipe-lock="true"
                 className="no-scrollbar flex overflow-x-auto"
