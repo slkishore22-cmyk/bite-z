@@ -11,6 +11,7 @@ const markIosPwa = () => {
   const isStandalone = nav.standalone === true ||
     window.matchMedia("(display-mode: standalone)").matches;
 
+  document.documentElement.classList.toggle("ios-device", isAppleTouch);
   document.documentElement.classList.toggle("ios-pwa", isAppleTouch && isStandalone);
 };
 
