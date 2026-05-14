@@ -48,8 +48,9 @@ const OrderStatus = () => {
 
   return (
     <div
-      className="min-h-screen w-full flex flex-col items-center"
+      className="w-full flex flex-col items-center"
       style={{
+        minHeight: "var(--app-vh, 100dvh)",
         background: "#F8FAFC",
         color: "#0F172A",
         fontFamily:
@@ -60,8 +61,8 @@ const OrderStatus = () => {
       <header
         className="w-full max-w-md px-6 flex items-center justify-start"
         style={{
-          height: "calc(64px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
-          paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
+          paddingBottom: 10,
         }}
       >
         <h1 className="font-bold text-lg" style={{ color: "#0F172A" }}>
@@ -69,38 +70,44 @@ const OrderStatus = () => {
         </h1>
       </header>
 
-      <main className="flex-1 w-full max-w-md px-6 flex flex-col items-center pb-12" style={{ paddingTop: 24 }}>
+      <main
+        className="flex-1 w-full max-w-md px-6 flex flex-col items-center"
+        style={{
+          paddingTop: 8,
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
+        }}
+      >
         <OrderConfirmedAnimation />
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 gap-4 w-full">
+        <div className="grid grid-cols-1 gap-3 w-full">
           {/* Order ID */}
           <div
             className="flex flex-col items-center justify-center transition-all duration-400"
             style={{
               animation: 'ob-card-slide-up 500ms 900ms ease both',
               background: "#FFFFFF",
-              padding: 20,
+              padding: 16,
               borderRadius: 16,
               boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
               border: "1px solid #F1F5F9",
             }}
           >
             <span
-              className="uppercase mb-2"
+              className="uppercase mb-1"
               style={{
                 color: "#64748B",
-                fontSize: 12,
+                fontSize: 11,
                 letterSpacing: "0.1em",
               }}
             >
               Order ID
             </span>
             <div
-              className="font-bold mb-4"
+              className="font-bold mb-3"
               style={{
                 color: "#0F172A",
-                fontSize: 24,
+                fontSize: 22,
                 letterSpacing: "0.1em",
               }}
             >
@@ -116,8 +123,8 @@ const OrderStatus = () => {
               className="font-bold transition-all"
               style={{
                 color: "#2563EB",
-                fontSize: 13,
-                padding: "8px 24px",
+                fontSize: 12,
+                padding: "6px 20px",
                 borderRadius: 9999,
                 border: "1px solid rgba(37,99,235,0.2)",
                 background: "transparent",
@@ -135,7 +142,7 @@ const OrderStatus = () => {
             style={{
               animation: 'ob-card-slide-up 500ms 1050ms ease both',
               background: "#FFFFFF",
-              padding: 20,
+              padding: 16,
               borderRadius: 16,
               boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
               border: "1px solid #F1F5F9",
@@ -192,7 +199,7 @@ const OrderStatus = () => {
             style={{
               animation: 'ob-card-slide-up 500ms 1200ms ease both',
               background: "#FFFFFF",
-              padding: 24,
+              padding: 18,
               borderRadius: 16,
               boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
               border: "1px solid #F1F5F9",
@@ -213,7 +220,7 @@ const OrderStatus = () => {
                   "linear-gradient(135deg, #B4C5FF 0%, #2563EB 100%)",
               }}
             />
-            <div className="flex justify-between items-start mb-6 relative z-10">
+            <div className="flex justify-between items-start mb-4 relative z-10">
               <div className="flex items-center min-w-0" style={{ gap: 10 }}>
                 <div
                   className="flex items-center justify-center shrink-0"
@@ -247,7 +254,7 @@ const OrderStatus = () => {
                 {itemCount} Item{itemCount === 1 ? "" : "s"}
               </div>
             </div>
-            <div className="space-y-3 mb-6 relative z-10">
+            <div className="space-y-2 mb-4 relative z-10">
               {items.length === 0 ? (
                 <div className="flex justify-between" style={{ fontSize: 14, color: "#64748B" }}>
                   <span>No items</span>
@@ -271,7 +278,7 @@ const OrderStatus = () => {
             <div
               className="flex justify-between items-center relative z-10"
               style={{
-                paddingTop: 16,
+                paddingTop: 12,
                 borderTop: "1px solid #F1F5F9",
               }}
             >
@@ -289,7 +296,7 @@ const OrderStatus = () => {
         </div>
 
         {/* Action */}
-        <div className="mt-10 w-full flex flex-col gap-4">
+        <div className="mt-5 w-full flex flex-col gap-4">
           <button
             onClick={() => navigate("/app/home")}
             className="w-full font-bold transition-all duration-400"
@@ -298,9 +305,9 @@ const OrderStatus = () => {
               boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
               border: "1px solid #E2E8F0",
               color: "#0F172A",
-              padding: "16px 0",
+              padding: "14px 0",
               borderRadius: 9999,
-              fontSize: 16,
+              fontSize: 15,
             }}
           >
             Back to Home
