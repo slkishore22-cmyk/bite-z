@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { queryWithTimeout } from "@/utils/networkStatus";
 
 export type SellerCategory = "Food" | "Snacks" | "Drinks";
 export type SellerStatus = "Active" | "Inactive";
@@ -92,8 +93,8 @@ export async function loadInventoryFromBackend(sellerId?: string | null): Promis
     .order("created_at", { ascending: false });
   if (sellerId) query = query.eq("seller_id", sellerId);
 
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
+  const { data, error } = await queryWithTimeout(query, 5000);
+  if (error) return getInventory(sellerId);
   const incoming = (data ?? []).map(fromProduct);
   upsertCache(incoming, sellerId);
   return incoming;
@@ -102,12 +103,12 @@ export async function loadInventoryFromBackend(sellerId?: string | null): Promis
 export async function preloadInventoryForSellers(sellerIds: string[]): Promise<SellerInventoryItem[]> {
   const ids = Array.from(new Set(sellerIds.filter(Boolean)));
   if (ids.length === 0) return [];
-  const { data, error } = await db
+  const { data, error } = await queryWithTimeout(db
     .from("seller_products")
     .select("id, seller_id, product_name, price, category, emoji, is_active, created_at")
     .in("seller_id", ids)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+    .order("created_at", { ascending: false }), 5000);
+  if (error) return getInventory().filter((it) => it.sellerId && ids.includes(it.sellerId));
   const incoming = (data ?? []).map(fromProduct);
   const existing = read().filter((it) => !it.sellerId || !ids.includes(it.sellerId));
   write([...incoming, ...existing]);
