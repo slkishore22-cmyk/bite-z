@@ -148,7 +148,7 @@ const Home = () => {
         <h1
           className="user-home-greeting"
           style={{
-            paddingTop: "var(--home-greeting-top, calc(max(56px, env(safe-area-inset-top, 0px)) + 24px))",
+            paddingTop: "var(--home-greeting-top, calc(env(safe-area-inset-top, 0px) + clamp(20px, 5svh, 44px)))",
             marginTop: 0,
             paddingLeft: 24,
             paddingRight: 24,
@@ -156,7 +156,7 @@ const Home = () => {
             fontWeight: 800,
             letterSpacing: 0,
             color: "#1D1D1F",
-            marginBottom: "var(--home-greeting-gap, 52px)",
+            marginBottom: "var(--home-greeting-gap, clamp(24px, 5.5svh, 52px))",
           }}
         >
           Hey, {getUserName()} 👋
