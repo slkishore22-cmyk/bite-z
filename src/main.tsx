@@ -13,6 +13,8 @@ const markIosPwa = () => {
 
   document.documentElement.classList.toggle("ios-device", isAppleTouch);
   document.documentElement.classList.toggle("ios-pwa", isAppleTouch && isStandalone);
+  document.documentElement.classList.toggle("pwa-standalone", isStandalone);
+  document.documentElement.classList.toggle("android-pwa", isStandalone && /Android/i.test(nav.userAgent));
 };
 
 markIosPwa();
