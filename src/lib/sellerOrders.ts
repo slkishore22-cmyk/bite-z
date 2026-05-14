@@ -136,7 +136,7 @@ export async function loadOrdersFromBackend(sellerId?: string | null, userId = g
   if (sellerId) query = query.eq("metadata->>sellerId", sellerId);
   else if (userId && String(userId).includes("-")) query = query.eq("user_id", userId);
   else if (userId) query = query.eq("metadata->>appUserId", userId);
-  const { data, error } = await queryWithTimeout(query, 8000);
+  const { data, error } = await queryWithTimeout(query, 5000);
   if (error) {
     // Network slow or offline — return locally cached orders instead of throwing.
     return getOrders();
