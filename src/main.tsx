@@ -60,13 +60,18 @@ installGlobalTapHaptics();
     return;
   }
 
-  // Production: register the generated PWA service worker.
+  // Production: if an older PWA shell service worker exists, register the
+  // static cleanup worker once so installed apps stop serving stale screens.
   window.addEventListener("load", () => {
-    import("virtual:pwa-register")
-      .then(({ registerSW }) => {
-        registerSW({ immediate: true });
-      })
-      .catch(() => { /* plugin not available */ });
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      const hasShellWorker = regs.some((r) => {
+        const url = r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL || "";
+        return !url.endsWith("/sw-push.js");
+      });
+      if (hasShellWorker) {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => null);
+      }
+    });
   });
 })();
 
