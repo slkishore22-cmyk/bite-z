@@ -353,17 +353,17 @@ All colors MUST be HSL.
 
   .user-home-screen {
     min-height: var(--app-vh, 100dvh);
-    --home-greeting-top: calc(max(56px, env(safe-area-inset-top, 0px)) + 24px);
-    --home-greeting-gap: 52px;
-    --home-section-gap: 48px;
+    --home-greeting-top: calc(env(safe-area-inset-top, 0px) + clamp(20px, 5svh, 44px));
+    --home-greeting-gap: clamp(24px, 5.5svh, 52px);
+    --home-section-gap: clamp(28px, 5.5svh, 48px);
   }
 
   html.pwa-standalone .user-home-screen,
   html.android-pwa .user-home-screen,
   html.ios-pwa .user-home-screen {
-    --home-greeting-top: calc(max(48px, env(safe-area-inset-top, 0px)) + 16px);
-    --home-greeting-gap: 38px;
-    --home-section-gap: 40px;
+    --home-greeting-top: calc(env(safe-area-inset-top, 0px) + clamp(16px, 4.5svh, 36px));
+    --home-greeting-gap: clamp(22px, 4.5svh, 42px);
+    --home-section-gap: clamp(26px, 5svh, 44px);
   }
 
   html.pwa-standalone .user-home-greeting,
@@ -371,23 +371,6 @@ All colors MUST be HSL.
   html.ios-pwa .user-home-greeting {
     padding-top: var(--home-greeting-top) !important;
     margin-bottom: var(--home-greeting-gap) !important;
-  }
-
-  @media (max-height: 700px) {
-    html.pwa-standalone .user-home-screen,
-    html.android-pwa .user-home-screen,
-    html.ios-pwa .user-home-screen {
-      --home-greeting-top: calc(max(44px, env(safe-area-inset-top, 0px)) + 14px);
-      --home-greeting-gap: 34px;
-      --home-section-gap: 36px;
-    }
-
-    html.pwa-standalone .user-home-greeting,
-    html.android-pwa .user-home-greeting,
-    html.ios-pwa .user-home-greeting {
-      padding-top: var(--home-greeting-top) !important;
-      margin-bottom: var(--home-greeting-gap) !important;
-    }
   }
 
   .lg-card {
