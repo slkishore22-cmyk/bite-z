@@ -48,6 +48,8 @@ html, body, #root {
   --ios-pwa-safe-top: 0px;
   --ios-pwa-safe-bottom: 0px;
   --ios-pwa-top-breathing: 0px;
+  --ios-content-top: 0px;
+  --ios-page-gap: 24px;
   --user-bottom-nav-height: 64px;
 }
 
@@ -63,8 +65,18 @@ html, body, #root {
   html.ios-pwa {
     --ios-pwa-safe-top: max(env(safe-area-inset-top, 0px), 18px);
     --ios-pwa-safe-bottom: env(safe-area-inset-bottom, 0px);
-    --ios-pwa-top-breathing: 14px;
+    --ios-pwa-top-breathing: 18px;
+    --ios-content-top: 28px;
+    --ios-page-gap: 34px;
   }
+}
+
+html.ios-device:not(.ios-pwa) {
+  --ios-pwa-safe-top: max(env(safe-area-inset-top, 0px), 16px);
+  --ios-pwa-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --ios-pwa-top-breathing: 16px;
+  --ios-content-top: 24px;
+  --ios-page-gap: 32px;
 }
 
 .safe-area-top { padding-top: env(safe-area-inset-top, 0px); }
