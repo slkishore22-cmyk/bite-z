@@ -28,6 +28,7 @@ type BulkRow = {
 type OrderItem = { emoji: string; name: string; qty: number };
 type Order = {
   id: string;
+  uid: string;
   agoMinutes: number;
   payment: "Online" | "Cash";
   total: number;
@@ -259,7 +260,7 @@ const SellerOrders = () => {
               )}
               {filteredOrders.map((o) => (
                 <article
-                  key={o.id}
+                  key={o.uid}
                   className="rounded-2xl border border-border bg-gradient-card p-4 shadow-card"
                 >
                   <div className="flex items-start justify-between">
@@ -317,7 +318,7 @@ const SellerOrders = () => {
                   {tab === "live" && (
                     <button
                       type="button"
-                      onClick={() => setOrderStatus(o.id, "Completed")}
+                      onClick={() => setOrderStatus(o.uid, "Completed")}
                       className="mt-3 w-full rounded-full bg-primary py-2 text-xs font-extrabold uppercase tracking-wider text-primary-foreground transition hover:bg-primary/90"
                     >
                       Mark Completed
@@ -356,6 +357,7 @@ function toOrder(o: StoreOrder): Order {
   const ago = Math.max(0, Math.floor((Date.now() - o.createdAt) / 60000));
   return {
     id: o.id,
+    uid: o.uid,
     agoMinutes: ago,
     payment: o.payment,
     total: o.total,

@@ -98,7 +98,7 @@ const Payment = () => {
         playOnlineSuccessOnce(order.uid);
       }
       setPlacing(false);
-      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.id}`, {
+      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.uid}`, {
         replace: true,
       });
     };

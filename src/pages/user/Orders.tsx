@@ -12,6 +12,7 @@ import { getUserSession } from "@/utils/sessionManager";
 
 type OrderRow = {
   id: string;
+  uid: string;
   itemsCount: number;
   total: number;
   emojis: string[];
@@ -27,6 +28,7 @@ type CanteenGroup = {
 
 const toOrderRow = (o: Order): OrderRow => ({
   id: o.id,
+  uid: o.uid,
   itemsCount: o.items.reduce((s, i) => s + i.qty, 0),
   total: o.total,
   emojis: o.items.slice(0, 3).map((i) => i.icon),
@@ -340,9 +342,9 @@ const GroupCard = ({
         <div style={{ padding: "0 16px 16px 16px" }} className="space-y-3">
           {group.orders.map((o) => (
             <button
-              key={o.id}
+              key={o.uid}
               onClick={() =>
-                isPending ? navigate(`/app/order-status?id=${encodeURIComponent(o.id)}`) : undefined
+                isPending ? navigate(`/app/order-status?id=${encodeURIComponent(o.uid)}`) : undefined
               }
               className="w-full text-left active:scale-[0.99] transition-transform"
               style={{
