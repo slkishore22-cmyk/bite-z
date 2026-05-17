@@ -40,6 +40,8 @@ export type Order = {
 const STORAGE_KEY = "bitez:orders";
 const EVENT_NAME = "bitez:orders:change";
 const ID_COUNTER_KEY = "bitez:orders:counter";
+const SHORT_ID_MIN = 1000;
+const SHORT_ID_RANGE = 9000;
 
 // COD orders soft-expire (status="Expired") after this duration.
 // They are NOT deleted from storage/backend — sales/audit data is preserved.
@@ -86,11 +88,20 @@ function getCurrentUserId(): string | null {
 
 function nextShortId(): string {
   if (typeof window === "undefined") return "1000";
+  const existing = new Set(read().map((o) => o.id));
   const raw = window.localStorage.getItem(ID_COUNTER_KEY);
-  const n = raw ? parseInt(raw, 10) || 1000 : 1000;
-  const next = n + 1;
-  window.localStorage.setItem(ID_COUNTER_KEY, String(next));
-  return String(next);
+  let n = raw ? parseInt(raw, 10) || SHORT_ID_MIN : SHORT_ID_MIN;
+  for (let i = 0; i < SHORT_ID_RANGE; i += 1) {
+    n = n >= 9999 ? SHORT_ID_MIN : n + 1;
+    const candidate = String(n);
+    if (!existing.has(candidate)) {
+      window.localStorage.setItem(ID_COUNTER_KEY, candidate);
+      return candidate;
+    }
+  }
+  const fallback = String(Date.now()).slice(-6);
+  window.localStorage.setItem(ID_COUNTER_KEY, fallback);
+  return fallback;
 }
 
 export function getOrders(): Order[] {
