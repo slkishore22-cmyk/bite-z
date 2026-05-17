@@ -97,8 +97,13 @@ const Home = () => {
       }
     }
     return Array.from(counts.values())
+      // Frequency-first ranking across ALL historical orders for this user.
+      // Tie-breakers: total quantity ever ordered, then most recently ordered.
+      // This never "resets" — it always reflects lifetime ordering behavior.
+      // First-time orders naturally appear (count = 1); over time the most
+      // frequently ordered items rise to the top. Capped at 10.
       .sort((a, b) => b.orderCount - a.orderCount || b.quantityCount - a.quantityCount || b.latestAt - a.latestAt)
-      .slice(0, 8);
+      .slice(0, 10);
   }, [orders, canteens]);
 
   const cartCanteenKey = (canteenId?: string) => canteenId ?? "__unknown__";
