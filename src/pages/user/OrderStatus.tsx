@@ -317,9 +317,9 @@ const OrderStatus = () => {
                   <span>No items</span>
                 </div>
               ) : (
-                items.map((it) => (
+                items.map((it, index) => (
                   <div
-                    key={it.itemId}
+                    key={`${it.canteenId ?? "unknown"}-${it.itemId}-${index}`}
                     className="flex justify-between"
                     style={{ fontSize: 14, color: "#64748B" }}
                   >
