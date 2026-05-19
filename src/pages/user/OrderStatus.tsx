@@ -11,6 +11,13 @@ const OrderStatus = () => {
   const orderParamId = params.get("id");
 
   const [revealed, setRevealed] = useState(false);
+  const reduceMotion = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const nav = window.navigator as Navigator & { standalone?: boolean };
+    const isAppleTouch = /iPad|iPhone|iPod/.test(nav.userAgent) ||
+      (nav.platform === "MacIntel" && nav.maxTouchPoints > 1);
+    return isAppleTouch || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
 
   // Pull the most recent order (or the one referenced in the URL).
   const order = useMemo(() => {
@@ -78,7 +85,7 @@ const OrderStatus = () => {
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
         }}
       >
-        <OrderConfirmedAnimation />
+        <OrderConfirmedAnimation reduceMotion={reduceMotion} />
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-3 w-full">
@@ -86,7 +93,7 @@ const OrderStatus = () => {
           <div
             className="flex flex-col items-center justify-center"
             style={{
-              animation: 'ob-card-slide-up 500ms 800ms ease both',
+              animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 800ms ease both',
               background: "#FFFFFF",
               padding: 20,
               borderRadius: 20,
@@ -142,7 +149,7 @@ const OrderStatus = () => {
           <div
             className="flex flex-col items-center justify-center transition-all duration-400"
             style={{
-              animation: 'ob-card-slide-up 500ms 900ms ease both',
+              animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 900ms ease both',
               background: "#FFFFFF",
               padding: 16,
               borderRadius: 16,
@@ -197,7 +204,7 @@ const OrderStatus = () => {
           <div
             className="flex items-center justify-between"
             style={{
-              animation: 'ob-card-slide-up 500ms 1050ms ease both',
+              animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 1050ms ease both',
               background: "#FFFFFF",
               padding: 16,
               borderRadius: 16,
@@ -254,7 +261,7 @@ const OrderStatus = () => {
           <div
             className="relative overflow-hidden"
             style={{
-              animation: 'ob-card-slide-up 500ms 1200ms ease both',
+              animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 1200ms ease both',
               background: "#FFFFFF",
               padding: 18,
               borderRadius: 16,
