@@ -13,6 +13,31 @@ declare global {
   }
 }
 
+const loadRazorpay = () =>
+  new Promise<boolean>((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(false);
+      return;
+    }
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const existing = document.querySelector<HTMLScriptElement>('script[data-razorpay-checkout="true"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true), { once: true });
+      existing.addEventListener("error", () => resolve(false), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.dataset.razorpayCheckout = "true";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(40px)",
@@ -117,7 +142,8 @@ const Payment = () => {
         setPlacing(false);
         return;
       }
-      if (!window.Razorpay) {
+      const sdkReady = await loadRazorpay();
+      if (!sdkReady || !window.Razorpay) {
         alert("Payment SDK not loaded. Please refresh and try again.");
         setPlacing(false);
         return;
