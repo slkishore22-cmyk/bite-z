@@ -245,12 +245,12 @@ export default function OrderConfirmedAnimation({ onAnimationComplete, reduceMot
                 strokeLinejoin="round"
                 fill="none"
                 strokeDasharray="60"
-                strokeDashoffset="60"
-                style={showCheck ? {
+                strokeDashoffset={showCheck ? 0 : 60}
+                style={showCheck && !reduceMotion ? {
                   animation: 'ob-check-draw 420ms 0ms cubic-bezier(0.4,0,0.2,1) forwards',
                 } : {
-                  strokeDashoffset: 60,
-                  opacity: 0,
+                  strokeDashoffset: showCheck ? 0 : 60,
+                  opacity: showCheck ? 1 : 0,
                 }}
               />
             </svg>
@@ -262,7 +262,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete, reduceMot
       {showText && (
         <div style={{
           textAlign: 'center',
-          animation: 'ob-fade-slide-up 500ms cubic-bezier(0.4,0,0.2,1) forwards',
+          animation: reduceMotion ? 'none' : 'ob-fade-slide-up 500ms cubic-bezier(0.4,0,0.2,1) forwards',
           marginBottom: 8,
         }}>
           <h2 style={{
@@ -280,7 +280,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete, reduceMot
             margin: 0,
             lineHeight: 1.5,
             padding: '0 32px',
-            animation: 'ob-fade-slide-up 500ms 150ms cubic-bezier(0.4,0,0.2,1) both',
+            animation: reduceMotion ? 'none' : 'ob-fade-slide-up 500ms 150ms cubic-bezier(0.4,0,0.2,1) both',
           }}>
             Your order has been placed successfully<br />
             and is being shared with the chef.
