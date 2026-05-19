@@ -160,7 +160,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete, reduceMot
       }}>
 
         {/* Ripple rings — fire on pulse phase */}
-        {showPulse && [0, 1, 2].map(i => (
+        {showPulse && !reduceMotion && [0, 1, 2].map(i => (
           <div key={i} style={{
             position: 'absolute',
             width: 96,
@@ -173,7 +173,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete, reduceMot
         ))}
 
         {/* Particle burst — fires on check phase */}
-        {showCheck && PARTICLES.map((p, i) => {
+        {showCheck && !reduceMotion && PARTICLES.map((p, i) => {
           const px = Math.cos(toRad(p.angle)) * p.dist;
           const py = Math.sin(toRad(p.angle)) * p.dist;
           return (
@@ -200,7 +200,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete, reduceMot
             height: 140,
             borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.04) 60%, transparent 75%)',
-            animation: showRing ? 'ob-outer-ring 500ms cubic-bezier(0.34,1.56,0.64,1) forwards' : 'none',
+            animation: showRing && !reduceMotion ? 'ob-outer-ring 500ms cubic-bezier(0.34,1.56,0.64,1) forwards' : 'none',
           }} />
         )}
 
