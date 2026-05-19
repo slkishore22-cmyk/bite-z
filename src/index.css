@@ -1,15 +1,15 @@
 html {
-  touch-action: pan-x pan-y;
+  touch-action: manipulation;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   -webkit-touch-callout: none;
 }
 
-/* Force-disable pinch-zoom and double-tap zoom on iOS Safari (browser + PWA). */
+/* Keep taps fast without blocking Safari's native scroll pipeline. */
 html, body {
-  touch-action: pan-x pan-y;
-  -ms-touch-action: pan-x pan-y;
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
 }
 
 /* Perf: kill iOS 300ms tap delay on interactive elements globally. */
@@ -40,10 +40,6 @@ button, a, [role="button"], [role="link"], [data-tappable="true"] {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 html, body, #root {
   width: 100%;
@@ -142,7 +138,8 @@ input, textarea {
   -webkit-touch-callout: default;
 }
 body {
-  overscroll-behavior: none;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 /* Subtle native-app cross-fade between routes. Pure opacity — no layout
@@ -159,7 +156,7 @@ main {
 }
 html, body {
   overscroll-behavior-x: none;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
 }
 
 @keyframes bitez-pulse {

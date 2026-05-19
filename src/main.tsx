@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { installGlobalTapHaptics } from "./lib/haptics";
 
 const markIosPwa = () => {
   if (typeof window === "undefined") return;
@@ -20,9 +19,6 @@ const markIosPwa = () => {
 markIosPwa();
 
 createRoot(document.getElementById("root")!).render(<App />);
-
-// Native-app-feel: tiny vibration on every interactive tap (touch only).
-installGlobalTapHaptics();
 
 /* ---------- PWA service worker registration ----------
  * vite-plugin-pwa generates /sw.js for the main PWA shell. We deliberately
@@ -85,14 +81,17 @@ installGlobalTapHaptics();
 (function installAppViewport() {
   if (typeof window === "undefined") return;
   const vv = window.visualViewport;
+  let raf = 0;
   const apply = () => {
-    const h = vv?.height ?? window.innerHeight;
-    document.documentElement.style.setProperty("--app-vh", `${h}px`);
+    window.cancelAnimationFrame(raf);
+    raf = window.requestAnimationFrame(() => {
+      const h = window.innerHeight;
+      document.documentElement.style.setProperty("--app-vh", `${h}px`);
+    });
   };
   apply();
   if (vv) {
     vv.addEventListener("resize", apply);
-    vv.addEventListener("scroll", apply);
   }
   window.addEventListener("resize", apply);
   window.addEventListener("orientationchange", apply);

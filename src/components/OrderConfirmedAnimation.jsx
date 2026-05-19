@@ -107,8 +107,8 @@ const PARTICLES = [
 function toRad(deg) { return (deg * Math.PI) / 180; }
 
 // ── Main component ───────────────────────────────────────────────
-export default function OrderConfirmedAnimation({ onAnimationComplete }) {
-  const [phase, setPhase] = useState('idle');
+export default function OrderConfirmedAnimation({ onAnimationComplete, reduceMotion = false }) {
+  const [phase, setPhase] = useState(reduceMotion ? 'done' : 'idle');
   // idle → ring → circle → check → pulse → breathe → done
   const hasPlayed = useRef(false);
 
@@ -117,19 +117,25 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
   }, []);
 
   useEffect(() => {
+    if (reduceMotion) {
+      onAnimationComplete?.();
+      return;
+    }
     if (hasPlayed.current) return;
     hasPlayed.current = true;
 
     // Animation timeline
     const t = (delay, fn) => setTimeout(fn, delay);
-
-    t(0,    () => setPhase('ring'));
-    t(160,  () => setPhase('circle'));
-    t(420,  () => setPhase('check'));
-    t(520,  () => setPhase('pulse'));
-    t(1400, () => setPhase('breathe'));
-    t(2200, () => { setPhase('done'); onAnimationComplete?.(); });
-  }, []);
+    const timers = [
+      t(0,    () => setPhase('ring')),
+      t(160,  () => setPhase('circle')),
+      t(420,  () => setPhase('check')),
+      t(520,  () => setPhase('pulse')),
+      t(1400, () => setPhase('breathe')),
+      t(2200, () => { setPhase('done'); onAnimationComplete?.(); }),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [onAnimationComplete, reduceMotion]);
 
   const showRing    = ['ring','circle','check','pulse','breathe','done'].includes(phase);
   const showCircle  = ['circle','check','pulse','breathe','done'].includes(phase);
@@ -154,7 +160,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
       }}>
 
         {/* Ripple rings — fire on pulse phase */}
-        {showPulse && [0, 1, 2].map(i => (
+        {showPulse && !reduceMotion && [0, 1, 2].map(i => (
           <div key={i} style={{
             position: 'absolute',
             width: 96,
@@ -167,7 +173,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
         ))}
 
         {/* Particle burst — fires on check phase */}
-        {showCheck && PARTICLES.map((p, i) => {
+        {showCheck && !reduceMotion && PARTICLES.map((p, i) => {
           const px = Math.cos(toRad(p.angle)) * p.dist;
           const py = Math.sin(toRad(p.angle)) * p.dist;
           return (
@@ -194,7 +200,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
             height: 140,
             borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.04) 60%, transparent 75%)',
-            animation: showRing ? 'ob-outer-ring 500ms cubic-bezier(0.34,1.56,0.64,1) forwards' : 'none',
+            animation: showRing && !reduceMotion ? 'ob-outer-ring 500ms cubic-bezier(0.34,1.56,0.64,1) forwards' : 'none',
           }} />
         )}
 
@@ -210,10 +216,12 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
             justifyContent: 'center',
             position: 'relative',
             zIndex: 3,
-            animation: showPulse
+            animation: reduceMotion
+              ? 'none'
+              : showPulse
               ? 'ob-glow-pulse 800ms cubic-bezier(0.34,1.56,0.64,1) forwards'
               : showBreathe
-              ? 'ob-glow-breathe 2.8s ease-in-out infinite'
+              ? 'none'
               : 'ob-circle-pop 550ms cubic-bezier(0.34,1.56,0.64,1) forwards',
             // Static glow after pulse settles
             boxShadow: showBreathe || showPulse
@@ -237,12 +245,12 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
                 strokeLinejoin="round"
                 fill="none"
                 strokeDasharray="60"
-                strokeDashoffset="60"
-                style={showCheck ? {
+                strokeDashoffset={showCheck ? 0 : 60}
+                style={showCheck && !reduceMotion ? {
                   animation: 'ob-check-draw 420ms 0ms cubic-bezier(0.4,0,0.2,1) forwards',
                 } : {
-                  strokeDashoffset: 60,
-                  opacity: 0,
+                  strokeDashoffset: showCheck ? 0 : 60,
+                  opacity: showCheck ? 1 : 0,
                 }}
               />
             </svg>
@@ -254,7 +262,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
       {showText && (
         <div style={{
           textAlign: 'center',
-          animation: 'ob-fade-slide-up 500ms cubic-bezier(0.4,0,0.2,1) forwards',
+          animation: reduceMotion ? 'none' : 'ob-fade-slide-up 500ms cubic-bezier(0.4,0,0.2,1) forwards',
           marginBottom: 8,
         }}>
           <h2 style={{
@@ -272,7 +280,7 @@ export default function OrderConfirmedAnimation({ onAnimationComplete }) {
             margin: 0,
             lineHeight: 1.5,
             padding: '0 32px',
-            animation: 'ob-fade-slide-up 500ms 150ms cubic-bezier(0.4,0,0.2,1) both',
+            animation: reduceMotion ? 'none' : 'ob-fade-slide-up 500ms 150ms cubic-bezier(0.4,0,0.2,1) both',
           }}>
             Your order has been placed successfully<br />
             and is being shared with the chef.

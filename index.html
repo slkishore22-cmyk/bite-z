@@ -19,8 +19,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" />
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
     
     
     <meta property="og:type" content="website" />
@@ -38,21 +36,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-    document.addEventListener('keydown',function(e){
-      if((e.ctrlKey||e.metaKey)&&
-        (e.key==='+'||e.key==='-'||e.key==='='||e.key==='0'))
-        e.preventDefault();
-    },{passive:false});
-    document.addEventListener('wheel',function(e){
-      if(e.ctrlKey||e.metaKey)e.preventDefault();
-    },{passive:false});
-    document.addEventListener('touchstart',function(e){
-      if(e.touches.length>1)e.preventDefault();
-    },{passive:false});
-    document.addEventListener('touchmove',function(e){
-      if(e.touches.length>1)e.preventDefault();
-    },{passive:false});
-    </script>
   </body>
 </html>
