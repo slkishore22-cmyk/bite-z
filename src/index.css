@@ -138,7 +138,8 @@ input, textarea {
   -webkit-touch-callout: default;
 }
 body {
-  overscroll-behavior: none;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 /* Subtle native-app cross-fade between routes. Pure opacity — no layout
