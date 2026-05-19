@@ -55,10 +55,8 @@ export const LiquidGlassNav = ({
       style={{
         height: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom))",
         paddingBottom: "var(--ios-pwa-safe-bottom)",
-        WebkitBackdropFilter: "blur(36px) saturate(200%)",
-        backdropFilter: "blur(36px) saturate(200%)",
         background:
-          "linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.45))",
+          "linear-gradient(135deg, rgba(255,255,255,0.94), rgba(255,255,255,0.88))",
         boxShadow:
           "0 -8px 30px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.7) inset",
       }}
