@@ -98,8 +98,9 @@ const App = () => (
       <OfflineBanner />
       <AppDataPreloader />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/" element={<RootRedirect />} />
 
           {/* USER APP */}
           <Route path="/app/login" element={<UserLogin />} />
@@ -142,8 +143,9 @@ const App = () => (
           <Route path="/master-admin" element={<Navigate to="/master-admin/overview" replace />} />
 
           <Route path="/404" element={<NotFound />} />
-          <Route path="*" element={<RootRedirect />} />
-        </Routes>
+            <Route path="*" element={<RootRedirect />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </PersistQueryClientProvider>
