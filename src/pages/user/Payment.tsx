@@ -38,6 +38,20 @@ const loadRazorpay = () =>
     document.body.appendChild(script);
   });
 
+const releaseMobileScrollLocks = () => {
+  if (typeof document === "undefined") return;
+  [document.documentElement, document.body].forEach((node) => {
+    node.style.overflow = "";
+    node.style.position = "";
+    node.style.top = "";
+    node.style.left = "";
+    node.style.right = "";
+    node.style.height = "";
+    node.style.touchAction = "";
+  });
+  document.querySelectorAll(".razorpay-container").forEach((node) => node.remove());
+};
+
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(40px)",
@@ -122,6 +136,7 @@ const Payment = () => {
       if (method === "Online" && paymentStatus === "SUCCESS") {
         playOnlineSuccessOnce(order.uid);
       }
+      releaseMobileScrollLocks();
       setPlacing(false);
       navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.uid}`, {
         replace: true,
@@ -167,10 +182,14 @@ const Payment = () => {
           await finalize("SUCCESS");
         },
         modal: {
-          ondismiss: () => setPlacing(false),
+          ondismiss: () => {
+            releaseMobileScrollLocks();
+            setPlacing(false);
+          },
         },
       });
       rzp.on("payment.failed", () => {
+        releaseMobileScrollLocks();
         alert("Payment failed. Please try again.");
         setPlacing(false);
       });
