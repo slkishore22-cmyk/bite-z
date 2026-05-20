@@ -8,6 +8,7 @@ import {
   subscribeCart,
   type CartItem,
 } from "@/lib/userCart";
+import { getActiveDiscountPctForSeller, subscribeOffers } from "@/lib/sellerOffers";
 
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.55)",
@@ -37,8 +38,11 @@ const Cart = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<CartItem[]>(() => getCart());
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  // Re-render whenever any offer changes so discount updates instantly.
+  const [, setOffersTick] = useState(0);
 
   useEffect(() => subscribeCart(() => setItems(getCart())), []);
+  useEffect(() => subscribeOffers(() => setOffersTick((n) => n + 1)), []);
 
   const update = (item: CartItem, delta: number) =>
     setCartQty(item.itemId, item.qty + delta, item.canteenId);
@@ -130,6 +134,9 @@ const Cart = () => {
               {groups.map((group) => {
                 const groupQty = group.items.reduce((s, i) => s + i.qty, 0);
                 const groupSubtotal = group.items.reduce((s, i) => s + i.price * i.qty, 0);
+                const discountPct = getActiveDiscountPctForSeller(group.canteenId);
+                const groupTotal = Math.round(groupSubtotal * (1 - discountPct / 100));
+                const hasDiscount = discountPct > 0;
                 const expanded = !collapsed[group.canteenId];
                 return (
               <section key={group.canteenId} style={{ ...liquidGlass }}>
@@ -163,7 +170,18 @@ const Cart = () => {
                         className="font-medium"
                         style={{ fontSize: 12, color: "#6E6E73", marginTop: 1 }}
                       >
-                        {groupQty} Item{groupQty > 1 ? "s" : ""} · ₹{groupSubtotal.toFixed(0)}
+                        {groupQty} Item{groupQty > 1 ? "s" : ""} ·{" "}
+                        {hasDiscount ? (
+                          <>
+                            <span style={{ textDecoration: "line-through", color: "#9CA3AF", marginRight: 6 }}>
+                              ₹{groupSubtotal.toFixed(0)}
+                            </span>
+                            <span style={{ color: "#16A34A", fontWeight: 700 }}>₹{groupTotal.toFixed(0)}</span>
+                            <span style={{ marginLeft: 6, color: "#16A34A", fontWeight: 700 }}>· {discountPct}% OFF</span>
+                          </>
+                        ) : (
+                          <>₹{groupSubtotal.toFixed(0)}</>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -290,8 +308,13 @@ const Cart = () => {
                       Pay {group.canteenName}
                     </span>
                     <div className="flex items-center gap-2 relative z-20">
+                      {hasDiscount && (
+                        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "line-through" }}>
+                          ₹{groupSubtotal.toFixed(0)}
+                        </span>
+                      )}
                       <span className="font-bold" style={{ fontSize: 15 }}>
-                        ₹{groupSubtotal.toFixed(0)}
+                        ₹{groupTotal.toFixed(0)}
                       </span>
                       <span className="material-symbols-outlined" style={{ fontSize: 21 }}>
                         arrow_forward
@@ -314,7 +337,14 @@ const Cart = () => {
             className="fixed left-1/2 -translate-x-1/2 z-30 px-6 w-full max-w-md"
             style={{ bottom: 96 }}
           >
-            <button
+            {(() => {
+              const g = groups[0];
+              const sub = g.items.reduce((s, i) => s + i.price * i.qty, 0);
+              const pct = getActiveDiscountPctForSeller(g.canteenId);
+              const total = Math.round(sub * (1 - pct / 100));
+              const has = pct > 0;
+              return (
+              <button
               onClick={() => navigate(`/app/payment?canteenId=${encodeURIComponent(groups[0].canteenId)}`)}
               className="w-full flex items-center justify-between relative overflow-hidden active:scale-[0.98] transition-all duration-[400ms]"
               style={{
@@ -345,8 +375,13 @@ const Cart = () => {
                 Pay Now
               </span>
               <div className="flex items-center gap-2 relative z-20">
+                {has && (
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", textDecoration: "line-through" }}>
+                    ₹{sub.toFixed(0)}
+                  </span>
+                )}
                 <span className="font-bold" style={{ fontSize: 16 }}>
-                  ₹{groups[0].items.reduce((s, i) => s + i.price * i.qty, 0).toFixed(0)}
+                  ₹{total.toFixed(0)}
                 </span>
                 <span
                   className="material-symbols-outlined"
@@ -355,7 +390,9 @@ const Cart = () => {
                   arrow_forward
                 </span>
               </div>
-            </button>
+              </button>
+              );
+            })()}
           </div>
         )}
       </div>
