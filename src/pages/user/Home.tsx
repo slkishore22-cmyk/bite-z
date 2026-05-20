@@ -333,9 +333,10 @@ const Home = () => {
 };
 
 /* ---------------- Offer Card ---------------- */
-const OfferCard = ({ offer }: { offer: Offer }) => (
+const OfferCard = ({ offer, onClick }: { offer: Offer; onClick?: () => void }) => (
   <button
     type="button"
+    onClick={onClick}
     className="cb-glass shrink-0 flex flex-col justify-between text-left"
     style={{ width: 260, height: 150, padding: "16px 20px" }}
   >
