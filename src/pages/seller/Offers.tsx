@@ -2,7 +2,15 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { getInventory, subscribeInventory, type SellerInventoryItem } from "@/lib/sellerInventory";
-import { addOffer } from "@/lib/sellerOffers";
+import {
+  addOffer,
+  getOffers,
+  removeOffer,
+  subscribeOffers,
+  updateOffer,
+  type SellerOffer,
+} from "@/lib/sellerOffers";
+import { getSellerSession } from "@/lib/sellerAuth";
 
 type OfferType = "general" | "inventory";
 
@@ -22,10 +30,12 @@ const toInventoryItem = (it: SellerInventoryItem): InventoryItem => ({
 
 const SellerOffers = () => {
   const [step, setStep] = useState<"select" | "details">("select");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [offerType, setOfferType] = useState<OfferType>("general");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [inventory, setInventory] = useState<SellerInventoryItem[]>(() => getInventory());
+  const [offers, setOffers] = useState<SellerOffer[]>(() => getOffers());
   // Form fields (lifted to parent so submit can persist)
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -34,6 +44,13 @@ const SellerOffers = () => {
   const [condition, setCondition] = useState("");
 
   useEffect(() => subscribeInventory(() => setInventory(getInventory())), []);
+  useEffect(() => subscribeOffers(() => setOffers(getOffers())), []);
+
+  const sellerId = getSellerSession()?.id ?? null;
+  const myOffers = useMemo(
+    () => offers.filter((o) => o.sellerId === sellerId),
+    [offers, sellerId],
+  );
 
   const filteredItems = useMemo(() => {
     const all = inventory.map(toInventoryItem);
@@ -62,15 +79,28 @@ const SellerOffers = () => {
       toast.error("Pick at least one item");
       return;
     }
-    addOffer({
-      kind: offerType,
-      name: trimmedName,
-      discountPct: pct,
-      startDate,
-      endDate,
-      condition: condition.trim(),
-      itemIds: offerType === "inventory" ? selectedItems : [],
-    });
+    if (editingId) {
+      updateOffer(editingId, {
+        kind: offerType,
+        name: trimmedName,
+        discountPct: pct,
+        startDate,
+        endDate,
+        condition: offerType === "general" ? "" : condition.trim(),
+        itemIds: offerType === "inventory" ? selectedItems : [],
+      });
+    } else {
+      addOffer({
+        sellerId,
+        kind: offerType,
+        name: trimmedName,
+        discountPct: pct,
+        startDate,
+        endDate,
+        condition: offerType === "general" ? "" : condition.trim(),
+        itemIds: offerType === "inventory" ? selectedItems : [],
+      });
+    }
     // Reset form & return to step 1
     setName("");
     setStartDate("");
@@ -78,15 +108,41 @@ const SellerOffers = () => {
     setDiscount("");
     setCondition("");
     setSelectedItems([]);
+    const wasEditing = Boolean(editingId);
+    setEditingId(null);
     setStep("select");
-    toast.success(offerType === "general" ? "General offer created" : "Inventory offer created");
+    toast.success(wasEditing ? "Offer updated" : offerType === "general" ? "General offer created" : "Inventory offer created");
   };
 
   const goBack = () => {
     if (step === "details") {
+      setEditingId(null);
+      setName("");
+      setStartDate("");
+      setEndDate("");
+      setDiscount("");
+      setCondition("");
+      setSelectedItems([]);
       setStep("select");
       return;
     }
+  };
+
+  const startEdit = (o: SellerOffer) => {
+    setEditingId(o.id);
+    setOfferType(o.kind);
+    setName(o.name);
+    setStartDate(o.startDate);
+    setEndDate(o.endDate);
+    setDiscount(String(o.discountPct));
+    setCondition(o.condition ?? "");
+    setSelectedItems(o.itemIds ?? []);
+    setStep("details");
+  };
+
+  const deleteOffer = (id: string) => {
+    removeOffer(id);
+    toast.success("Offer deleted");
   };
 
   const toggleItem = (id: string) => {
@@ -100,6 +156,7 @@ const SellerOffers = () => {
       <GeneralOfferForm
         onBack={goBack}
         onSubmit={createOffer}
+        editing={Boolean(editingId)}
         name={name}
         setName={setName}
         startDate={startDate}
@@ -119,6 +176,7 @@ const SellerOffers = () => {
       <InventoryOfferForm
         onBack={goBack}
         onSubmit={createOffer}
+        editing={Boolean(editingId)}
         query={query}
         setQuery={setQuery}
         items={filteredItems}
@@ -196,6 +254,64 @@ const SellerOffers = () => {
           </span>
         </button>
         <p className="mt-4 text-center text-sm font-medium text-muted-foreground">Step 1 of 3: Selection</p>
+
+        {/* Live / Saved Offers */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-extrabold tracking-tight">Your Offers</h3>
+            <span className="rounded-full bg-secondary px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+              {myOffers.length}
+            </span>
+          </div>
+          {myOffers.length === 0 ? (
+            <p className="mt-4 rounded-2xl border border-dashed border-border bg-secondary/40 p-6 text-center text-sm text-muted-foreground">
+              No offers yet. Create one above to start.
+            </p>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {myOffers.map((o) => (
+                <div
+                  key={o.id}
+                  className="flex items-center gap-3 rounded-2xl border border-border bg-gradient-card p-4 shadow-card"
+                >
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+                    <span className="material-symbols-outlined" style={{ fontSize: 26 }}>
+                      {o.kind === "general" ? "restaurant_menu" : "inventory_2"}
+                    </span>
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-base font-extrabold">{o.name}</p>
+                      <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-extrabold text-primary-foreground">
+                        {o.discountPct}% OFF
+                      </span>
+                    </div>
+                    <p className="mt-1 truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {o.kind === "general" ? "All items" : `${o.itemIds.length} item${o.itemIds.length === 1 ? "" : "s"}`}
+                      {o.startDate || o.endDate ? ` • ${o.startDate || "—"} → ${o.endDate || "—"}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => startEdit(o)}
+                    aria-label="Edit offer"
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground transition hover:bg-secondary/80"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteOffer(o.id)}
+                    aria-label="Delete offer"
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-destructive/15 text-destructive transition hover:bg-destructive/25"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
@@ -278,6 +394,7 @@ type FormFieldProps = {
 const GeneralOfferForm = ({
   onBack,
   onSubmit,
+  editing,
   name,
   setName,
   startDate,
@@ -286,12 +403,10 @@ const GeneralOfferForm = ({
   setEndDate,
   discount,
   setDiscount,
-  condition,
-  setCondition,
-}: { onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void } & FormFieldProps) => (
+}: { onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; editing?: boolean } & Omit<FormFieldProps, "condition" | "setCondition">) => (
   <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
     <main className="mx-auto w-full max-w-md px-5 pb-12">
-      <PageHeader title="General Offer" subtitle="Apply discounts across all items" onBack={onBack} />
+      <PageHeader title={editing ? "Edit Offer" : "General Offer"} subtitle="Apply discounts across all items" onBack={onBack} />
 
       <form onSubmit={onSubmit} className="mt-8 rounded-3xl border border-border bg-gradient-card p-5 shadow-card">
         <FieldLabel>Offer Name</FieldLabel>
@@ -311,16 +426,8 @@ const GeneralOfferForm = ({
         <FieldLabel className="mt-5">Discount Percentage</FieldLabel>
         <IconInput placeholder="Enter discount %" icon="percent" value={discount} onChange={setDiscount} type="number" />
 
-        <FieldLabel className="mt-5">Offer Condition (Optional)</FieldLabel>
-        <textarea
-          value={condition}
-          onChange={(e) => setCondition(e.target.value)}
-          placeholder="Enter condition (e.g. Buy above ₹200)"
-          className="mt-2 min-h-24 w-full resize-none rounded-2xl border border-border bg-secondary/70 px-5 py-4 text-sm font-medium text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/60"
-        />
-
         <button type="submit" className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
-          Create Offer
+          {editing ? "Save Changes" : "Create Offer"}
           <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
             bolt
           </span>
@@ -338,6 +445,7 @@ const GeneralOfferForm = ({
 const InventoryOfferForm = ({
   onBack,
   onSubmit,
+  editing,
   query,
   setQuery,
   items,
@@ -356,6 +464,7 @@ const InventoryOfferForm = ({
 }: {
   onBack: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  editing?: boolean;
   query: string;
   setQuery: (value: string) => void;
   items: InventoryItem[];
@@ -364,7 +473,7 @@ const InventoryOfferForm = ({
 } & FormFieldProps) => (
   <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
     <main className="mx-auto w-full max-w-md px-5 pb-12">
-      <PageHeader title="Create Offer" subtitle="Fill in the details" onBack={onBack} />
+      <PageHeader title={editing ? "Edit Offer" : "Create Offer"} subtitle="Fill in the details" onBack={onBack} />
 
       <form onSubmit={onSubmit} className="mt-8">
         <FieldLabel>Offer Name</FieldLabel>
@@ -435,7 +544,7 @@ const InventoryOfferForm = ({
         </div>
 
         <button type="submit" className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-glow transition hover:bg-primary/90">
-          Create Offer
+          {editing ? "Save Changes" : "Create Offer"}
           <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
             arrow_forward
           </span>
