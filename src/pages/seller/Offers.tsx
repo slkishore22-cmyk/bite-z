@@ -165,8 +165,6 @@ const SellerOffers = () => {
         setEndDate={setEndDate}
         discount={discount}
         setDiscount={setDiscount}
-        condition={condition}
-        setCondition={setCondition}
       />
     );
   }
