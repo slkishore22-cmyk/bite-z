@@ -9,7 +9,7 @@ import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/seller
 import { getRegisteredCanteens, getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
 import { getUserName } from "@/utils/sessionManager";
 
-type Offer = { canteen: string; title: string; discount: string; active: boolean };
+type Offer = { canteen: string; title: string; discount: string; active: boolean; sellerId: string | null };
 type Repeat = {
   itemId: string;
   emoji: string;
@@ -24,13 +24,6 @@ type Repeat = {
   latestAt: number;
 };
 type Spot = { id: string; icon: string; name: string; sub: string };
-
-const toDisplayOffer = (o: SellerOffer): Offer => ({
-  canteen: o.kind === "general" ? "ALL ITEMS" : "SELECTED ITEMS",
-  title: o.name,
-  discount: `${o.discountPct}% OFF`,
-  active: true,
-});
 
 const Home = () => {
   const navigate = useNavigate();
@@ -60,7 +53,20 @@ const Home = () => {
     refresh();
     return subscribeProfile(refresh);
   }, []);
-  const offers: Offer[] = useMemo(() => liveOffers.map(toDisplayOffer), [liveOffers]);
+  const offers: Offer[] = useMemo(
+    () =>
+      liveOffers.map((o) => {
+        const canteen = canteens.find((c) => c.id === o.sellerId);
+        return {
+          canteen: (canteen?.canteenName ?? (o.kind === "general" ? "ALL ITEMS" : "SELECTED ITEMS")).toUpperCase(),
+          title: o.name,
+          discount: `${o.discountPct}% OFF`,
+          active: true,
+          sellerId: o.sellerId,
+        };
+      }),
+    [liveOffers, canteens],
+  );
   const spots: Spot[] = useMemo(
     () => canteens.map((c) => ({ id: c.id, icon: c.icon, name: c.canteenName, sub: c.slogan })),
     [canteens],
@@ -179,7 +185,13 @@ const Home = () => {
               }}
           >
             {offers.map((o, i) => (
-              <OfferCard key={i} offer={o} />
+              <OfferCard
+                key={i}
+                offer={o}
+                onClick={() => {
+                  if (o.sellerId) navigate(`/app/menu/${o.sellerId}`);
+                }}
+              />
             ))}
           </div>
         )}
@@ -321,9 +333,10 @@ const Home = () => {
 };
 
 /* ---------------- Offer Card ---------------- */
-const OfferCard = ({ offer }: { offer: Offer }) => (
+const OfferCard = ({ offer, onClick }: { offer: Offer; onClick?: () => void }) => (
   <button
     type="button"
+    onClick={onClick}
     className="cb-glass shrink-0 flex flex-col justify-between text-left"
     style={{ width: 260, height: 150, padding: "16px 20px" }}
   >

@@ -6,6 +6,7 @@ import { pinItem } from "@/lib/userPins";
 import { playOrderConfirmation } from "../../utils/orderConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserSession } from "@/utils/sessionManager";
+import { getActiveDiscountPctForSeller } from "@/lib/sellerOffers";
 
 declare global {
   interface Window {
@@ -109,7 +110,9 @@ const Payment = () => {
     }
     setPlacing(true);
     const subtotal = activeCart.reduce((s, c) => s + c.price * c.qty, 0);
-    const totalAmount = Math.round(subtotal);
+    const sellerKey = activeCart[0]?.canteenId ?? null;
+    const discountPct = getActiveDiscountPctForSeller(sellerKey);
+    const totalAmount = Math.max(1, Math.round(subtotal * (1 - discountPct / 100)));
 
     const firstCartItem = activeCart[0];
 
