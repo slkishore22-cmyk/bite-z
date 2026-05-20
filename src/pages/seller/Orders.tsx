@@ -66,42 +66,55 @@ const SellerOrders = () => {
   const [startDate, setStartDate] = useState<Date>(() => startOfDay(new Date()));
   const [endDate, setEndDate] = useState<Date>(() => endOfDay(new Date()));
   const [storeOrders, setStoreOrders] = useState<StoreOrder[]>(() => getOrders());
+  const [sellerId, setSellerId] = useState<string | null>(() => getSellerSession()?.id ?? null);
 
   useEffect(() => {
-    const sellerId = getSellerSession()?.id;
+    const sid = getSellerSession()?.id ?? null;
+    setSellerId(sid);
     const unsub = subscribeOrders(() => setStoreOrders(getOrders()));
-    loadOrdersFromBackend(sellerId).then(setStoreOrders).catch(() => setStoreOrders([]));
+    loadOrdersFromBackend(sid).then(setStoreOrders).catch(() => setStoreOrders([]));
     return unsub;
   }, []);
 
+  // Scope every derived list to the currently logged-in seller so other
+  // sellers' cached orders never leak into bulk/individual views.
+  const sellerOrders = useMemo(
+    () => (sellerId ? storeOrders.filter((o) => o.sellerId === sellerId) : storeOrders),
+    [storeOrders, sellerId],
+  );
+
   const liveOrders: Order[] = useMemo(
     () =>
-      storeOrders
+      sellerOrders
         .filter((o) => o.status === "Pending")
         .map(toOrder),
-    [storeOrders],
+    [sellerOrders],
   );
 
   const historyOrders: Order[] = useMemo(
     () =>
-      storeOrders
+      sellerOrders
         .filter((o) => o.status !== "Pending")
         .map(toOrder),
-    [storeOrders],
+    [sellerOrders],
   );
 
   // Aggregate items across live orders for the bulk summary view.
   const bulkRows: BulkRow[] = useMemo(() => {
     const map = new Map<string, BulkRow & { units: number }>();
     const tones: BulkRow["tone"][] = ["primary", "accent", "warning"];
-    storeOrders
+    sellerOrders
       .filter((o) => o.status === "Pending")
       .forEach((o) =>
         o.items.forEach((it) => {
-          const cur = map.get(it.itemId);
+          // Stable composite key: prefer itemId, but always include name+category
+          // so different products never collide on a missing/duplicate itemId,
+          // and the same product across orders always merges into one row.
+          const key = `${(it.itemId ?? "").trim()}|${it.name.trim().toLowerCase()}|${it.category}`;
+          const cur = map.get(key);
           if (cur) cur.units += it.qty;
           else
-            map.set(it.itemId, {
+            map.set(key, {
               emoji: it.icon,
               name: it.name,
               category: it.category,
@@ -111,7 +124,7 @@ const SellerOrders = () => {
         }),
       );
     return Array.from(map.values()).sort((a, b) => b.units - a.units);
-  }, [storeOrders]);
+  }, [sellerOrders]);
 
   const sourceOrders = useMemo(() => {
     if (tab === "live") return liveOrders;
