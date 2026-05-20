@@ -505,6 +505,13 @@ const SellerInventory = () => {
       toast.error("Please choose an icon");
       return;
     }
+    // Prevent duplicate inventory items (case-insensitive name match within this seller).
+    const normalized = trimmed.toLowerCase();
+    const duplicate = items.find((it) => it.name.trim().toLowerCase() === normalized);
+    if (duplicate) {
+      toast.error(`"${duplicate.name}" is already in your inventory`);
+      return;
+    }
     try {
       await addInventoryItem({
         name: trimmed,
