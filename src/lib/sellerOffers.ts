@@ -5,6 +5,7 @@ export type OfferKind = "general" | "inventory";
 
 export type SellerOffer = {
   id: string;
+  sellerId: string | null;
   kind: OfferKind;
   name: string;
   discountPct: number;
@@ -48,6 +49,23 @@ export function getActiveOffers(now = Date.now()): SellerOffer[] {
   });
 }
 
+/** Return the highest active general-offer % for a given seller (0 if none). */
+export function getActiveDiscountPctForSeller(sellerId?: string | null, now = Date.now()): number {
+  if (!sellerId) return 0;
+  const pct = getActiveOffers(now)
+    .filter((o) => o.kind === "general" && o.sellerId === sellerId)
+    .reduce((max, o) => Math.max(max, Number(o.discountPct) || 0), 0);
+  return Math.max(0, Math.min(100, pct));
+}
+
+export function getActiveOfferForSeller(sellerId?: string | null, now = Date.now()): SellerOffer | null {
+  if (!sellerId) return null;
+  const list = getActiveOffers(now)
+    .filter((o) => o.kind === "general" && o.sellerId === sellerId)
+    .sort((a, b) => b.discountPct - a.discountPct);
+  return list[0] ?? null;
+}
+
 export function addOffer(input: Omit<SellerOffer, "id" | "createdAt">): SellerOffer {
   const newOffer: SellerOffer = {
     ...input,
@@ -59,6 +77,10 @@ export function addOffer(input: Omit<SellerOffer, "id" | "createdAt">): SellerOf
   };
   write([newOffer, ...read()]);
   return newOffer;
+}
+
+export function updateOffer(id: string, patch: Partial<Omit<SellerOffer, "id" | "createdAt">>) {
+  write(read().map((o) => (o.id === id ? { ...o, ...patch } : o)));
 }
 
 export function removeOffer(id: string) {
