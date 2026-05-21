@@ -11,15 +11,14 @@ import {
 import { getActiveDiscountPctForSeller, loadOffersFromBackend, subscribeOffers } from "@/lib/sellerOffers";
 
 const liquidGlass: React.CSSProperties = {
-  background: "rgba(255,255,255,0.55)",
-  backdropFilter: "blur(40px)",
-  WebkitBackdropFilter: "blur(40px)",
+  background: "hsl(var(--user-surface) / 0.76)",
+  backdropFilter: "blur(24px) saturate(135%)",
+  WebkitBackdropFilter: "blur(24px) saturate(135%)",
   borderRadius: 26,
   position: "relative",
   overflow: "hidden",
-  border: "1px solid rgba(255,255,255,0.6)",
-  boxShadow:
-    "inset 0 1.5px 0 0 rgba(255,255,255,0.7), 0 8px 32px rgba(31,38,135,0.07)",
+  border: "1px solid hsl(var(--user-border) / 0.84)",
+  boxShadow: "0 10px 28px hsl(220 25% 40% / 0.09)",
 };
 
 const glassHighlight: React.CSSProperties = {
@@ -29,7 +28,7 @@ const glassHighlight: React.CSSProperties = {
   right: 0,
   height: "45%",
   background:
-    "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)",
+    "linear-gradient(180deg, hsl(var(--user-app-bg-soft) / 0.34) 0%, transparent 100%)",
   pointerEvents: "none",
   zIndex: 1,
 };
@@ -79,38 +78,33 @@ const Cart = () => {
   return (
     <UserLayout>
       <div
-        className="min-h-screen pb-44 antialiased"
+        className="user-page pb-44 antialiased"
         style={{
-          background: "#F8FAFC",
-          color: "#1D1D1F",
+          color: "hsl(var(--user-text))",
           fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
         }}
       >
-        {/* Fixed Header */}
         <header
-          className="fixed top-0 left-0 w-full z-40"
+          className="user-topbar fixed top-0 left-0 w-full z-40"
           style={{
-            background: "rgba(248,250,252,0.8)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
             paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
           }}
         >
-          <div className="flex items-center gap-3 px-6 py-4 max-w-md mx-auto">
+          <div className="user-content user-content-readable flex items-center gap-3 py-4">
             <button
               onClick={() => navigate(-1)}
               className="active:scale-95 transition-transform p-1 -ml-1"
             >
               <span
                 className="material-symbols-outlined"
-                style={{ color: "#1D1D1F", fontSize: 24 }}
+                style={{ color: "hsl(var(--user-text))", fontSize: 24 }}
               >
                 arrow_back
               </span>
             </button>
             <h1
               className="font-bold tracking-tight"
-              style={{ fontSize: 20, color: "#1D1D1F" }}
+              style={{ fontSize: 20, color: "hsl(var(--user-text))" }}
             >
               Your Cart
             </h1>
@@ -118,11 +112,11 @@ const Cart = () => {
         </header>
 
         <main
-          className="px-6 max-w-md mx-auto space-y-6"
+          className="user-content user-content-readable space-y-6"
           style={{ paddingTop: "calc(80px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
         >
           {items.length === 0 ? (
-            <section style={{ ...liquidGlass, padding: 24 }}>
+            <section className="user-card" style={{ ...liquidGlass, padding: 24 }}>
               <span style={glassHighlight} aria-hidden />
               <div className="relative z-10">
                 <p className="font-semibold" style={{ fontSize: 15 }}>
