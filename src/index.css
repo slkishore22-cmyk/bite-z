@@ -489,12 +489,13 @@ All colors MUST be HSL.
     max-width: none !important;
   }
 
-  body.user-app-route [style*="#050505"],
-  body.user-app-route [style*="#05070D"],
-  body.user-app-route [style*="#000"],
-  body.user-app-route [style*="rgb(0, 0, 0)"],
-  body.user-app-route [style*="rgba(0, 0, 0"],
-  body.user-app-route [style*="rgba(0,0,0"] {
+  body.user-app-route [style*="background: #050505"],
+  body.user-app-route [style*="background:#050505"],
+  body.user-app-route [style*="background: #05070D"],
+  body.user-app-route [style*="background:#05070D"],
+  body.user-app-route [style*="background: rgb(0, 0, 0)"],
+  body.user-app-route [style*="background: rgba(0, 0, 0"],
+  body.user-app-route [style*="background: rgba(0,0,0"] {
     background: hsl(var(--user-app-bg)) !important;
   }
 
