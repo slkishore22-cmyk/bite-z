@@ -6,11 +6,30 @@ import { pinItem } from "@/lib/userPins";
 import { playOrderConfirmation } from "../../utils/orderConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserSession } from "@/utils/sessionManager";
-import { getActiveDiscountPctForSeller } from "@/lib/sellerOffers";
+import { getActiveDiscountPctForSeller, loadOffersFromBackend } from "@/lib/sellerOffers";
+
+type RazorpayPaymentResponse = Record<string, unknown>;
+type RazorpayOptions = {
+  key: string;
+  amount: number | string;
+  currency: string;
+  order_id: string;
+  name: string;
+  description: string;
+  method: { upi: boolean; card: boolean; netbanking: boolean; wallet: boolean };
+  prefill: { name: string; contact: string };
+  theme: { color: string };
+  handler: (response: RazorpayPaymentResponse) => void | Promise<void>;
+  modal: { ondismiss: () => void };
+};
+type RazorpayInstance = {
+  on: (event: "payment.failed", handler: (response: RazorpayPaymentResponse) => void) => void;
+  open: () => void;
+};
 
 declare global {
   interface Window {
-    Razorpay?: any;
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -111,6 +130,7 @@ const Payment = () => {
     setPlacing(true);
     const subtotal = activeCart.reduce((s, c) => s + c.price * c.qty, 0);
     const sellerKey = activeCart[0]?.canteenId ?? null;
+    await loadOffersFromBackend(sellerKey).catch(() => []);
     const discountPct = getActiveDiscountPctForSeller(sellerKey);
     const totalAmount = Math.max(1, Math.round(subtotal * (1 - discountPct / 100)));
 

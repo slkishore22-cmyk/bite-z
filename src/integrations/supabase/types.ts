@@ -527,6 +527,51 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_offers: {
+        Row: {
+          condition: string
+          created_at: string
+          discount_pct: number
+          end_date: string | null
+          id: string
+          is_active: boolean
+          item_ids: string[]
+          kind: string
+          name: string
+          seller_id: string | null
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          condition?: string
+          created_at?: string
+          discount_pct?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          item_ids?: string[]
+          kind?: string
+          name: string
+          seller_id?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          condition?: string
+          created_at?: string
+          discount_pct?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          item_ids?: string[]
+          kind?: string
+          name?: string
+          seller_id?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seller_products: {
         Row: {
           category: string | null
