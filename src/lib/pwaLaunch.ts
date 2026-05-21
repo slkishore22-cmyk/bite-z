@@ -12,6 +12,7 @@ type PwaHeadConfig = {
   manifest: string;
   title: string;
   theme: string;
+  statusBar: "default" | "black-translucent";
   standalone: boolean;
   kind: AdminPwaKind | "user";
 };
@@ -74,12 +75,12 @@ export function getStoredAdminLaunchKind(): AdminPwaKind | null {
 function configForPath(pathname: string): PwaHeadConfig {
   const kind = adminPwaKindForPath(pathname);
   if (kind === "master-admin") {
-    return { manifest: "/manifest-admin.webmanifest", title: "Bitez Master Admin", theme: "#0A0A0F", standalone: true, kind };
+    return { manifest: "/manifest-admin.webmanifest", title: "Bitez Master Admin", theme: "#0A0A0F", statusBar: "black-translucent", standalone: true, kind };
   }
   if (kind === "seller-admin") {
-    return { manifest: "/manifest-seller-admin.webmanifest", title: "Bitez Admin", theme: "#050505", standalone: true, kind };
+    return { manifest: "/manifest-seller-admin.webmanifest", title: "Bitez Admin", theme: "#050505", statusBar: "black-translucent", standalone: true, kind };
   }
-  return { manifest: "/manifest.webmanifest", title: "Bitez", theme: "#050505", standalone: false, kind: "user" };
+  return { manifest: "/manifest.webmanifest", title: "Bitez", theme: "#E9EEF5", statusBar: "default", standalone: true, kind: "user" };
 }
 
 function ensureMeta(name: string) {
@@ -118,6 +119,7 @@ export function applyPwaHeadForPath(pathname = window.location.pathname) {
   ensureMeta("apple-mobile-web-app-title").setAttribute("content", config.title);
   ensureMeta("apple-mobile-web-app-capable").setAttribute("content", config.standalone ? "yes" : "no");
   ensureMeta("mobile-web-app-capable").setAttribute("content", config.standalone ? "yes" : "no");
+  ensureMeta("apple-mobile-web-app-status-bar-style").setAttribute("content", config.statusBar);
 
   if (config.kind === "seller-admin" || config.kind === "master-admin") {
     try {
