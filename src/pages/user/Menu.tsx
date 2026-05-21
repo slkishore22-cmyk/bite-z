@@ -284,7 +284,7 @@ const Menu = () => {
           </div>
 
           {/* Food list */}
-          <div className="space-y-8">
+          <div ref={inventoryRef} className="space-y-8">
             {visible.map((it, idx) => {
               const n = qtyOf(it.id);
               return (
