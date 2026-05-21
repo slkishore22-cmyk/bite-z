@@ -450,16 +450,6 @@ All colors MUST be HSL.
      inline iOS-style white/gray backgrounds. Route-scoped important rules beat
      those inline values so no user page can reintroduce white blocks or black
      side gutters while the app grows responsively. */
-  body.user-app-route [style*="#F5F5F7"],
-  body.user-app-route [style*="#F8FAFC"],
-  body.user-app-route [style*="#FFFFFF"],
-  body.user-app-route [style*="#fff"],
-  body.user-app-route [style*="rgb(255, 255, 255)"],
-  body.user-app-route [style*="rgba(255,255,255"],
-  body.user-app-route [style*="rgba(255, 255, 255"] {
-    background: hsl(var(--user-surface) / 0.72) !important;
-  }
-
   body.user-app-route main[style*="#F5F5F7"],
   body.user-app-route main[style*="#F8FAFC"],
   body.user-app-route div[style*="min-height"][style*="#F5F5F7"],
