@@ -33,6 +33,30 @@ export function adminHomeForKind(kind: AdminPwaKind, authenticated: boolean) {
   return authenticated ? "/seller/dashboard" : "/seller/login";
 }
 
+function hasStoredSession(kind: AdminPwaKind) {
+  if (typeof window === "undefined") return false;
+  const keys = kind === "master-admin" ? ["bitez_admin_session", "ma_session_v1"] : ["bitez_seller_session", "bitez.seller.session.v1"];
+  return keys.some((key) => {
+    try {
+      const raw = window.localStorage.getItem(key) || window.sessionStorage.getItem(key);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      return Boolean(parsed?.authenticated || parsed?.id || parsed?.role === "seller" || parsed?.role === "master_admin");
+    } catch {
+      return false;
+    }
+  });
+}
+
+export function getAdminStandaloneRedirect(pathname = window.location.pathname) {
+  if (!isStandalonePwa()) return null;
+  if (adminPwaKindForPath(pathname)) return null;
+  if (!(pathname === "/" || pathname.startsWith("/app"))) return null;
+  const kind = getStoredAdminLaunchKind();
+  if (!kind) return null;
+  return adminHomeForKind(kind, hasStoredSession(kind));
+}
+
 export function getStoredAdminLaunchKind(): AdminPwaKind | null {
   if (typeof window === "undefined") return null;
   try {
