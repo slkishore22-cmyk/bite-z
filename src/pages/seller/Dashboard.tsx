@@ -100,9 +100,9 @@ const SellerDashboard = () => {
   }, [pinned]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="seller-admin-shell">
       {/* App shell — phone-first, max width on larger screens */}
-      <div className="mx-auto w-full max-w-md px-5 pb-10 pt-6">
+      <div className="seller-admin-content">
         {/* Top bar */}
         <SellerHeader />
 
@@ -123,7 +123,7 @@ const SellerDashboard = () => {
 
         {/* Sales card */}
         <section
-          className="mt-5 overflow-hidden rounded-3xl border border-border bg-gradient-card p-5 shadow-card"
+          className="mt-5 overflow-hidden rounded-3xl border border-border bg-gradient-card p-5 shadow-card lg:p-6"
           aria-label="Today's sales"
         >
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">
@@ -193,7 +193,7 @@ const SellerDashboard = () => {
         </section>
 
         {/* Action tiles */}
-        <section className="mt-6 space-y-3" aria-label="Quick actions">
+        <section className="seller-admin-grid mt-6 space-y-3 md:space-y-0" aria-label="Quick actions">
           {orderedTiles.map((t) => (
             <TileRow
               key={t.title}

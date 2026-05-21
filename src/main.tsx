@@ -98,7 +98,7 @@ createRoot(document.getElementById("root")!).render(<App />);
   const apply = () => {
     window.cancelAnimationFrame(raf);
     raf = window.requestAnimationFrame(() => {
-      const h = window.innerHeight;
+      const h = vv?.height ?? window.innerHeight;
       document.documentElement.style.setProperty("--app-vh", `${h}px`);
     });
   };

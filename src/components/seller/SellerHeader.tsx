@@ -45,16 +45,16 @@ const SellerHeader = () => {
   }, []);
 
   return (
-    <header className="flex items-center justify-between">
-      <Link to="/seller/dashboard" className="flex items-center gap-2">
+    <header className="flex w-full min-w-0 items-center justify-between gap-3">
+      <Link to="/seller/dashboard" className="flex min-w-0 items-center gap-2">
         <span className="material-symbols-outlined text-primary" style={{ fontSize: 26 }}>
           shield_lock
         </span>
-        <h1 className="text-xl font-extrabold tracking-tight text-primary">
+        <h1 className="truncate text-base font-extrabold tracking-tight text-primary sm:text-xl">
           Bitez Admin Panel
         </h1>
       </Link>
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <Link
           to="/seller/orders"
           aria-label="Orders"

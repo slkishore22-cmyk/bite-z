@@ -45,10 +45,10 @@ const SellerLogin = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
+    <main className="seller-admin-shell flex items-center justify-center px-5 py-[calc(env(safe-area-inset-top,0px)+1.5rem)] pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
       <form
         onSubmit={submit}
-        className="w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-xl space-y-6"
+        className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-xl space-y-6 sm:p-8"
       >
         <div className="text-center space-y-2">
           <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">

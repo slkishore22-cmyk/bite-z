@@ -52,8 +52,8 @@ const SellerStaff = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <main className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
+    <div className="seller-admin-shell">
+      <main className="seller-admin-content">
         <header className="flex items-center gap-3">
           <Link
             to="/seller/dashboard"

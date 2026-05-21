@@ -108,7 +108,7 @@ const App = () => (
       <AppDataPreloader />
       <BrowserRouter>
         <PwaRouteSync />
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="app-route-loader" aria-label="Loading" />}>
           <Routes>
             <Route path="/" element={<RootRedirect />} />
 
