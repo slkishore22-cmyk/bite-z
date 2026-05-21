@@ -18,10 +18,10 @@ const Profile = () => {
   return (
   <UserLayout>
     <div
-      className="min-h-screen pb-32 antialiased"
-      style={{ background: "#F5F5F7", color: "#1D1D1F" }}
+      className="user-page pb-32 antialiased"
+      style={{ color: "hsl(var(--user-text))" }}
     >
-      <main className="px-6 mx-auto w-full max-w-md pt-12">
+      <main className="user-content user-content-readable pt-12">
         <h1 className="text-2xl font-bold tracking-tight mb-8">
           Hey, {firstName} 👋
         </h1>
