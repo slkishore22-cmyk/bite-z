@@ -66,6 +66,17 @@ html, body, #root {
 }
 
 @supports (-webkit-touch-callout: none) {
+  html.user-app-route,
+  html.user-app-route body,
+  body.user-app-route,
+  html.user-app-route #root,
+  body.user-app-route #root,
+  body.user-app-route .user-shell,
+  body.user-app-route .user-page {
+    background: hsl(var(--user-app-bg)) !important;
+    min-height: -webkit-fill-available;
+  }
+
   @media (display-mode: standalone) {
     :root {
       --ios-pwa-safe-top: env(safe-area-inset-top, 0px);
@@ -419,7 +430,7 @@ All colors MUST be HSL.
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   .user-content {
@@ -483,7 +494,9 @@ All colors MUST be HSL.
   body.user-app-route [style*="max-width: 390px"],
   body.user-app-route [style*="max-width:390px"],
   body.user-app-route [style*="max-width: 448px"],
-  body.user-app-route [style*="max-width:448px"] {
+  body.user-app-route [style*="max-width:448px"],
+  body.user-app-route [style*="max-width: 520px"],
+  body.user-app-route [style*="max-width:520px"] {
     max-width: none !important;
   }
 
