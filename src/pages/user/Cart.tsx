@@ -8,7 +8,7 @@ import {
   subscribeCart,
   type CartItem,
 } from "@/lib/userCart";
-import { getActiveDiscountPctForSeller, subscribeOffers } from "@/lib/sellerOffers";
+import { getActiveDiscountPctForSeller, loadOffersFromBackend, subscribeOffers } from "@/lib/sellerOffers";
 
 const liquidGlass: React.CSSProperties = {
   background: "rgba(255,255,255,0.55)",
@@ -42,7 +42,11 @@ const Cart = () => {
   const [, setOffersTick] = useState(0);
 
   useEffect(() => subscribeCart(() => setItems(getCart())), []);
-  useEffect(() => subscribeOffers(() => setOffersTick((n) => n + 1)), []);
+  useEffect(() => {
+    const unsub = subscribeOffers(() => setOffersTick((n) => n + 1));
+    loadOffersFromBackend().then(() => setOffersTick((n) => n + 1)).catch(() => null);
+    return unsub;
+  }, []);
 
   const update = (item: CartItem, delta: number) =>
     setCartQty(item.itemId, item.qty + delta, item.canteenId);
