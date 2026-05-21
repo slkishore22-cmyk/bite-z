@@ -374,65 +374,72 @@ All colors MUST be HSL.
     background: hsl(var(--user-app-bg));
   }
 
-  /* User app: light background everywhere, responsive content width.
-     The user app pages are designed as a mobile-first column. On wider
-     screens we keep the column centered but paint the surrounding area
-     with the same light surface so there are no black/white gaps. */
+  /* User app: one real canvas. No centered phone mockup, no black support
+     layer, no page-sized decorative background behind the app. */
   html.user-app-route,
   html.user-app-route body,
   body.user-app-route {
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
+    min-width: 100%;
   }
   html.user-app-route #root,
   body.user-app-route #root {
-    background: hsl(var(--user-app-bg));
+    background: hsl(var(--user-app-bg)) !important;
+    min-height: var(--app-vh, 100dvh);
   }
 
   .user-shell {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
-    background:
-      radial-gradient(circle at 50% -18%, hsl(212 68% 91% / 0.9), transparent 42%),
-      linear-gradient(180deg, hsl(var(--user-app-bg-soft)), hsl(var(--user-app-bg)) 38%, hsl(214 28% 92%));
+    background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   .user-page {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
-    background: transparent !important;
+    background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 
   .user-content {
-    width: min(100%, 68rem);
-    margin-inline: auto;
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
     padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
     padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
   }
 
   .user-content-readable {
-    width: min(100%, 52rem);
+    width: 100% !important;
+    max-width: none !important;
   }
 
   .user-topbar {
-    background: hsl(var(--user-app-bg) / 0.86) !important;
-    backdrop-filter: blur(22px) saturate(140%);
-    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    position: sticky !important;
+    top: 0;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    background: hsl(var(--user-app-bg)) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-bottom: 1px solid hsl(var(--user-border) / 0.72);
+    box-shadow: none !important;
   }
 
   .user-card {
-    background: hsl(var(--user-surface) / 0.72) !important;
+    background: hsl(var(--user-surface-raised)) !important;
     border: 1px solid hsl(var(--user-border) / 0.82) !important;
-    box-shadow: 0 10px 28px hsl(220 25% 40% / 0.09);
+    box-shadow: none !important;
   }
 
   .user-card-muted {
-    background: hsl(var(--user-surface-raised) / 0.72) !important;
+    background: hsl(var(--user-surface-raised)) !important;
     border: 1px solid hsl(var(--user-border) / 0.78) !important;
   }
 
@@ -447,34 +454,38 @@ All colors MUST be HSL.
   }
 
   /* Startup-level guard for the legacy user screens: many pages still carry
-     inline iOS-style white/gray backgrounds. Route-scoped important rules beat
-     those inline values so no user page can reintroduce white blocks or black
-     side gutters while the app grows responsively. */
+     inline iOS-style white/gray backgrounds. Route-scoped important rules keep
+     every user page on the same real canvas while the app grows responsively. */
   body.user-app-route main[style*="#F5F5F7"],
   body.user-app-route main[style*="#F8FAFC"],
   body.user-app-route div[style*="min-height"][style*="#F5F5F7"],
   body.user-app-route div[style*="min-height"][style*="#F8FAFC"] {
-    background: transparent !important;
+    background: hsl(var(--user-app-bg)) !important;
   }
 
   body.user-app-route [style*="max-width: 390px"],
   body.user-app-route [style*="max-width:390px"],
   body.user-app-route [style*="max-width: 448px"],
   body.user-app-route [style*="max-width:448px"] {
-    max-width: min(100%, 52rem) !important;
+    max-width: none !important;
   }
 
   /* Make the legacy mobile-width wrappers inside user pages expand on
      larger screens so the app uses the available space responsively
      instead of staying pinned to a fixed phone width. */
   body.user-app-route .max-w-md {
-    max-width: min(100%, 28rem);
+    max-width: none !important;
   }
-  @media (min-width: 640px) {
-    body.user-app-route .max-w-md { max-width: min(100%, 34rem); }
-  }
-  @media (min-width: 1024px) {
-    body.user-app-route .max-w-md { max-width: min(100%, 42rem); }
+
+  body.user-app-route .cb-glass,
+  body.user-app-route .lg-card,
+  body.user-app-route .lg-canteen,
+  body.user-app-route .active-pill {
+    background: hsl(var(--user-surface-raised)) !important;
+    border-color: hsl(var(--user-border) / 0.8) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .seller-admin-shell {
