@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import UserLayout from "@/components/user/UserLayout";
 import { MenuItemsSkeleton } from "@/components/user/Skeletons";
 import {
@@ -42,6 +42,9 @@ const textGlass: React.CSSProperties = {
 const Menu = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromOffer = searchParams.get("fromOffer") === "1";
+  const inventoryRef = useRef<HTMLDivElement | null>(null);
   const [canteen, setCanteen] = useState<SellerProfile | null>(() => getRegisteredCanteens().find((c) => c.id === id) ?? null);
   const title = canteen?.canteenName ?? "Canteen";
 
@@ -72,6 +75,17 @@ const Menu = () => {
     return unsub;
   }, [id]);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
+  // When the user lands here from tapping an offer card, auto-scroll the
+  // inventory list into view so they immediately start exploring items for
+  // this canteen.
+  useEffect(() => {
+    if (!fromOffer) return;
+    if (inventoryLoading) return;
+    const t = window.setTimeout(() => {
+      inventoryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [fromOffer, inventoryLoading, id]);
   useEffect(
     () =>
       subscribePins(() => {
