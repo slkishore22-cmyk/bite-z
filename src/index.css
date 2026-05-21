@@ -55,6 +55,13 @@ html, body, #root {
   --ios-content-top: 0px;
   --ios-page-gap: 24px;
   --user-bottom-nav-height: 64px;
+    --user-app-bg: 214 32% 94%;
+    --user-app-bg-soft: 213 38% 97%;
+    --user-surface: 214 35% 98%;
+    --user-surface-raised: 212 42% 96%;
+    --user-border: 216 24% 86%;
+    --user-text: 220 24% 12%;
+    --user-muted: 218 11% 49%;
 }
 
 @supports (-webkit-touch-callout: none) {
@@ -364,7 +371,7 @@ All colors MUST be HSL.
 
   html.user-app-route .app-route-loader,
   body.user-app-route .app-route-loader {
-    background: #F5F5F7;
+    background: hsl(var(--user-app-bg));
   }
 
   /* User app: light background everywhere, responsive content width.
@@ -374,18 +381,69 @@ All colors MUST be HSL.
   html.user-app-route,
   html.user-app-route body,
   body.user-app-route {
-    background: #F5F5F7 !important;
-    color: #1D1D1F;
+    background: hsl(var(--user-app-bg)) !important;
+    color: hsl(var(--user-text));
   }
   html.user-app-route #root,
   body.user-app-route #root {
-    background: #F5F5F7;
+    background: hsl(var(--user-app-bg));
   }
 
   .user-shell {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
-    background: #F5F5F7;
+    background:
+      radial-gradient(circle at 50% -18%, hsl(212 68% 91% / 0.9), transparent 42%),
+      linear-gradient(180deg, hsl(var(--user-app-bg-soft)), hsl(var(--user-app-bg)) 38%, hsl(214 28% 92%));
+    color: hsl(var(--user-text));
+    overflow-x: clip;
+  }
+
+  .user-page {
+    width: 100%;
+    min-height: var(--app-vh, 100dvh);
+    background: transparent !important;
+    color: hsl(var(--user-text));
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  .user-content {
+    width: min(100%, 68rem);
+    margin-inline: auto;
+    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
+  }
+
+  .user-content-readable {
+    width: min(100%, 52rem);
+  }
+
+  .user-topbar {
+    background: hsl(var(--user-app-bg) / 0.86) !important;
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    border-bottom: 1px solid hsl(var(--user-border) / 0.72);
+  }
+
+  .user-card {
+    background: hsl(var(--user-surface) / 0.72) !important;
+    border: 1px solid hsl(var(--user-border) / 0.82) !important;
+    box-shadow: 0 10px 28px hsl(220 25% 40% / 0.09);
+  }
+
+  .user-card-muted {
+    background: hsl(var(--user-surface-raised) / 0.72) !important;
+    border: 1px solid hsl(var(--user-border) / 0.78) !important;
+  }
+
+  .user-floating-action {
+    position: fixed;
+    z-index: 30;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 52rem);
+    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
   }
 
   /* Make the legacy mobile-width wrappers inside user pages expand on
