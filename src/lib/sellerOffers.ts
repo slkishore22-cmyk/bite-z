@@ -71,8 +71,50 @@ function upsertCache(incoming: SellerOffer[], sellerId?: string | null) {
   write(Array.from(nextById.values()));
 }
 
+function toDbRow(offer: SellerOffer, keepId = false) {
+  return {
+    ...(keepId ? { id: offer.id } : {}),
+    seller_id: offer.sellerId,
+    kind: offer.kind,
+    name: offer.name,
+    discount_pct: offer.discountPct,
+    start_date: offer.startDate || null,
+    end_date: offer.endDate || null,
+    condition: offer.condition,
+    item_ids: offer.itemIds,
+    is_active: true,
+  };
+}
+
 export function getOffers(): SellerOffer[] {
   return read().sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export async function migrateCachedOffersToBackend(sellerId?: string | null): Promise<void> {
+  if (!sellerId) return;
+  const cached = read().filter((o) => o.sellerId === sellerId);
+  if (cached.length === 0) return;
+  const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const rows: SellerOffer[] = [];
+  const withIds = cached.filter((o) => uuidLike.test(o.id));
+  const withoutIds = cached.filter((o) => !uuidLike.test(o.id));
+  if (withIds.length > 0) {
+    const { data, error } = await db
+      .from("seller_offers")
+      .upsert(withIds.map((offer) => toDbRow(offer, true)), { onConflict: "id" })
+      .select("id, seller_id, kind, name, discount_pct, start_date, end_date, condition, item_ids, created_at");
+    if (error) throw new Error(error.message);
+    rows.push(...((data ?? []).map(fromRow)));
+  }
+  if (withoutIds.length > 0) {
+    const { data, error } = await db
+      .from("seller_offers")
+      .insert(withoutIds.map((offer) => toDbRow(offer)))
+      .select("id, seller_id, kind, name, discount_pct, start_date, end_date, condition, item_ids, created_at");
+    if (error) throw new Error(error.message);
+    rows.push(...((data ?? []).map(fromRow)));
+  }
+  if (rows.length > 0) upsertCache(rows, sellerId);
 }
 
 export async function loadOffersFromBackend(sellerId?: string | null): Promise<SellerOffer[]> {
