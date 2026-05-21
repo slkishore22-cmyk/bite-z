@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getActiveSession } from '../utils/sessionManager';
+import { getAdminStandaloneRedirect } from '../lib/pwaLaunch';
 
 export default function RootRedirect() {
   const [path, setPath] = useState(() => window.location.pathname);
@@ -17,6 +18,9 @@ export default function RootRedirect() {
   }, []);
 
   const s = getActiveSession();
+  const adminPwaRedirect = getAdminStandaloneRedirect(path);
+  if (adminPwaRedirect) return <Navigate to={adminPwaRedirect} replace />;
+
   if (path.startsWith('/master-admin')) {
     return <Navigate to={s?.role === 'master_admin' ? '/master-admin/overview' : '/master-admin/login'} replace />;
   }
