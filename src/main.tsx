@@ -20,19 +20,13 @@ const markIosPwa = () => {
   const nav = window.navigator as Navigator & { standalone?: boolean };
   const isAppleTouch = /iPad|iPhone|iPod/.test(nav.userAgent) ||
     (nav.platform === "MacIntel" && nav.maxTouchPoints > 1);
-  const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(nav.userAgent);
   const isStandalone = nav.standalone === true ||
     window.matchMedia("(display-mode: standalone)").matches;
 
   document.documentElement.classList.toggle("ios-device", isAppleTouch);
   document.documentElement.classList.toggle("ios-pwa", isAppleTouch && isStandalone);
-  document.documentElement.classList.toggle("safari-browser", isSafari);
   document.documentElement.classList.toggle("pwa-standalone", isStandalone);
   document.documentElement.classList.toggle("android-pwa", isStandalone && /Android/i.test(nav.userAgent));
-  document.body?.classList.toggle("ios-device", isAppleTouch);
-  document.body?.classList.toggle("ios-pwa", isAppleTouch && isStandalone);
-  document.body?.classList.toggle("safari-browser", isSafari);
-  document.body?.classList.toggle("pwa-standalone", isStandalone);
 };
 
 markIosPwa();
@@ -105,9 +99,7 @@ createRoot(document.getElementById("root")!).render(<App />);
     window.cancelAnimationFrame(raf);
     raf = window.requestAnimationFrame(() => {
       const h = vv?.height ?? window.innerHeight;
-      const w = vv?.width ?? window.innerWidth;
       document.documentElement.style.setProperty("--app-vh", `${h}px`);
-      document.documentElement.style.setProperty("--app-width", `${w}px`);
     });
   };
   apply();
