@@ -38,9 +38,11 @@ const ForgotPin = () => {
         type="button"
         onClick={() => navigate(-1)}
         aria-label="Back"
-        className="fixed top-4 left-4 z-20 inline-flex items-center justify-center rounded-full"
+        className="absolute z-20 inline-flex items-center justify-center rounded-full"
         style={{
           width: 40, height: 40,
+          top: "var(--user-header-top-space)",
+          left: "max(var(--user-edge-gutter), env(safe-area-inset-left, 0px))",
           background: "hsl(var(--user-surface) / 0.78)",
           backdropFilter: "blur(12px)",
           border: "1px solid hsl(var(--user-border) / 0.8)",
