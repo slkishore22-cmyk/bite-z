@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { clearSession, getSession, logAudit } from "../auth";
 import { clearAdminSession } from "@/utils/sessionManager";
 import { useAdminPwa } from "../useAdminPwa";
+import SeedDataAlert from "./SeedDataAlert";
 import "../theme.css";
 
 const NAV = [
@@ -112,7 +113,10 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           </header>
-          <main className="ma-page">{children}</main>
+          <main className="ma-page">
+            <SeedDataAlert />
+            {children}
+          </main>
         </div>
       </div>
     </div>
