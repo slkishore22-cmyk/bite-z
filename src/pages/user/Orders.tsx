@@ -93,8 +93,8 @@ const Orders = () => {
         }}
       >
         <main
-          className="user-content user-content-readable"
-          style={{ paddingTop: "calc(32px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
+          className="user-content user-content-readable user-safe-header"
+          style={{ paddingBottom: 24 }}
         >
           {/* Editorial Header */}
           <section className="mb-8">
