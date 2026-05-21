@@ -151,12 +151,9 @@ const Menu = () => {
         }}
       >
         <div
-          className="user-topbar z-50 flex items-center justify-between"
+          className="user-topbar user-safe-header z-50 flex items-center justify-between"
           style={{
-            paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 16,
-            paddingLeft: "max(16px, env(safe-area-inset-left, 0px))",
-            paddingRight: "max(16px, env(safe-area-inset-right, 0px))",
           }}
         >
           <button
@@ -197,7 +194,7 @@ const Menu = () => {
           className="user-content"
           style={{
             paddingTop: 16,
-            paddingBottom: 120,
+              paddingBottom: totalItems > 0 ? 24 : 120,
           }}
         >
           {/* Search + tabs (scrolls with page) */}
@@ -318,7 +315,10 @@ const Menu = () => {
           <div
             className="user-floating-action z-50"
             style={{
-              bottom: "calc(24px + var(--ios-pwa-safe-bottom))",
+              bottom: "var(--ios-pwa-safe-bottom)",
+              marginTop: 24,
+              paddingBottom: "calc(16px + var(--ios-pwa-safe-bottom))",
+              background: "hsl(var(--user-app-bg))",
             }}
           >
             <div className="flex items-center justify-between" style={{ ...liquidGlass, padding: 16 }}>
