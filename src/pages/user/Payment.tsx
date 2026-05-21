@@ -7,6 +7,7 @@ import { playOrderConfirmation } from "../../utils/orderConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserSession } from "@/utils/sessionManager";
 import { getActiveDiscountPctForSeller, loadOffersFromBackend } from "@/lib/sellerOffers";
+import UserLayout from "@/components/user/UserLayout";
 
 type RazorpayPaymentResponse = Record<string, unknown>;
 type RazorpayOptions = {
@@ -73,15 +74,12 @@ const releaseMobileScrollLocks = () => {
 };
 
 const liquidGlass: React.CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(40px)",
-  WebkitBackdropFilter: "blur(40px)",
-  borderRadius: 26,
-  boxShadow:
-    "inset 0 1.5px 0 0 rgba(255,255,255,0.55), 0 8px 32px rgba(0,0,0,0.06)",
+  background: "hsl(var(--user-surface-raised))",
+  borderRadius: 18,
+  boxShadow: "none",
   position: "relative",
   overflow: "hidden",
-  border: "1px solid rgba(0,0,0,0.03)",
+  border: "1px solid hsl(var(--user-border) / 0.82)",
 };
 
 const glassHighlight: React.CSSProperties = {
@@ -90,9 +88,8 @@ const glassHighlight: React.CSSProperties = {
   top: 0,
   left: 0,
   right: 0,
-  height: "45%",
-  background:
-    "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)",
+  height: 0,
+  background: "transparent",
   pointerEvents: "none",
   zIndex: 1,
 };
