@@ -11,14 +11,12 @@ import {
 import { getActiveDiscountPctForSeller, loadOffersFromBackend, subscribeOffers } from "@/lib/sellerOffers";
 
 const liquidGlass: React.CSSProperties = {
-  background: "hsl(var(--user-surface) / 0.76)",
-  backdropFilter: "blur(24px) saturate(135%)",
-  WebkitBackdropFilter: "blur(24px) saturate(135%)",
-  borderRadius: 26,
+  background: "hsl(var(--user-surface-raised))",
+  borderRadius: 18,
   position: "relative",
   overflow: "hidden",
   border: "1px solid hsl(var(--user-border) / 0.84)",
-  boxShadow: "0 10px 28px hsl(220 25% 40% / 0.09)",
+  boxShadow: "none",
 };
 
 const glassHighlight: React.CSSProperties = {
@@ -26,9 +24,8 @@ const glassHighlight: React.CSSProperties = {
   top: 0,
   left: 0,
   right: 0,
-  height: "45%",
-  background:
-    "linear-gradient(180deg, hsl(var(--user-app-bg-soft) / 0.34) 0%, transparent 100%)",
+  height: 0,
+  background: "transparent",
   pointerEvents: "none",
   zIndex: 1,
 };
@@ -85,7 +82,7 @@ const Cart = () => {
         }}
       >
         <header
-          className="user-topbar fixed top-0 left-0 w-full z-40"
+          className="user-topbar z-40"
           style={{
             paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
           }}
@@ -113,7 +110,7 @@ const Cart = () => {
 
         <main
           className="user-content user-content-readable space-y-6"
-          style={{ paddingTop: "calc(80px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
+          style={{ paddingTop: 18 }}
         >
           {items.length === 0 ? (
             <section className="user-card" style={{ ...liquidGlass, padding: 24 }}>

@@ -7,6 +7,7 @@ import { playOrderConfirmation } from "../../utils/orderConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserSession } from "@/utils/sessionManager";
 import { getActiveDiscountPctForSeller, loadOffersFromBackend } from "@/lib/sellerOffers";
+import UserLayout from "@/components/user/UserLayout";
 
 type RazorpayPaymentResponse = Record<string, unknown>;
 type RazorpayOptions = {
@@ -73,15 +74,12 @@ const releaseMobileScrollLocks = () => {
 };
 
 const liquidGlass: React.CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(40px)",
-  WebkitBackdropFilter: "blur(40px)",
-  borderRadius: 26,
-  boxShadow:
-    "inset 0 1.5px 0 0 rgba(255,255,255,0.55), 0 8px 32px rgba(0,0,0,0.06)",
+  background: "hsl(var(--user-surface-raised))",
+  borderRadius: 18,
+  boxShadow: "none",
   position: "relative",
   overflow: "hidden",
-  border: "1px solid rgba(0,0,0,0.03)",
+  border: "1px solid hsl(var(--user-border) / 0.82)",
 };
 
 const glassHighlight: React.CSSProperties = {
@@ -90,9 +88,8 @@ const glassHighlight: React.CSSProperties = {
   top: 0,
   left: 0,
   right: 0,
-  height: "45%",
-  background:
-    "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)",
+  height: 0,
+  background: "transparent",
   pointerEvents: "none",
   zIndex: 1,
 };
@@ -232,13 +229,14 @@ const Payment = () => {
   };
 
   return (
+    <UserLayout>
     <div
       className="user-page"
       style={{ color: "hsl(var(--user-text))", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* TopAppBar */}
       <header
-        className="user-topbar fixed top-0 w-full z-50 flex items-center px-6"
+        className="user-topbar z-50 flex items-center px-6"
         style={{
           height: "calc(64px + var(--ios-pwa-safe-top))",
           paddingTop: "var(--ios-pwa-safe-top)",
@@ -247,7 +245,7 @@ const Payment = () => {
         <div className="flex items-center w-full">
           <button
             onClick={() => navigate(-1)}
-            className="transition-all duration-[400ms] ease-in-out p-2 rounded-full active:scale-95 mr-2 hover:bg-black/5"
+            className="transition-all duration-[400ms] ease-in-out p-2 rounded-full active:scale-95 mr-2"
           >
             <span className="material-symbols-outlined" style={{ color: "#1D1D1F" }}>
               arrow_back
@@ -265,7 +263,7 @@ const Payment = () => {
       {/* Main Content Canvas */}
       <main
         className="user-content flex flex-col"
-        style={{ paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))", maxWidth: "56rem", gap: 48 }}
+        style={{ paddingTop: 24, gap: 32 }}
       >
         {/* Branding Hero Moment */}
         <div
@@ -439,6 +437,7 @@ const Payment = () => {
         <div style={{ height: 48 }} />
       </main>
     </div>
+    </UserLayout>
   );
 };
 

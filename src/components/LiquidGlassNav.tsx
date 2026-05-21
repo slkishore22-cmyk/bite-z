@@ -55,13 +55,11 @@ export const LiquidGlassNav = ({
       style={{
         height: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom))",
         paddingBottom: "var(--ios-pwa-safe-bottom)",
-        background:
-          "linear-gradient(135deg, hsl(var(--user-surface) / 0.92), hsl(var(--user-app-bg-soft) / 0.86))",
+        background: "hsl(var(--user-app-bg))",
         borderTop: "1px solid hsl(var(--user-border) / 0.78)",
-        backdropFilter: "blur(22px) saturate(135%)",
-        WebkitBackdropFilter: "blur(22px) saturate(135%)",
-        boxShadow:
-          "0 -8px 30px hsl(220 25% 40% / 0.08)",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        boxShadow: "none",
       }}
     >
       {items.map((item) => {
