@@ -372,7 +372,8 @@ All colors MUST be HSL.
   .seller-admin-content {
     width: min(100%, 1180px);
     margin-inline: auto;
-    padding-inline: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
     padding-top: calc(env(safe-area-inset-top, 0px) + clamp(1rem, 3vw, 1.75rem));
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(2rem, 5vw, 3.5rem));
   }
