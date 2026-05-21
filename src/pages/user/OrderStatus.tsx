@@ -120,7 +120,7 @@ const OrderStatus = () => {
               style={{
                 padding: 14,
                 borderRadius: 18,
-                background: "#FFFFFF",
+                background: "hsl(var(--user-surface))",
                 border: "1px solid #E2E8F0",
                 boxShadow: "0 2px 12px -4px rgba(15,23,42,0.08)",
               }}
@@ -363,9 +363,9 @@ const OrderStatus = () => {
             onClick={() => navigate("/app/home")}
             className="w-full font-bold transition-all duration-400"
             style={{
-              background: "#FFFFFF",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-              border: "1px solid #E2E8F0",
+              background: "hsl(var(--user-surface-raised))",
+              boxShadow: "none",
+              border: "1px solid hsl(var(--user-border) / 0.82)",
               color: "#0F172A",
               padding: "14px 0",
               borderRadius: 9999,
