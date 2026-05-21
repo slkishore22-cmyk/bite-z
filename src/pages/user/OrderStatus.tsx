@@ -3,6 +3,13 @@ import { useEffect, useState, useMemo } from "react";
 import { getOrderById, getOrders } from "@/lib/sellerOrders";
 import OrderConfirmedAnimation from "../../components/OrderConfirmedAnimation";
 import { QRCodeSVG } from "qrcode.react";
+import UserLayout from "@/components/user/UserLayout";
+
+const statusCard: React.CSSProperties = {
+  background: "hsl(var(--user-surface-raised))",
+  border: "1px solid hsl(var(--user-border) / 0.82)",
+  boxShadow: "none",
+};
 
 const OrderStatus = () => {
   const navigate = useNavigate();
@@ -55,6 +62,7 @@ const OrderStatus = () => {
   const showCodTimer = isCod && expiresAt != null && order?.status === "Pending";
 
   return (
+    <UserLayout>
     <div
       className="user-page w-full flex flex-col items-center"
       style={{
@@ -92,11 +100,9 @@ const OrderStatus = () => {
             className="flex flex-col items-center justify-center"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 800ms ease both',
-              background: "#FFFFFF",
+              ...statusCard,
               padding: 20,
               borderRadius: 20,
-              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
-              border: "1px solid #F1F5F9",
             }}
           >
             <span
@@ -148,11 +154,9 @@ const OrderStatus = () => {
             className="flex flex-col items-center justify-center transition-all duration-400"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 900ms ease both',
-              background: "#FFFFFF",
+              ...statusCard,
               padding: 16,
               borderRadius: 16,
-              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
-              border: "1px solid #F1F5F9",
             }}
           >
             <span
@@ -203,11 +207,9 @@ const OrderStatus = () => {
             className="flex items-center justify-between"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 1050ms ease both',
-              background: "#FFFFFF",
+              ...statusCard,
               padding: 16,
               borderRadius: 16,
-              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
-              border: "1px solid #F1F5F9",
             }}
           >
             <div className="flex items-center" style={{ gap: 12 }}>
@@ -260,11 +262,9 @@ const OrderStatus = () => {
             className="relative overflow-hidden"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 1200ms ease both',
-              background: "#FFFFFF",
+              ...statusCard,
               padding: 18,
               borderRadius: 16,
-              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
-              border: "1px solid #F1F5F9",
             }}
           >
             <div
@@ -377,6 +377,7 @@ const OrderStatus = () => {
         </div>
       </main>
     </div>
+    </UserLayout>
   );
 };
 
