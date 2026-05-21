@@ -24,10 +24,14 @@
         document.write('<meta name="apple-mobile-web-app-status-bar-style" content="' + statusBar + '">');
         document.write('<meta name="apple-mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
         document.write('<meta name="mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
-        document.documentElement.className += (isSellerAdmin ? ' seller-admin-route admin-app-route' : '') + (isMasterAdmin ? ' master-admin-route admin-app-route' : '');
+        var startupClasses = (isSellerAdmin ? ' seller-admin-route admin-app-route' : '') + (isMasterAdmin ? ' master-admin-route admin-app-route' : '');
         if (!isSellerAdmin && !isMasterAdmin) {
-          document.documentElement.className += ' user-app-route';
+          startupClasses += ' user-app-route';
         }
+        document.documentElement.className += startupClasses;
+        document.addEventListener('DOMContentLoaded', function () {
+          document.body.className += startupClasses;
+        });
       })();
     </script>
     <style>
