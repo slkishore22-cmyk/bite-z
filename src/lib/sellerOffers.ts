@@ -196,10 +196,17 @@ export function subscribeOffers(cb: () => void): () => void {
   const onStorage = (e: StorageEvent) => {
     if (e.key === STORAGE_KEY) cb();
   };
+  const channel = db
+    .channel("seller-offers-live")
+    .on("postgres_changes", { event: "*", schema: "public", table: "seller_offers" }, () => {
+      loadOffersFromBackend().then(cb).catch(() => cb());
+    })
+    .subscribe();
   window.addEventListener(EVENT_NAME, onLocal as EventListener);
   window.addEventListener("storage", onStorage);
   return () => {
     window.removeEventListener(EVENT_NAME, onLocal as EventListener);
     window.removeEventListener("storage", onStorage);
+    db.removeChannel(channel);
   };
 }
