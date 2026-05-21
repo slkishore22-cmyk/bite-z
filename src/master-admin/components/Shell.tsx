@@ -15,6 +15,7 @@ const NAV = [
   { to: "/master-admin/behaviour", label: "Behaviour Insights", icon: "visibility" },
   { to: "/master-admin/products", label: "Product Performance", icon: "inventory_2" },
   { to: "/master-admin/audit", label: "Audit Log", icon: "schedule" },
+  { to: "/master-admin/traces", label: "Trace Inspector", icon: "bug_report" },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
@@ -26,6 +27,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/master-admin/behaviour": "Behaviour Insights",
   "/master-admin/products": "Product Performance",
   "/master-admin/audit": "Audit Log",
+  "/master-admin/traces": "Trace Inspector",
 };
 
 function pageTitle(pathname: string) {
