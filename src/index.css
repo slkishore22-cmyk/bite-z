@@ -489,6 +489,15 @@ All colors MUST be HSL.
     max-width: none !important;
   }
 
+  body.user-app-route [style*="#050505"],
+  body.user-app-route [style*="#05070D"],
+  body.user-app-route [style*="#000"],
+  body.user-app-route [style*="rgb(0, 0, 0)"],
+  body.user-app-route [style*="rgba(0, 0, 0"],
+  body.user-app-route [style*="rgba(0,0,0"] {
+    background: hsl(var(--user-app-bg)) !important;
+  }
+
   /* Make the legacy mobile-width wrappers inside user pages expand on
      larger screens so the app uses the available space responsively
      instead of staying pinned to a fixed phone width. */
