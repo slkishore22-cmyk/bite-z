@@ -446,6 +446,34 @@ All colors MUST be HSL.
     padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
   }
 
+  /* Startup-level guard for the legacy user screens: many pages still carry
+     inline iOS-style white/gray backgrounds. Route-scoped important rules beat
+     those inline values so no user page can reintroduce white blocks or black
+     side gutters while the app grows responsively. */
+  body.user-app-route [style*="#F5F5F7"],
+  body.user-app-route [style*="#F8FAFC"],
+  body.user-app-route [style*="#FFFFFF"],
+  body.user-app-route [style*="#fff"],
+  body.user-app-route [style*="rgb(255, 255, 255)"],
+  body.user-app-route [style*="rgba(255,255,255"],
+  body.user-app-route [style*="rgba(255, 255, 255"] {
+    background: hsl(var(--user-surface) / 0.72) !important;
+  }
+
+  body.user-app-route main[style*="#F5F5F7"],
+  body.user-app-route main[style*="#F8FAFC"],
+  body.user-app-route div[style*="min-height"][style*="#F5F5F7"],
+  body.user-app-route div[style*="min-height"][style*="#F8FAFC"] {
+    background: transparent !important;
+  }
+
+  body.user-app-route [style*="max-width: 390px"],
+  body.user-app-route [style*="max-width:390px"],
+  body.user-app-route [style*="max-width: 448px"],
+  body.user-app-route [style*="max-width:448px"] {
+    max-width: min(100%, 52rem) !important;
+  }
+
   /* Make the legacy mobile-width wrappers inside user pages expand on
      larger screens so the app uses the available space responsively
      instead of staying pinned to a fixed phone width. */
