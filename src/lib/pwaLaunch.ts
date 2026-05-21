@@ -97,11 +97,14 @@ export function applyPwaHeadForPath(pathname = window.location.pathname) {
   const config = configForPath(pathname);
   const isSellerAdmin = config.kind === "seller-admin";
   const isMasterAdmin = config.kind === "master-admin";
+  const isUserApp = config.kind === "user" && (pathname === "/" || pathname.startsWith("/app"));
 
   document.documentElement.classList.toggle("seller-admin-route", isSellerAdmin);
   document.documentElement.classList.toggle("master-admin-route", isMasterAdmin);
   document.documentElement.classList.toggle("admin-app-route", isSellerAdmin || isMasterAdmin);
   document.body?.classList.toggle("admin-app-route", isSellerAdmin || isMasterAdmin);
+  document.documentElement.classList.toggle("user-app-route", isUserApp);
+  document.body?.classList.toggle("user-app-route", isUserApp);
 
   let link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
   if (!link) {
