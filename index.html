@@ -22,8 +22,14 @@
         document.write('<meta name="theme-color" content="' + theme + '">');
         document.write('<meta name="apple-mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
         document.write('<meta name="mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
+        document.documentElement.className += (isSellerAdmin ? ' seller-admin-route admin-app-route' : '') + (isMasterAdmin ? ' master-admin-route admin-app-route' : '');
       })();
     </script>
+    <style>
+      html, body, #root { margin: 0; min-height: 100%; background: #05070D; }
+      body { background: #05070D; }
+      #root:empty { min-height: 100vh; min-height: 100dvh; background: #05070D; }
+    </style>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
