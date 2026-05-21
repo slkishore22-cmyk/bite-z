@@ -5,6 +5,7 @@ import { getInventory, subscribeInventory, type SellerInventoryItem } from "@/li
 import {
   addOffer,
   getOffers,
+  loadOffersFromBackend,
   removeOffer,
   subscribeOffers,
   updateOffer,
@@ -47,6 +48,9 @@ const SellerOffers = () => {
   useEffect(() => subscribeOffers(() => setOffers(getOffers())), []);
 
   const sellerId = getSellerSession()?.id ?? null;
+  useEffect(() => {
+    loadOffersFromBackend(sellerId).then(() => setOffers(getOffers())).catch(() => null);
+  }, [sellerId]);
   const myOffers = useMemo(
     () => offers.filter((o) => o.sellerId === sellerId),
     [offers, sellerId],
@@ -63,10 +67,14 @@ const SellerOffers = () => {
     );
   }, [query, inventory]);
 
-  const createOffer = (event: FormEvent<HTMLFormElement>) => {
+  const createOffer = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedName = name.trim();
     const pct = Number(discount);
+    if (!sellerId) {
+      toast.error("Seller session expired. Please login again.");
+      return;
+    }
     if (!trimmedName) {
       toast.error("Add an offer name");
       return;
@@ -79,27 +87,33 @@ const SellerOffers = () => {
       toast.error("Pick at least one item");
       return;
     }
-    if (editingId) {
-      updateOffer(editingId, {
-        kind: offerType,
-        name: trimmedName,
-        discountPct: pct,
-        startDate,
-        endDate,
-        condition: offerType === "general" ? "" : condition.trim(),
-        itemIds: offerType === "inventory" ? selectedItems : [],
-      });
-    } else {
-      addOffer({
-        sellerId,
-        kind: offerType,
-        name: trimmedName,
-        discountPct: pct,
-        startDate,
-        endDate,
-        condition: offerType === "general" ? "" : condition.trim(),
-        itemIds: offerType === "inventory" ? selectedItems : [],
-      });
+    try {
+      if (editingId) {
+        await updateOffer(editingId, {
+          sellerId,
+          kind: offerType,
+          name: trimmedName,
+          discountPct: pct,
+          startDate,
+          endDate,
+          condition: offerType === "general" ? "" : condition.trim(),
+          itemIds: offerType === "inventory" ? selectedItems : [],
+        });
+      } else {
+        await addOffer({
+          sellerId,
+          kind: offerType,
+          name: trimmedName,
+          discountPct: pct,
+          startDate,
+          endDate,
+          condition: offerType === "general" ? "" : condition.trim(),
+          itemIds: offerType === "inventory" ? selectedItems : [],
+        });
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to save offer");
+      return;
     }
     // Reset form & return to step 1
     setName("");
@@ -140,9 +154,13 @@ const SellerOffers = () => {
     setStep("details");
   };
 
-  const deleteOffer = (id: string) => {
-    removeOffer(id);
-    toast.success("Offer deleted");
+  const deleteOffer = async (id: string) => {
+    try {
+      await removeOffer(id);
+      toast.success("Offer deleted");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to delete offer");
+    }
   };
 
   const toggleItem = (id: string) => {
