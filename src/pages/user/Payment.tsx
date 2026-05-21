@@ -245,7 +245,7 @@ const Payment = () => {
         <div className="flex items-center w-full">
           <button
             onClick={() => navigate(-1)}
-            className="transition-all duration-[400ms] ease-in-out p-2 rounded-full active:scale-95 mr-2 hover:bg-black/5"
+            className="transition-all duration-[400ms] ease-in-out p-2 rounded-full active:scale-95 mr-2"
           >
             <span className="material-symbols-outlined" style={{ color: "#1D1D1F" }}>
               arrow_back
