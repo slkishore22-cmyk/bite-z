@@ -1,5 +1,8 @@
-// Shared local store for seller-created offers. Used by the seller Offers page
-// to persist offers and by the user Home page to display live offers.
+import { supabase } from "@/integrations/supabase/client";
+import { queryWithTimeout } from "@/utils/networkStatus";
+
+// Shared store for seller-created offers. Backend is the source of truth so
+// offers created by sellers are visible to users on every device/session.
 
 export type OfferKind = "general" | "inventory";
 
@@ -19,6 +22,29 @@ export type SellerOffer = {
 const STORAGE_KEY = "bitez:seller:offers";
 const EVENT_NAME = "bitez:seller:offers:change";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
+function normalizeKind(value: unknown): OfferKind {
+  return value === "inventory" ? "inventory" : "general";
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function fromRow(row: any): SellerOffer {
+  return {
+    id: String(row.id),
+    sellerId: row.seller_id ?? null,
+    kind: normalizeKind(row.kind),
+    name: row.name ?? "Offer",
+    discountPct: Number(row.discount_pct ?? 0),
+    startDate: row.start_date ?? "",
+    endDate: row.end_date ?? "",
+    condition: row.condition ?? "",
+    itemIds: Array.isArray(row.item_ids) ? row.item_ids : [],
+    createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+  };
+}
+
 function read(): SellerOffer[] {
   if (typeof window === "undefined") return [];
   try {
@@ -35,6 +61,14 @@ function write(items: SellerOffer[]) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   window.dispatchEvent(new CustomEvent(EVENT_NAME));
+}
+
+function upsertCache(incoming: SellerOffer[], sellerId?: string | null) {
+  const existing = read();
+  const kept = sellerId ? existing.filter((o) => o.sellerId !== sellerId) : [];
+  const nextById = new Map<string, SellerOffer>();
+  [...incoming, ...kept].forEach((offer) => nextById.set(offer.id, offer));
+  write(Array.from(nextById.values()));
 }
 
 export function getOffers(): SellerOffer[] {
