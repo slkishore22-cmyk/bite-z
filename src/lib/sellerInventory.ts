@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { queryWithTimeout } from "@/utils/networkStatus";
+import { enforceNoSeedData } from "@/lib/seedDataGuard";
 
 export type SellerCategory = "Food" | "Snacks" | "Drinks";
 export type SellerStatus = "Active" | "Inactive";
@@ -95,7 +96,12 @@ export async function loadInventoryFromBackend(sellerId?: string | null): Promis
 
   const { data, error } = await queryWithTimeout(query, 5000);
   if (error) return getInventory(sellerId);
-  const incoming = (data ?? []).map(fromProduct);
+  const safe = enforceNoSeedData(
+    data ?? [],
+    ["product_name", "category"],
+    `seller_products (sellerId=${sellerId ?? "all"})`,
+  );
+  const incoming = safe.map(fromProduct);
   upsertCache(incoming, sellerId);
   return incoming;
 }
@@ -109,7 +115,12 @@ export async function preloadInventoryForSellers(sellerIds: string[]): Promise<S
     .in("seller_id", ids)
     .order("created_at", { ascending: false }), 5000);
   if (error) return getInventory().filter((it) => it.sellerId && ids.includes(it.sellerId));
-  const incoming = (data ?? []).map(fromProduct);
+  const safe = enforceNoSeedData(
+    data ?? [],
+    ["product_name", "category"],
+    "seller_products (preload)",
+  );
+  const incoming = safe.map(fromProduct);
   const existing = read().filter((it) => !it.sellerId || !ids.includes(it.sellerId));
   write([...incoming, ...existing]);
   return incoming;
