@@ -75,6 +75,21 @@ export function getOffers(): SellerOffer[] {
   return read().sort((a, b) => b.createdAt - a.createdAt);
 }
 
+export async function loadOffersFromBackend(sellerId?: string | null): Promise<SellerOffer[]> {
+  let query = db
+    .from("seller_offers")
+    .select("id, seller_id, kind, name, discount_pct, start_date, end_date, condition, item_ids, created_at")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+  if (sellerId) query = query.eq("seller_id", sellerId);
+
+  const { data, error } = await queryWithTimeout(query, 5000);
+  if (error) return getOffers().filter((o) => !sellerId || o.sellerId === sellerId);
+  const incoming = (data ?? []).map(fromRow);
+  upsertCache(incoming, sellerId);
+  return incoming;
+}
+
 export function getActiveOffers(now = Date.now()): SellerOffer[] {
   return getOffers().filter((o) => {
     const start = o.startDate ? new Date(o.startDate + "T00:00:00").getTime() : -Infinity;
@@ -100,24 +115,46 @@ export function getActiveOfferForSeller(sellerId?: string | null, now = Date.now
   return list[0] ?? null;
 }
 
-export function addOffer(input: Omit<SellerOffer, "id" | "createdAt">): SellerOffer {
-  const newOffer: SellerOffer = {
-    ...input,
-    id:
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `ofr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    createdAt: Date.now(),
-  };
-  write([newOffer, ...read()]);
+export async function addOffer(input: Omit<SellerOffer, "id" | "createdAt">): Promise<SellerOffer> {
+  const { data, error } = await db
+    .from("seller_offers")
+    .insert({
+      seller_id: input.sellerId,
+      kind: input.kind,
+      name: input.name,
+      discount_pct: input.discountPct,
+      start_date: input.startDate || null,
+      end_date: input.endDate || null,
+      condition: input.condition,
+      item_ids: input.itemIds,
+      is_active: true,
+    })
+    .select("id, seller_id, kind, name, discount_pct, start_date, end_date, condition, item_ids, created_at")
+    .single();
+  if (error) throw new Error(error.message);
+  const newOffer = fromRow(data);
+  write([newOffer, ...read().filter((o) => o.id !== newOffer.id)]);
   return newOffer;
 }
 
-export function updateOffer(id: string, patch: Partial<Omit<SellerOffer, "id" | "createdAt">>) {
+export async function updateOffer(id: string, patch: Partial<Omit<SellerOffer, "id" | "createdAt">>) {
+  const payload: Record<string, unknown> = {};
+  if (patch.sellerId !== undefined) payload.seller_id = patch.sellerId;
+  if (patch.kind !== undefined) payload.kind = patch.kind;
+  if (patch.name !== undefined) payload.name = patch.name;
+  if (patch.discountPct !== undefined) payload.discount_pct = patch.discountPct;
+  if (patch.startDate !== undefined) payload.start_date = patch.startDate || null;
+  if (patch.endDate !== undefined) payload.end_date = patch.endDate || null;
+  if (patch.condition !== undefined) payload.condition = patch.condition;
+  if (patch.itemIds !== undefined) payload.item_ids = patch.itemIds;
+  const { error } = await db.from("seller_offers").update(payload).eq("id", id);
+  if (error) throw new Error(error.message);
   write(read().map((o) => (o.id === id ? { ...o, ...patch } : o)));
 }
 
-export function removeOffer(id: string) {
+export async function removeOffer(id: string) {
+  const { error } = await db.from("seller_offers").delete().eq("id", id);
+  if (error) throw new Error(error.message);
   write(read().filter((o) => o.id !== id));
 }
 
