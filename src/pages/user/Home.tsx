@@ -5,7 +5,7 @@ import { CanteenListSkeleton } from "@/components/user/Skeletons";
 import OfflineFallback from "@/components/OfflineFallback";
 import { getOrders, loadOrdersFromBackend, subscribeOrders } from "@/lib/sellerOrders";
 import { addToCart, getCart, pruneCartByCanteens, setCartQty, subscribeCart } from "@/lib/userCart";
-import { getActiveOffers, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
+import { getActiveOffers, loadOffersFromBackend, subscribeOffers, type SellerOffer } from "@/lib/sellerOffers";
 import { getRegisteredCanteens, getRegisteredCanteensFromBackend, subscribeProfile, type SellerProfile } from "@/lib/sellerProfile";
 import { getUserName } from "@/utils/sessionManager";
 
@@ -40,7 +40,11 @@ const Home = () => {
     return unsub;
   }, []);
   useEffect(() => subscribeCart(() => setCart(getCart())), []);
-  useEffect(() => subscribeOffers(() => setLiveOffers(getActiveOffers())), []);
+  useEffect(() => {
+    const unsub = subscribeOffers(() => setLiveOffers(getActiveOffers()));
+    loadOffersFromBackend().then(() => setLiveOffers(getActiveOffers())).catch(() => null);
+    return unsub;
+  }, []);
   useEffect(() => {
     const refresh = () =>
       getRegisteredCanteensFromBackend()
@@ -55,7 +59,7 @@ const Home = () => {
   }, []);
   const offers: Offer[] = useMemo(
     () =>
-      liveOffers.map((o) => {
+      liveOffers.filter((o) => o.kind === "general").map((o) => {
         const canteen = canteens.find((c) => c.id === o.sellerId);
         return {
           canteen: (canteen?.canteenName ?? (o.kind === "general" ? "ALL ITEMS" : "SELECTED ITEMS")).toUpperCase(),
