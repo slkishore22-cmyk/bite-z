@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { queryWithTimeout } from "@/utils/networkStatus";
+import { enforceNoSeedData } from "@/lib/seedDataGuard";
 
 export type SellerProfile = {
   id: string;
