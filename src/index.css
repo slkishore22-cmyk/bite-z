@@ -415,8 +415,8 @@ All colors MUST be HSL.
     width: 100% !important;
     max-width: none !important;
     margin-inline: 0 !important;
-    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
-    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
+    padding-left: max(var(--user-edge-gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--user-edge-gutter), env(safe-area-inset-right, 0px));
     box-sizing: border-box;
   }
 
@@ -438,6 +438,13 @@ All colors MUST be HSL.
     box-shadow: none !important;
   }
 
+  .user-safe-header {
+    padding-top: var(--user-header-top-space) !important;
+    padding-left: max(var(--user-edge-gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--user-edge-gutter), env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
+  }
+
   .user-card {
     background: hsl(var(--user-surface-raised)) !important;
     border: 1px solid hsl(var(--user-border) / 0.82) !important;
@@ -450,13 +457,19 @@ All colors MUST be HSL.
   }
 
   .user-floating-action {
-    position: fixed;
+    position: sticky;
     z-index: 30;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(100%, 52rem);
-    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
-    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding-left: max(var(--user-edge-gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--user-edge-gutter), env(safe-area-inset-right, 0px));
+    pointer-events: none;
+    box-sizing: border-box;
+  }
+
+  .user-floating-action > * {
+    pointer-events: auto;
   }
 
   /* Startup-level guard for the legacy user screens: many pages still carry
