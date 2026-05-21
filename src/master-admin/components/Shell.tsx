@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { clearSession, getSession, logAudit } from "../auth";
 import { clearAdminSession } from "@/utils/sessionManager";
+import { useAdminPwa } from "../useAdminPwa";
 import "../theme.css";
 
 const NAV = [
@@ -34,6 +35,7 @@ function pageTitle(pathname: string) {
 }
 
 export default function Shell({ children }: { children: React.ReactNode }) {
+  useAdminPwa();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);

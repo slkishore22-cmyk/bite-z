@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSession, loginMasterAdmin, setSession, logAudit } from "../auth";
 import { saveAdminSession } from "@/utils/sessionManager";
+import { useAdminPwa } from "../useAdminPwa";
 import "../theme.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  useAdminPwa();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
