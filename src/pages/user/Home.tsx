@@ -151,10 +151,9 @@ const Home = () => {
           to render — prevents the blank-screen state on cold offline launch. */}
       <OfflineFallback show={canteens.length === 0 && !canteensLoading} />
       <div
-        className="user-home-screen min-h-screen antialiased"
+        className="user-home-screen user-page antialiased"
         style={{
-          background: "#F5F5F7",
-          color: "#1D1D1F",
+          color: "hsl(var(--user-text))",
           paddingBottom: 120,
           fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
         }}
