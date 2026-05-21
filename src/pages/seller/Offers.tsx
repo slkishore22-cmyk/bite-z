@@ -216,8 +216,8 @@ const SellerOffers = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <main className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
+    <div className="seller-admin-shell">
+      <main className="seller-admin-content">
         <header className="flex items-center gap-3">
           <Link
             to="/seller/dashboard"
@@ -423,8 +423,8 @@ const GeneralOfferForm = ({
   discount,
   setDiscount,
 }: { onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; editing?: boolean } & Omit<FormFieldProps, "condition" | "setCondition">) => (
-  <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-    <main className="mx-auto w-full max-w-md px-5 pb-12">
+  <div className="seller-admin-shell">
+    <main className="seller-admin-content">
       <PageHeader title={editing ? "Edit Offer" : "General Offer"} subtitle="Apply discounts across all items" onBack={onBack} />
 
       <form onSubmit={onSubmit} className="mt-8 rounded-3xl border border-border bg-gradient-card p-5 shadow-card">
@@ -490,8 +490,8 @@ const InventoryOfferForm = ({
   selectedItems: string[];
   toggleItem: (id: string) => void;
 } & FormFieldProps) => (
-  <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-    <main className="mx-auto w-full max-w-md px-5 pb-12">
+  <div className="seller-admin-shell">
+    <main className="seller-admin-content">
       <PageHeader title={editing ? "Edit Offer" : "Create Offer"} subtitle="Fill in the details" onBack={onBack} />
 
       <form onSubmit={onSubmit} className="mt-8">

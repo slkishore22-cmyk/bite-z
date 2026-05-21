@@ -100,9 +100,9 @@ const SellerDashboard = () => {
   }, [pinned]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="seller-admin-shell">
       {/* App shell — phone-first, max width on larger screens */}
-      <div className="mx-auto w-full max-w-md px-5 pb-10 pt-6">
+      <div className="seller-admin-content">
         {/* Top bar */}
         <SellerHeader />
 

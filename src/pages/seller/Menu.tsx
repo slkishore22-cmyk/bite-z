@@ -103,8 +103,8 @@ const SellerMenu = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto w-full max-w-md px-5 pb-12 pt-6">
+    <div className="seller-admin-shell">
+      <div className="seller-admin-content">
         {/* Header — same style as Inventory */}
         <header className="flex items-center gap-3">
           <Link
