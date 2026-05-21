@@ -229,13 +229,14 @@ const Payment = () => {
   };
 
   return (
+    <UserLayout>
     <div
       className="user-page"
       style={{ color: "hsl(var(--user-text))", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* TopAppBar */}
       <header
-        className="user-topbar fixed top-0 w-full z-50 flex items-center px-6"
+        className="user-topbar z-50 flex items-center px-6"
         style={{
           height: "calc(64px + var(--ios-pwa-safe-top))",
           paddingTop: "var(--ios-pwa-safe-top)",
@@ -262,7 +263,7 @@ const Payment = () => {
       {/* Main Content Canvas */}
       <main
         className="user-content flex flex-col"
-        style={{ paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))", maxWidth: "56rem", gap: 48 }}
+        style={{ paddingTop: 24, gap: 32 }}
       >
         {/* Branding Hero Moment */}
         <div
@@ -436,6 +437,7 @@ const Payment = () => {
         <div style={{ height: 48 }} />
       </main>
     </div>
+    </UserLayout>
   );
 };
 
