@@ -137,7 +137,7 @@ const Cart = () => {
                 const hasDiscount = discountPct > 0;
                 const expanded = !collapsed[group.canteenId];
                 return (
-              <section key={group.canteenId} style={{ ...liquidGlass }}>
+              <section key={group.canteenId} className="user-card" style={{ ...liquidGlass }}>
                 <span style={glassHighlight} aria-hidden />
                 {/* Header */}
                 <button
@@ -186,7 +186,7 @@ const Cart = () => {
                   <span
                     className="material-symbols-outlined"
                     style={{
-                      color: "#6E6E73",
+                          color: "hsl(var(--user-muted))",
                       fontSize: 22,
                       transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
                       transition: "transform 300ms ease",
@@ -219,9 +219,9 @@ const Cart = () => {
                           width: 56,
                           height: 56,
                           borderRadius: 14,
-                          background: "rgba(255,255,255,0.5)",
+                            background: "hsl(var(--user-surface-raised) / 0.72)",
                           fontSize: 28,
-                          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.4)",
+                            boxShadow: "inset 0 0 0 1px hsl(var(--user-border) / 0.75)",
                         }}
                       >
                         {it.icon}
@@ -257,12 +257,12 @@ const Cart = () => {
                           <div
                             className="flex items-center"
                             style={{
-                              background: "rgba(255,255,255,0.6)",
+                              background: "hsl(var(--user-surface-raised) / 0.82)",
                               backdropFilter: "blur(12px)",
                               borderRadius: 9999,
                               padding: "3px 10px",
                               gap: 12,
-                              border: "1px solid rgba(255,255,255,0.5)",
+                              border: "1px solid hsl(var(--user-border) / 0.82)",
                             }}
                           >
                             <button
