@@ -383,28 +383,43 @@ All colors MUST be HSL.
   body.user-app-route {
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
+    width: 100%;
+    min-height: 100%;
+    min-height: -webkit-fill-available;
     min-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   html.user-app-route #root,
   body.user-app-route #root {
     background: hsl(var(--user-app-bg)) !important;
     min-height: var(--app-vh, 100dvh);
+    min-height: -webkit-fill-available;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: initial !important;
   }
 
   .user-shell {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
+    min-height: 100svh;
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
     overflow-x: hidden;
+    position: relative;
   }
 
   .user-page {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
+    min-height: 100svh;
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: clip;
   }
 
   .user-content {
