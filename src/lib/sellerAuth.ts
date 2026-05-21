@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { clearSellerScopedCaches } from "@/lib/sellerCaches";
 
 const SESSION_KEY = "bitez_seller_session";
 const LEGACY_SESSION_KEY = "bitez.seller.session.v1";
@@ -32,6 +33,7 @@ export function getSellerSession(): SellerSession | null {
 export function clearSellerSession() {
   localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(LEGACY_SESSION_KEY);
+  clearSellerScopedCaches();
 }
 
 export async function loginSeller(identifier: string, password: string): Promise<SellerSession> {
@@ -56,6 +58,17 @@ export async function loginSeller(identifier: string, password: string): Promise
   });
   if (rpcErr) throw new Error(rpcErr.message);
   if (!ok) throw new Error("Invalid username or password");
+
+  // If a different seller was previously logged in on this device, wipe any
+  // single-seller caches before storing the new session so the new canteen
+  // never sees the previous canteen's profile / offers / staff / orders.
+  try {
+    const prevRaw = localStorage.getItem(SESSION_KEY);
+    const prev = prevRaw ? (JSON.parse(prevRaw) as { id?: string }) : null;
+    if (!prev?.id || prev.id !== seller.id) clearSellerScopedCaches();
+  } catch {
+    clearSellerScopedCaches();
+  }
 
   const session: SellerSession = {
     id: seller.id,

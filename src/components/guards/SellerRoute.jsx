@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getSellerSession } from '../../utils/sessionManager';
 import { queryWithTimeout } from '../../utils/networkStatus';
+import { clearSellerScopedCaches } from '../../lib/sellerCaches';
 
 export default function SellerRoute({ children }) {
   const session = getSellerSession();
@@ -18,6 +19,7 @@ export default function SellerRoute({ children }) {
       if (!session?.id || !String(session.id).includes('-')) {
         localStorage.removeItem('bitez_seller_session');
         localStorage.removeItem('bitez.seller.session.v1');
+        clearSellerScopedCaches();
         if (alive) setValid(false);
         return;
       }
@@ -32,6 +34,7 @@ export default function SellerRoute({ children }) {
       if (!ok) {
         localStorage.removeItem('bitez_seller_session');
         localStorage.removeItem('bitez.seller.session.v1');
+        clearSellerScopedCaches();
       }
       if (alive) setValid(ok);
     }
