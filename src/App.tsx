@@ -2,7 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +16,7 @@ import { loadOrdersFromBackend } from "@/lib/sellerOrders";
 import { getRegisteredCanteensFromBackend } from "@/lib/sellerProfile";
 import { getUserSession } from "@/utils/sessionManager";
 import { pruneCartByCanteens } from "@/lib/userCart";
+import { applyPwaHeadForPath } from "@/lib/pwaLaunch";
 
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const UserHome = lazy(() => import("./pages/user/Home.tsx"));
@@ -87,6 +88,14 @@ const AppDataPreloader = () => {
   return null;
 };
 
+const PwaRouteSync = () => {
+  const location = useLocation();
+  useEffect(() => {
+    applyPwaHeadForPath(location.pathname);
+  }, [location.pathname]);
+  return null;
+};
+
 const App = () => (
   <PersistQueryClientProvider
     client={queryClient}
@@ -98,6 +107,7 @@ const App = () => (
       <OfflineBanner />
       <AppDataPreloader />
       <BrowserRouter>
+        <PwaRouteSync />
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<RootRedirect />} />

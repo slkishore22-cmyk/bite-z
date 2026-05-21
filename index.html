@@ -10,14 +10,20 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <script>
       (function () {
-        var isAdmin = window.location.pathname.indexOf('/master-admin') === 0;
-        document.write('<link rel="manifest" href="' + (isAdmin ? '/manifest-admin.webmanifest' : '/manifest.webmanifest') + '">');
-        document.write('<meta name="apple-mobile-web-app-title" content="' + (isAdmin ? 'Bitez Admin' : 'Bitez') + '">');
-        document.write('<meta name="theme-color" content="' + (isAdmin ? '#0A0A0F' : '#050505') + '">');
+        var path = window.location.pathname;
+        var isMasterAdmin = path.indexOf('/master-admin') === 0;
+        var isSellerAdmin = path.indexOf('/seller') === 0;
+        var manifest = isMasterAdmin ? '/manifest-admin.webmanifest' : (isSellerAdmin ? '/manifest-seller-admin.webmanifest' : '/manifest.webmanifest');
+        var title = isMasterAdmin ? 'Bitez Master Admin' : (isSellerAdmin ? 'Bitez Admin' : 'Bitez');
+        var theme = isMasterAdmin ? '#0A0A0F' : '#050505';
+        var standalone = isMasterAdmin || isSellerAdmin;
+        document.write('<link rel="manifest" href="' + manifest + '">');
+        document.write('<meta name="apple-mobile-web-app-title" content="' + title + '">');
+        document.write('<meta name="theme-color" content="' + theme + '">');
+        document.write('<meta name="apple-mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
+        document.write('<meta name="mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
       })();
     </script>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -1,22 +1,19 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { applyPwaHeadForPath, getAdminStandaloneRedirect } from "@/lib/pwaLaunch";
 
 const installRouteManifest = () => {
-  if (typeof document === "undefined" || typeof window === "undefined") return;
-  const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
-  if (!link) return;
-  const isAdminRoute = window.location.pathname.startsWith("/master-admin");
-  link.setAttribute("href", isAdminRoute ? "/manifest-admin.webmanifest" : "/manifest.webmanifest");
-
-  const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-  themeMeta?.setAttribute("content", isAdminRoute ? "#0A0A0F" : "#050505");
-
-  const appleTitle = document.querySelector<HTMLMetaElement>('meta[name="apple-mobile-web-app-title"]');
-  appleTitle?.setAttribute("content", isAdminRoute ? "Bitez Admin" : "Bitez");
+  applyPwaHeadForPath();
 };
 
 installRouteManifest();
+
+const adminStandaloneRedirect = getAdminStandaloneRedirect();
+if (adminStandaloneRedirect && adminStandaloneRedirect !== window.location.pathname) {
+  window.history.replaceState(null, "", adminStandaloneRedirect);
+  applyPwaHeadForPath(adminStandaloneRedirect);
+}
 
 const markIosPwa = () => {
   if (typeof window === "undefined") return;
