@@ -160,17 +160,7 @@ export function getActiveOfferForSeller(sellerId?: string | null, now = Date.now
 export async function addOffer(input: Omit<SellerOffer, "id" | "createdAt">): Promise<SellerOffer> {
   const { data, error } = await db
     .from("seller_offers")
-    .insert({
-      seller_id: input.sellerId,
-      kind: input.kind,
-      name: input.name,
-      discount_pct: input.discountPct,
-      start_date: input.startDate || null,
-      end_date: input.endDate || null,
-      condition: input.condition,
-      item_ids: input.itemIds,
-      is_active: true,
-    })
+    .insert(toDbRow({ ...input, id: "", createdAt: Date.now() }))
     .select("id, seller_id, kind, name, discount_pct, start_date, end_date, condition, item_ids, created_at")
     .single();
   if (error) throw new Error(error.message);
