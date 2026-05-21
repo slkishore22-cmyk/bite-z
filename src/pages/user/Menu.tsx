@@ -413,7 +413,7 @@ const FoodCard = ({
       className="flex items-center animate-fade-in"
       style={{
         ...liquidGlass,
-        background: hover ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.4)",
+        background: hover ? "hsl(var(--user-surface))" : "hsl(var(--user-surface-raised))",
         padding: 12,
         gap: 12,
         transition: "background 400ms ease",
@@ -481,7 +481,8 @@ const FoodCard = ({
             type="button"
             onClick={() => onChange(1)}
             style={{
-              background: "rgba(255,255,255,0.5)",
+              background: "hsl(var(--user-surface))",
+              border: "1px solid hsl(var(--user-border) / 0.82)",
               borderRadius: 9999,
               padding: "6px 16px",
               fontSize: 10,
@@ -492,11 +493,11 @@ const FoodCard = ({
               transition: "all 400ms ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.85)";
+              e.currentTarget.style.background = "hsl(var(--user-surface-raised))";
               e.currentTarget.style.color = "#2563eb";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.5)";
+              e.currentTarget.style.background = "hsl(var(--user-surface))";
               e.currentTarget.style.color = "#374151";
             }}
           >
@@ -507,8 +508,8 @@ const FoodCard = ({
             className="flex items-center"
             style={{
               gap: 8,
-              background: "rgba(255,255,255,0.4)",
-              border: "1px solid rgba(255,255,255,0.5)",
+              background: "hsl(var(--user-surface))",
+              border: "1px solid hsl(var(--user-border) / 0.82)",
               borderRadius: 9999,
               padding: 4,
             }}
