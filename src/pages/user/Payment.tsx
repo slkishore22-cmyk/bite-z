@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder, hasSoundPlayed, markSoundPlayed } from "@/lib/sellerOrders";
@@ -103,6 +103,19 @@ const Payment = () => {
   const [placing, setPlacing] = useState(false);
   const selectedCanteenId = params.get("canteenId");
 
+  // Preload Razorpay SDK + active offers on mount. Safari blocks the payment
+  // popup if too much async work happens between the user's tap and
+  // rzp.open(); preloading makes the open call near-synchronous.
+  useEffect(() => {
+    void loadRazorpay();
+    const cart = getCart();
+    const sellerKey =
+      (selectedCanteenId
+        ? cart.find((c) => c.canteenId === selectedCanteenId)
+        : cart[0])?.canteenId ?? null;
+    void loadOffersFromBackend(sellerKey).catch(() => []);
+  }, [selectedCanteenId]);
+
   const playOnlineSuccessOnce = useCallback((orderUid: string) => {
     if (hasSoundPlayed(orderUid)) return;
     markSoundPlayed(orderUid);
@@ -127,9 +140,14 @@ const Payment = () => {
     setPlacing(true);
     const subtotal = activeCart.reduce((s, c) => s + c.price * c.qty, 0);
     const sellerKey = activeCart[0]?.canteenId ?? null;
-    await loadOffersFromBackend(sellerKey).catch(() => []);
-    const discountPct = getActiveDiscountPctForSeller(sellerKey);
-    const totalAmount = Math.max(1, Math.round(subtotal * (1 - discountPct / 100)));
+    // CRITICAL: Offers are valid for ONLINE payment only. Cash on Delivery
+    // customers are always charged the full bill — no discount.
+    const discountPct =
+      method === "Online" ? getActiveDiscountPctForSeller(sellerKey) : 0;
+    const totalAmount =
+      method === "Online"
+        ? Math.max(1, Math.round(subtotal * (1 - discountPct / 100)))
+        : subtotal;
 
     const firstCartItem = activeCart[0];
 
@@ -140,6 +158,9 @@ const Payment = () => {
         isSoundPlayed: false,
         sellerId: firstCartItem?.canteenId ?? null,
         sellerName: firstCartItem?.canteenName ?? null,
+        subtotal,
+        // Online: charge the discounted total. Cash: charge the full subtotal.
+        total: totalAmount,
         items: activeCart.map((c) => ({
           itemId: c.itemId,
           name: c.name,
