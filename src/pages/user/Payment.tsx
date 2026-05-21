@@ -233,15 +233,13 @@ const Payment = () => {
 
   return (
     <div
-      style={{ background: "#F5F5F7", minHeight: "100vh", color: "#1D1D1F", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      className="user-page"
+      style={{ color: "hsl(var(--user-text))", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* TopAppBar */}
       <header
-        className="fixed top-0 w-full z-50 flex items-center px-6"
+        className="user-topbar fixed top-0 w-full z-50 flex items-center px-6"
         style={{
-          background: "rgba(245,245,247,0.8)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
           height: "calc(64px + var(--ios-pwa-safe-top))",
           paddingTop: "var(--ios-pwa-safe-top)",
         }}
@@ -266,8 +264,8 @@ const Payment = () => {
 
       {/* Main Content Canvas */}
       <main
-        className="max-w-4xl mx-auto flex flex-col"
-        style={{ paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))", paddingLeft: 24, paddingRight: 24, gap: 48 }}
+        className="user-content flex flex-col"
+        style={{ paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))", maxWidth: "56rem", gap: 48 }}
       >
         {/* Branding Hero Moment */}
         <div
