@@ -44,6 +44,7 @@ button, a, [role="button"], [role="link"], [data-tappable="true"] {
 html, body, #root {
   width: 100%;
   min-height: 100%;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
 }
 
@@ -65,6 +66,17 @@ html, body, #root {
 }
 
 @supports (-webkit-touch-callout: none) {
+  html.user-app-route,
+  html.user-app-route body,
+  body.user-app-route,
+  html.user-app-route #root,
+  body.user-app-route #root,
+  body.user-app-route .user-shell,
+  body.user-app-route .user-page {
+    background: hsl(var(--user-app-bg)) !important;
+    min-height: -webkit-fill-available;
+  }
+
   @media (display-mode: standalone) {
     :root {
       --ios-pwa-safe-top: env(safe-area-inset-top, 0px);
@@ -113,6 +125,7 @@ html.android-pwa {
 .safe-area-left { padding-left: env(safe-area-inset-left, 0px); }
 .safe-area-right { padding-right: env(safe-area-inset-right, 0px); }
 #root {
+  width: 100%;
   min-height: var(--app-vh, 100dvh);
   isolation: isolate;
   background: hsl(var(--background));
@@ -381,28 +394,43 @@ All colors MUST be HSL.
   body.user-app-route {
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
+    width: 100%;
+    min-height: 100%;
+    min-height: -webkit-fill-available;
     min-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   html.user-app-route #root,
   body.user-app-route #root {
     background: hsl(var(--user-app-bg)) !important;
     min-height: var(--app-vh, 100dvh);
+    min-height: -webkit-fill-available;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: initial !important;
   }
 
   .user-shell {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
+    min-height: 100svh;
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
     overflow-x: hidden;
+    position: relative;
   }
 
   .user-page {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
+    min-height: 100svh;
     background: hsl(var(--user-app-bg)) !important;
     color: hsl(var(--user-text));
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
   }
 
   .user-content {
@@ -446,9 +474,10 @@ All colors MUST be HSL.
   .user-floating-action {
     position: fixed;
     z-index: 30;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(100%, 52rem);
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
     padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
     padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
   }
@@ -466,7 +495,9 @@ All colors MUST be HSL.
   body.user-app-route [style*="max-width: 390px"],
   body.user-app-route [style*="max-width:390px"],
   body.user-app-route [style*="max-width: 448px"],
-  body.user-app-route [style*="max-width:448px"] {
+  body.user-app-route [style*="max-width:448px"],
+  body.user-app-route [style*="max-width: 520px"],
+  body.user-app-route [style*="max-width:520px"] {
     max-width: none !important;
   }
 
@@ -480,12 +511,27 @@ All colors MUST be HSL.
   body.user-app-route .cb-glass,
   body.user-app-route .lg-card,
   body.user-app-route .lg-canteen,
-  body.user-app-route .active-pill {
+  body.user-app-route .active-pill,
+  body.user-app-route .lg-input,
+  body.user-app-route .cb-pill {
     background: hsl(var(--user-surface-raised)) !important;
     border-color: hsl(var(--user-border) / 0.8) !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+
+  body.user-app-route .cb-glass::before,
+  body.user-app-route .cb-glass::after,
+  body.user-app-route .lg-card::before,
+  body.user-app-route .lg-card::after,
+  body.user-app-route .lg-canteen::before,
+  body.user-app-route .lg-canteen::after {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    -webkit-mask: none !important;
+    mask: none !important;
   }
 
   .seller-admin-shell {
