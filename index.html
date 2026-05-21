@@ -15,7 +15,7 @@
         var isSellerAdmin = path.indexOf('/seller') === 0;
         var manifest = isMasterAdmin ? '/manifest-admin.webmanifest' : (isSellerAdmin ? '/manifest-seller-admin.webmanifest' : '/manifest.webmanifest');
         var title = isMasterAdmin ? 'Bitez Master Admin' : (isSellerAdmin ? 'Bitez Admin' : 'Bitez');
-        var theme = isMasterAdmin ? '#0A0A0F' : '#050505';
+        var theme = isMasterAdmin ? '#0A0A0F' : (isSellerAdmin ? '#050505' : '#E9EEF5');
         var standalone = isMasterAdmin || isSellerAdmin;
         document.write('<link rel="manifest" href="' + manifest + '">');
         document.write('<meta name="apple-mobile-web-app-title" content="' + title + '">');
