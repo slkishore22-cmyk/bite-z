@@ -6,6 +6,7 @@ import {
   addOffer,
   getOffers,
   loadOffersFromBackend,
+  migrateCachedOffersToBackend,
   removeOffer,
   subscribeOffers,
   updateOffer,
@@ -49,7 +50,9 @@ const SellerOffers = () => {
 
   const sellerId = getSellerSession()?.id ?? null;
   useEffect(() => {
-    loadOffersFromBackend(sellerId).then(() => setOffers(getOffers())).catch(() => null);
+    migrateCachedOffersToBackend(sellerId)
+      .catch(() => null)
+      .finally(() => loadOffersFromBackend(sellerId).then(() => setOffers(getOffers())).catch(() => null));
   }, [sellerId]);
   const myOffers = useMemo(
     () => offers.filter((o) => o.sellerId === sellerId),
