@@ -332,8 +332,8 @@ const Cart = () => {
         {/* Sticky Pay Now */}
         {groups.length === 1 && (
           <div
-            className="fixed left-1/2 -translate-x-1/2 z-30 px-6 w-full max-w-md"
-            style={{ bottom: 96 }}
+            className="user-floating-action"
+            style={{ bottom: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom) + 18px)" }}
           >
             {(() => {
               const g = groups[0];
