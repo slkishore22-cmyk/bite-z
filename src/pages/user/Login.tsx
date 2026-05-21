@@ -53,8 +53,8 @@ const UserLogin = () => {
 
   return (
     <main
-      className="min-h-screen relative flex flex-col items-center justify-center antialiased overflow-hidden"
-      style={{ background: "#F5F5F7", color: "#1D1D1F" }}
+      className="user-page relative flex flex-col items-center justify-center antialiased overflow-hidden"
+      style={{ color: "hsl(var(--user-text))" }}
     >
       <BitezBloom />
       <div className="h-[280px] flex flex-col items-center justify-center">
@@ -83,7 +83,7 @@ const UserLogin = () => {
         </div>
       </div>
 
-      <div className="w-full" style={{ maxWidth: 390, paddingLeft: 24, paddingRight: 24 }}>
+      <div className="user-content" style={{ maxWidth: 448 }}>
         <h2
           className="text-center mb-2"
           style={{ fontSize: 24, fontWeight: 700, color: "#1D1D1F" }}
