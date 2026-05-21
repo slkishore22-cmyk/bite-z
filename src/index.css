@@ -362,6 +362,45 @@ All colors MUST be HSL.
     background: hsl(var(--background));
   }
 
+  html.user-app-route .app-route-loader,
+  body.user-app-route .app-route-loader {
+    background: #F5F5F7;
+  }
+
+  /* User app: light background everywhere, responsive content width.
+     The user app pages are designed as a mobile-first column. On wider
+     screens we keep the column centered but paint the surrounding area
+     with the same light surface so there are no black/white gaps. */
+  html.user-app-route,
+  html.user-app-route body,
+  body.user-app-route {
+    background: #F5F5F7 !important;
+    color: #1D1D1F;
+  }
+  html.user-app-route #root,
+  body.user-app-route #root {
+    background: #F5F5F7;
+  }
+
+  .user-shell {
+    width: 100%;
+    min-height: var(--app-vh, 100dvh);
+    background: #F5F5F7;
+  }
+
+  /* Make the legacy mobile-width wrappers inside user pages expand on
+     larger screens so the app uses the available space responsively
+     instead of staying pinned to a fixed phone width. */
+  body.user-app-route .max-w-md {
+    max-width: min(100%, 28rem);
+  }
+  @media (min-width: 640px) {
+    body.user-app-route .max-w-md { max-width: min(100%, 34rem); }
+  }
+  @media (min-width: 1024px) {
+    body.user-app-route .max-w-md { max-width: min(100%, 42rem); }
+  }
+
   .seller-admin-shell {
     min-height: var(--app-vh, 100dvh);
     background: hsl(var(--background));
