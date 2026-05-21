@@ -2,11 +2,12 @@
   "name": "Bitez Admin",
   "short_name": "Bitez Admin",
   "description": "Bitez Master Admin control panel.",
+  "id": "/master-admin/",
   "theme_color": "#0A0A0F",
   "background_color": "#0A0A0F",
   "display": "standalone",
   "orientation": "any",
-  "start_url": "/master-admin/login",
+  "start_url": "/master-admin/overview",
   "scope": "/master-admin/",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
