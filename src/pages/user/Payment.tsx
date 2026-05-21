@@ -173,7 +173,15 @@ const Payment = () => {
       }
       // Online (UPI / Razorpay)
       const { data, error } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: totalAmount, receipt: `bitez_${Date.now()}` },
+        // Send the raw subtotal + sellerId so the backend can re-validate the
+        // active offer against the database and compute the chargeable total
+        // server-side. We also send our client-computed total as a fallback.
+        body: {
+          subtotal,
+          sellerId: sellerKey,
+          amount: totalAmount,
+          receipt: `bitez_${Date.now()}`,
+        },
       });
       if (error || !data?.order_id) {
         alert("Unable to start payment. Please try again.");

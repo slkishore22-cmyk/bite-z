@@ -193,7 +193,7 @@ const Home = () => {
                 key={i}
                 offer={o}
                 onClick={() => {
-                  if (o.sellerId) navigate(`/app/menu/${o.sellerId}`);
+                  if (o.sellerId) navigate(`/app/menu/${o.sellerId}?fromOffer=1`);
                 }}
               />
             ))}
