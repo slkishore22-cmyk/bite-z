@@ -27,16 +27,14 @@ const TABS: { key: CategoryKey; label: string; emoji: string }[] = [
 ];
 
 const liquidGlass: React.CSSProperties = {
-  background: "rgba(255,255,255,0.4)",
-  backdropFilter: "blur(40px)",
-  WebkitBackdropFilter: "blur(40px)",
-  boxShadow:
-    "0 4px 24px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.8), inset 0 24px 24px -12px rgba(255,255,255,0.5)",
-  borderRadius: 22,
+  background: "hsl(var(--user-surface-raised))",
+  border: "1px solid hsl(var(--user-border) / 0.82)",
+  boxShadow: "none",
+  borderRadius: 18,
 };
 
 const textGlass: React.CSSProperties = {
-  textShadow: "0 1px 2px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.05)",
+  textShadow: "none",
 };
 
 const Menu = () => {
@@ -152,14 +150,13 @@ const Menu = () => {
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
-        {/* Fixed header */}
         <div
-          className="user-topbar fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
+          className="user-topbar z-50 flex items-center justify-between"
           style={{
             paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 16,
-            paddingLeft: 24,
-            paddingRight: 24,
+            paddingLeft: "max(16px, env(safe-area-inset-left, 0px))",
+            paddingRight: "max(16px, env(safe-area-inset-right, 0px))",
           }}
         >
           <button
@@ -199,9 +196,8 @@ const Menu = () => {
         <div
           className="user-content"
           style={{
-            paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+            paddingTop: 16,
             paddingBottom: 120,
-            maxWidth: 672,
           }}
         >
           {/* Search + tabs (scrolls with page) */}
@@ -213,9 +209,7 @@ const Menu = () => {
               marginRight: -16,
               paddingLeft: 16,
               paddingRight: 16,
-              background: "rgba(245,245,247,0.85)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
+              background: "transparent",
             }}
           >
             {/* Search */}
@@ -322,15 +316,12 @@ const Menu = () => {
         {/* Floating order panel */}
         {totalItems > 0 && (
           <div
-            className="fixed z-50 flex items-center justify-between"
+            className="user-floating-action z-50"
             style={{
-              ...liquidGlass,
-              left: 16,
-              right: 16,
               bottom: "calc(24px + var(--ios-pwa-safe-bottom))",
-              padding: 16,
             }}
           >
+            <div className="flex items-center justify-between" style={{ ...liquidGlass, padding: 16 }}>
             <div className="min-w-0">
               <div
                 style={{
@@ -372,6 +363,7 @@ const Menu = () => {
               >
                 Pay Now
               </button>
+            </div>
             </div>
           </div>
         )}
