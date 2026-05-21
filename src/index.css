@@ -510,12 +510,27 @@ All colors MUST be HSL.
   body.user-app-route .cb-glass,
   body.user-app-route .lg-card,
   body.user-app-route .lg-canteen,
-  body.user-app-route .active-pill {
+  body.user-app-route .active-pill,
+  body.user-app-route .lg-input,
+  body.user-app-route .cb-pill {
     background: hsl(var(--user-surface-raised)) !important;
     border-color: hsl(var(--user-border) / 0.8) !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+
+  body.user-app-route .cb-glass::before,
+  body.user-app-route .cb-glass::after,
+  body.user-app-route .lg-card::before,
+  body.user-app-route .lg-card::after,
+  body.user-app-route .lg-canteen::before,
+  body.user-app-route .lg-canteen::after {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    -webkit-mask: none !important;
+    mask: none !important;
   }
 
   .seller-admin-shell {
