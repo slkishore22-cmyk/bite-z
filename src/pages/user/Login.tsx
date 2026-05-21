@@ -53,8 +53,8 @@ const UserLogin = () => {
 
   return (
     <main
-      className="min-h-screen relative flex flex-col items-center justify-center antialiased overflow-hidden"
-      style={{ background: "#F5F5F7", color: "#1D1D1F" }}
+      className="user-page relative flex flex-col items-center justify-center antialiased overflow-hidden"
+      style={{ color: "hsl(var(--user-text))" }}
     >
       <BitezBloom />
       <div className="h-[280px] flex flex-col items-center justify-center">
@@ -83,7 +83,7 @@ const UserLogin = () => {
         </div>
       </div>
 
-      <div className="w-full" style={{ maxWidth: 390, paddingLeft: 24, paddingRight: 24 }}>
+      <div className="user-content" style={{ maxWidth: 448 }}>
         <h2
           className="text-center mb-2"
           style={{ fontSize: 24, fontWeight: 700, color: "#1D1D1F" }}
@@ -222,12 +222,11 @@ const UserLogin = () => {
 };
 
 export const lgStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.4)",
-  backdropFilter: "blur(20px) saturate(180%)",
-  WebkitBackdropFilter: "blur(20px) saturate(180%)",
-  border: "1px solid rgba(255,255,255,0.5)",
-  boxShadow:
-    "inset 0 1px 1px rgba(255,255,255,0.6), 0 4px 24px -1px rgba(0,0,0,0.04)",
+  background: "hsl(var(--user-surface) / 0.66)",
+  backdropFilter: "blur(18px) saturate(145%)",
+  WebkitBackdropFilter: "blur(18px) saturate(145%)",
+  border: "1px solid hsl(var(--user-border) / 0.82)",
+  boxShadow: "0 8px 24px hsl(220 25% 40% / 0.08)",
   height: 64,
   borderRadius: 12,
 };
@@ -250,7 +249,7 @@ export const BitezBloom = () => (
       left: "50%",
       width: 600,
       height: 600,
-      background: "rgba(0,113,227,0.05)",
+      background: "hsl(212 82% 66% / 0.12)",
       filter: "blur(100px)",
     }}
   />

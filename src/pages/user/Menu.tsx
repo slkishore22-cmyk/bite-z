@@ -146,24 +146,20 @@ const Menu = () => {
   return (
     <UserLayout>
       <div
-        className="min-h-screen antialiased"
+        className="user-page antialiased"
         style={{
-          background: "#F5F5F7",
           color: "#111827",
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
         {/* Fixed header */}
         <div
-          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
+          className="user-topbar fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
           style={{
             paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 16,
             paddingLeft: 24,
             paddingRight: 24,
-            background: "rgba(245,245,247,0.85)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
           }}
         >
           <button
@@ -201,12 +197,10 @@ const Menu = () => {
 
         {/* Main content */}
         <div
-          className="mx-auto"
+          className="user-content"
           style={{
             paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 120,
-            paddingLeft: 16,
-            paddingRight: 16,
             maxWidth: 672,
           }}
         >

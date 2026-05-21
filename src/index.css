@@ -55,6 +55,13 @@ html, body, #root {
   --ios-content-top: 0px;
   --ios-page-gap: 24px;
   --user-bottom-nav-height: 64px;
+    --user-app-bg: 214 32% 94%;
+    --user-app-bg-soft: 213 38% 97%;
+    --user-surface: 214 35% 98%;
+    --user-surface-raised: 212 42% 96%;
+    --user-border: 216 24% 86%;
+    --user-text: 220 24% 12%;
+    --user-muted: 218 11% 49%;
 }
 
 @supports (-webkit-touch-callout: none) {
@@ -364,7 +371,7 @@ All colors MUST be HSL.
 
   html.user-app-route .app-route-loader,
   body.user-app-route .app-route-loader {
-    background: #F5F5F7;
+    background: hsl(var(--user-app-bg));
   }
 
   /* User app: light background everywhere, responsive content width.
@@ -374,18 +381,87 @@ All colors MUST be HSL.
   html.user-app-route,
   html.user-app-route body,
   body.user-app-route {
-    background: #F5F5F7 !important;
-    color: #1D1D1F;
+    background: hsl(var(--user-app-bg)) !important;
+    color: hsl(var(--user-text));
   }
   html.user-app-route #root,
   body.user-app-route #root {
-    background: #F5F5F7;
+    background: hsl(var(--user-app-bg));
   }
 
   .user-shell {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
-    background: #F5F5F7;
+    background:
+      radial-gradient(circle at 50% -18%, hsl(212 68% 91% / 0.9), transparent 42%),
+      linear-gradient(180deg, hsl(var(--user-app-bg-soft)), hsl(var(--user-app-bg)) 38%, hsl(214 28% 92%));
+    color: hsl(var(--user-text));
+    overflow-x: clip;
+  }
+
+  .user-page {
+    width: 100%;
+    min-height: var(--app-vh, 100dvh);
+    background: transparent !important;
+    color: hsl(var(--user-text));
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  .user-content {
+    width: min(100%, 68rem);
+    margin-inline: auto;
+    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
+  }
+
+  .user-content-readable {
+    width: min(100%, 52rem);
+  }
+
+  .user-topbar {
+    background: hsl(var(--user-app-bg) / 0.86) !important;
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    border-bottom: 1px solid hsl(var(--user-border) / 0.72);
+  }
+
+  .user-card {
+    background: hsl(var(--user-surface) / 0.72) !important;
+    border: 1px solid hsl(var(--user-border) / 0.82) !important;
+    box-shadow: 0 10px 28px hsl(220 25% 40% / 0.09);
+  }
+
+  .user-card-muted {
+    background: hsl(var(--user-surface-raised) / 0.72) !important;
+    border: 1px solid hsl(var(--user-border) / 0.78) !important;
+  }
+
+  .user-floating-action {
+    position: fixed;
+    z-index: 30;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 52rem);
+    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
+  }
+
+  /* Startup-level guard for the legacy user screens: many pages still carry
+     inline iOS-style white/gray backgrounds. Route-scoped important rules beat
+     those inline values so no user page can reintroduce white blocks or black
+     side gutters while the app grows responsively. */
+  body.user-app-route main[style*="#F5F5F7"],
+  body.user-app-route main[style*="#F8FAFC"],
+  body.user-app-route div[style*="min-height"][style*="#F5F5F7"],
+  body.user-app-route div[style*="min-height"][style*="#F8FAFC"] {
+    background: transparent !important;
+  }
+
+  body.user-app-route [style*="max-width: 390px"],
+  body.user-app-route [style*="max-width:390px"],
+  body.user-app-route [style*="max-width: 448px"],
+  body.user-app-route [style*="max-width:448px"] {
+    max-width: min(100%, 52rem) !important;
   }
 
   /* Make the legacy mobile-width wrappers inside user pages expand on
@@ -454,11 +530,11 @@ All colors MUST be HSL.
 
   .lg-card {
     border-radius: 22px;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid transparent;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 24px rgba(0, 0, 0, 0.04);
+    background: hsl(var(--user-surface) / 0.72);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid hsl(var(--user-border) / 0.82);
+    box-shadow: 0 10px 28px hsl(220 25% 40% / 0.09);
     position: relative;
     overflow: hidden;
     transition: all 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -469,7 +545,7 @@ All colors MUST be HSL.
     inset: 0;
     border-radius: 22px;
     padding: 1px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.25) 100%);
+    background: linear-gradient(180deg, hsl(var(--user-app-bg-soft) / 0.55) 0%, hsl(var(--user-border) / 0.24) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -481,7 +557,7 @@ All colors MUST be HSL.
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 38%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 70%, transparent 100%);
+    background: linear-gradient(180deg, hsl(var(--user-app-bg-soft) / 0.45) 0%, hsl(var(--user-app-bg-soft) / 0.1) 70%, transparent 100%);
     border-radius: 22px 22px 50% 50% / 22px 22px 40px 40px;
     pointer-events: none;
     z-index: 1;

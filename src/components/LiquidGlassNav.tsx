@@ -51,14 +51,17 @@ export const LiquidGlassNav = ({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-stretch border-t border-white/40"
+      className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-stretch"
       style={{
         height: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom))",
         paddingBottom: "var(--ios-pwa-safe-bottom)",
         background:
-          "linear-gradient(135deg, rgba(255,255,255,0.94), rgba(255,255,255,0.88))",
+          "linear-gradient(135deg, hsl(var(--user-surface) / 0.92), hsl(var(--user-app-bg-soft) / 0.86))",
+        borderTop: "1px solid hsl(var(--user-border) / 0.78)",
+        backdropFilter: "blur(22px) saturate(135%)",
+        WebkitBackdropFilter: "blur(22px) saturate(135%)",
         boxShadow:
-          "0 -8px 30px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.7) inset",
+          "0 -8px 30px hsl(220 25% 40% / 0.08)",
       }}
     >
       {items.map((item) => {
@@ -75,7 +78,7 @@ export const LiquidGlassNav = ({
             aria-label={item.label}
             aria-current={isActive ? "page" : undefined}
             className="relative flex flex-1 flex-col items-center justify-center gap-1 outline-none transition-colors"
-            style={{ color: "#1D1D1F", opacity: isActive ? 1 : 0.6 }}
+            style={{ color: "hsl(var(--user-text))", opacity: isActive ? 1 : 0.62 }}
           >
             <span className="relative">
               <Icon size={24} strokeWidth={isActive ? 2.4 : 2} />
@@ -84,7 +87,7 @@ export const LiquidGlassNav = ({
                   className="absolute -top-1 -right-1 h-2 w-2 rounded-full"
                   style={{
                     background: "#FF3B30",
-                    boxShadow: "0 0 0 2px rgba(255,255,255,0.9)",
+                    boxShadow: "0 0 0 2px hsl(var(--user-surface) / 0.95)",
                   }}
                 />
               )}

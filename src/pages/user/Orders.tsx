@@ -86,15 +86,14 @@ const Orders = () => {
   return (
     <UserLayout>
       <div
-        className="min-h-screen pb-32 antialiased"
+        className="user-page pb-32 antialiased"
         style={{
-          background: "#F5F5F7",
-          color: "#1D1D1F",
+          color: "hsl(var(--user-text))",
           fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
         }}
       >
         <main
-          className="px-6 mx-auto w-full max-w-md"
+          className="user-content user-content-readable"
           style={{ paddingTop: "calc(32px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
         >
           {/* Editorial Header */}
@@ -147,13 +146,10 @@ const Orders = () => {
           {/* Reorder card – only when no orders at all */}
           {isEmpty && (
           <section
-            className="relative overflow-hidden mt-10"
+            className="user-card relative overflow-hidden mt-10"
             style={{
               borderRadius: 22,
-              background: "#FFFFFF",
               padding: 22,
-              border: "1px solid rgba(0,0,0,0.03)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
             }}
           >
             <div className="relative z-10">
@@ -443,8 +439,8 @@ const GroupCard = ({
                           width: 30,
                           height: 30,
                           borderRadius: 9999,
-                          background: "#F5F5F7",
-                          border: "2px solid #FFFFFF",
+                          background: "hsl(var(--user-surface-raised) / 0.9)",
+                          border: "2px solid hsl(var(--user-border) / 0.78)",
                           fontSize: 14,
                           marginLeft: i === 0 ? 0 : -8,
                           boxShadow: "0 1px 2px rgba(0,0,0,0.05)",

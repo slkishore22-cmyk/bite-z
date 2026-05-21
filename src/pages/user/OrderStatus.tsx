@@ -56,18 +56,16 @@ const OrderStatus = () => {
 
   return (
     <div
-      className="w-full flex flex-col items-center"
+      className="user-page w-full flex flex-col items-center"
       style={{
-        minHeight: "var(--app-vh, 100dvh)",
-        background: "#F8FAFC",
-        color: "#0F172A",
+        color: "hsl(var(--user-text))",
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       }}
     >
       {/* Top AppBar */}
       <header
-        className="w-full max-w-md px-6 flex items-center justify-start"
+        className="user-content user-content-readable flex items-center justify-start"
         style={{
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
           paddingBottom: 10,
@@ -79,7 +77,7 @@ const OrderStatus = () => {
       </header>
 
       <main
-        className="flex-1 w-full max-w-md px-6 flex flex-col items-center"
+        className="user-content user-content-readable flex-1 flex flex-col items-center"
         style={{
           paddingTop: 8,
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",

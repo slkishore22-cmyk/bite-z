@@ -66,8 +66,8 @@ const Signup = () => {
 
   return (
     <main
-      className="min-h-screen relative antialiased"
-      style={{ background: "#F5F5F7", color: "#1D1D1F" }}
+      className="user-page relative antialiased"
+      style={{ color: "hsl(var(--user-text))" }}
     >
       <BitezBloom />
 
@@ -79,9 +79,10 @@ const Signup = () => {
         style={{
           width: 40,
           height: 40,
-          background: "rgba(255,255,255,0.8)",
+          background: "hsl(var(--user-surface) / 0.78)",
           backdropFilter: "blur(12px)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+          border: "1px solid hsl(var(--user-border) / 0.8)",
+          boxShadow: "0 8px 22px hsl(220 25% 40% / 0.08)",
         }}
       >
         <span className="material-symbols-outlined" style={{ fontSize: 22, color: "#1D1D1F" }}>
@@ -89,7 +90,7 @@ const Signup = () => {
         </span>
       </button>
 
-      <div className="mx-auto px-6 pt-24 pb-12" style={{ maxWidth: 448 }}>
+      <div className="user-content pt-24 pb-12" style={{ maxWidth: 520 }}>
         <div className="px-2 mb-10">
           <h1
             className="font-semibold leading-tight mb-1"
@@ -102,8 +103,8 @@ const Signup = () => {
 
         <form
           onSubmit={submit}
-          className="bg-white p-6 space-y-5"
-          style={{ borderRadius: 20, boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}
+          className="user-card p-6 space-y-5"
+          style={{ borderRadius: 20 }}
         >
           <Field icon="person" placeholder="Full Name"
             value={form.fullName} onChange={(v) => set("fullName", v)} autoComplete="name" />

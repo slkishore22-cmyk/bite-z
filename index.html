@@ -15,7 +15,7 @@
         var isSellerAdmin = path.indexOf('/seller') === 0;
         var manifest = isMasterAdmin ? '/manifest-admin.webmanifest' : (isSellerAdmin ? '/manifest-seller-admin.webmanifest' : '/manifest.webmanifest');
         var title = isMasterAdmin ? 'Bitez Master Admin' : (isSellerAdmin ? 'Bitez Admin' : 'Bitez');
-        var theme = isMasterAdmin ? '#0A0A0F' : '#050505';
+        var theme = isMasterAdmin ? '#0A0A0F' : (isSellerAdmin ? '#050505' : '#E9EEF5');
         var standalone = isMasterAdmin || isSellerAdmin;
         document.write('<link rel="manifest" href="' + manifest + '">');
         document.write('<meta name="apple-mobile-web-app-title" content="' + title + '">');
@@ -29,11 +29,11 @@
       })();
     </script>
     <style>
-      html, body, #root { margin: 0; min-height: 100%; background: #05070D; }
+      html, body, #root { margin: 0; min-height: 100%; background: hsl(222 47% 6%); }
       body { background: #05070D; }
       #root:empty { min-height: 100vh; min-height: 100dvh; background: #05070D; }
-      html.user-app-route, html.user-app-route body, html.user-app-route #root { background: #F5F5F7; }
-      html.user-app-route #root:empty { background: #F5F5F7; }
+      html.user-app-route, html.user-app-route body, html.user-app-route #root { background: hsl(214 32% 94%); }
+      html.user-app-route #root:empty { background: hsl(214 32% 94%); }
     </style>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
