@@ -82,7 +82,10 @@ const Cart = () => {
         }}
       >
         <header
-          className="user-topbar user-safe-header z-40"
+          className="user-topbar z-40"
+          style={{
+            paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+          }}
         >
           <div className="user-content user-content-readable flex items-center gap-3 py-4">
             <button
@@ -327,12 +330,7 @@ const Cart = () => {
         {groups.length === 1 && (
           <div
             className="user-floating-action"
-            style={{
-              bottom: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom))",
-              marginTop: 24,
-              paddingBottom: 16,
-              background: "hsl(var(--user-app-bg))",
-            }}
+            style={{ bottom: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom) + 18px)" }}
           >
             {(() => {
               const g = groups[0];

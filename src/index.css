@@ -55,8 +55,6 @@ html, body, #root {
   --ios-content-top: 0px;
   --ios-page-gap: 24px;
   --user-bottom-nav-height: 64px;
-  --user-header-top-space: max(env(safe-area-inset-top, 0px), 16px);
-  --user-edge-gutter: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
     --user-app-bg: 214 32% 94%;
     --user-app-bg-soft: 213 38% 97%;
     --user-surface: 214 35% 98%;
@@ -81,7 +79,6 @@ html, body, #root {
     --ios-pwa-top-breathing: 18px;
     --ios-content-top: 28px;
     --ios-page-gap: 34px;
-    --user-header-top-space: max(env(safe-area-inset-top, 0px), 28px);
   }
 }
 
@@ -91,7 +88,6 @@ html.ios-device:not(.ios-pwa) {
   --ios-pwa-top-breathing: 16px;
   --ios-content-top: 24px;
   --ios-page-gap: 32px;
-  --user-header-top-space: max(env(safe-area-inset-top, 0px), 26px);
 }
 
 /* Android (and other non-iOS) PWA standalone — give the home screen
@@ -103,7 +99,6 @@ html.pwa-standalone:not(.ios-pwa) {
   --ios-pwa-top-breathing: 22px;
   --ios-content-top: 32px;
   --ios-page-gap: 36px;
-  --user-header-top-space: max(env(safe-area-inset-top, 0px), 32px);
 }
 
 html.android-pwa {
@@ -111,7 +106,6 @@ html.android-pwa {
   --ios-pwa-top-breathing: 26px;
   --ios-content-top: 36px;
   --ios-page-gap: 40px;
-  --user-header-top-space: max(env(safe-area-inset-top, 0px), 36px);
 }
 
 .safe-area-top { padding-top: env(safe-area-inset-top, 0px); }
@@ -415,8 +409,8 @@ All colors MUST be HSL.
     width: 100% !important;
     max-width: none !important;
     margin-inline: 0 !important;
-    padding-left: max(var(--user-edge-gutter), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--user-edge-gutter), env(safe-area-inset-right, 0px));
+    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
     box-sizing: border-box;
   }
 
@@ -438,13 +432,6 @@ All colors MUST be HSL.
     box-shadow: none !important;
   }
 
-  .user-safe-header {
-    padding-top: var(--user-header-top-space) !important;
-    padding-left: max(var(--user-edge-gutter), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--user-edge-gutter), env(safe-area-inset-right, 0px));
-    box-sizing: border-box;
-  }
-
   .user-card {
     background: hsl(var(--user-surface-raised)) !important;
     border: 1px solid hsl(var(--user-border) / 0.82) !important;
@@ -457,19 +444,13 @@ All colors MUST be HSL.
   }
 
   .user-floating-action {
-    position: sticky;
+    position: fixed;
     z-index: 30;
-    left: 0;
-    right: 0;
-    width: 100%;
-    padding-left: max(var(--user-edge-gutter), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--user-edge-gutter), env(safe-area-inset-right, 0px));
-    pointer-events: none;
-    box-sizing: border-box;
-  }
-
-  .user-floating-action > * {
-    pointer-events: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 52rem);
+    padding-left: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px));
   }
 
   /* Startup-level guard for the legacy user screens: many pages still carry
@@ -487,16 +468,6 @@ All colors MUST be HSL.
   body.user-app-route [style*="max-width: 448px"],
   body.user-app-route [style*="max-width:448px"] {
     max-width: none !important;
-  }
-
-  body.user-app-route [style*="background: #050505"],
-  body.user-app-route [style*="background:#050505"],
-  body.user-app-route [style*="background: #05070D"],
-  body.user-app-route [style*="background:#05070D"],
-  body.user-app-route [style*="background: rgb(0, 0, 0)"],
-  body.user-app-route [style*="background: rgba(0, 0, 0"],
-  body.user-app-route [style*="background: rgba(0,0,0"] {
-    background: hsl(var(--user-app-bg)) !important;
   }
 
   /* Make the legacy mobile-width wrappers inside user pages expand on

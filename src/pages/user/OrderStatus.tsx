@@ -73,8 +73,9 @@ const OrderStatus = () => {
     >
       {/* Top AppBar */}
       <header
-        className="user-content user-content-readable user-safe-header flex items-center justify-start"
+        className="user-content user-content-readable flex items-center justify-start"
         style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
           paddingBottom: 10,
         }}
       >

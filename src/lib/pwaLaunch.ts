@@ -79,7 +79,7 @@ function configForPath(pathname: string): PwaHeadConfig {
   if (kind === "seller-admin") {
     return { manifest: "/manifest-seller-admin.webmanifest", title: "Bitez Admin", theme: "#050505", standalone: true, kind };
   }
-  return { manifest: "/manifest.webmanifest", title: "Bitez", theme: "#E9EEF5", standalone: false, kind: "user" };
+  return { manifest: "/manifest.webmanifest", title: "Bitez", theme: "#050505", standalone: false, kind: "user" };
 }
 
 function ensureMeta(name: string) {
@@ -115,10 +115,6 @@ export function applyPwaHeadForPath(pathname = window.location.pathname) {
   link.setAttribute("href", config.manifest);
 
   ensureMeta("theme-color").setAttribute("content", config.theme);
-  ensureMeta("apple-mobile-web-app-status-bar-style").setAttribute(
-    "content",
-    config.kind === "user" ? "default" : "black",
-  );
   ensureMeta("apple-mobile-web-app-title").setAttribute("content", config.title);
   ensureMeta("apple-mobile-web-app-capable").setAttribute("content", config.standalone ? "yes" : "no");
   ensureMeta("mobile-web-app-capable").setAttribute("content", config.standalone ? "yes" : "no");

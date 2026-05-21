@@ -236,9 +236,10 @@ const Payment = () => {
     >
       {/* TopAppBar */}
       <header
-        className="user-topbar user-safe-header z-50 flex items-center"
+        className="user-topbar z-50 flex items-center px-6"
         style={{
-          paddingBottom: 12,
+          height: "calc(64px + var(--ios-pwa-safe-top))",
+          paddingTop: "var(--ios-pwa-safe-top)",
         }}
       >
         <div className="flex items-center w-full">
