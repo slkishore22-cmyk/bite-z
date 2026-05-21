@@ -16,16 +16,22 @@
         var manifest = isMasterAdmin ? '/manifest-admin.webmanifest' : (isSellerAdmin ? '/manifest-seller-admin.webmanifest' : '/manifest.webmanifest');
         var title = isMasterAdmin ? 'Bitez Master Admin' : (isSellerAdmin ? 'Bitez Admin' : 'Bitez');
         var theme = isMasterAdmin ? '#0A0A0F' : (isSellerAdmin ? '#050505' : '#E9EEF5');
+        var statusBar = isMasterAdmin || isSellerAdmin ? 'black' : 'default';
         var standalone = isMasterAdmin || isSellerAdmin;
         document.write('<link rel="manifest" href="' + manifest + '">');
         document.write('<meta name="apple-mobile-web-app-title" content="' + title + '">');
         document.write('<meta name="theme-color" content="' + theme + '">');
+        document.write('<meta name="apple-mobile-web-app-status-bar-style" content="' + statusBar + '">');
         document.write('<meta name="apple-mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
         document.write('<meta name="mobile-web-app-capable" content="' + (standalone ? 'yes' : 'no') + '">');
-        document.documentElement.className += (isSellerAdmin ? ' seller-admin-route admin-app-route' : '') + (isMasterAdmin ? ' master-admin-route admin-app-route' : '');
+        var startupClasses = (isSellerAdmin ? ' seller-admin-route admin-app-route' : '') + (isMasterAdmin ? ' master-admin-route admin-app-route' : '');
         if (!isSellerAdmin && !isMasterAdmin) {
-          document.documentElement.className += ' user-app-route';
+          startupClasses += ' user-app-route';
         }
+        document.documentElement.className += startupClasses;
+        document.addEventListener('DOMContentLoaded', function () {
+          document.body.className += startupClasses;
+        });
       })();
     </script>
     <style>
@@ -35,7 +41,6 @@
       html.user-app-route, html.user-app-route body, html.user-app-route #root { background: hsl(214 32% 94%); }
       html.user-app-route #root:empty { background: hsl(214 32% 94%); }
     </style>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
