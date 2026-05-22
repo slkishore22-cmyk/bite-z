@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { queryWithTimeout } from "@/utils/networkStatus";
-import { enforceNoSeedData } from "@/lib/seedDataGuard";
 
 // Shared store for seller-created offers. Backend is the source of truth so
 // offers created by sellers are visible to users on every device/session.
@@ -128,12 +127,7 @@ export async function loadOffersFromBackend(sellerId?: string | null): Promise<S
 
   const { data, error } = await queryWithTimeout(query, 5000);
   if (error) return getOffers().filter((o) => !sellerId || o.sellerId === sellerId);
-  const safe = enforceNoSeedData(
-    data ?? [],
-    ["name", "condition"],
-    `seller_offers (sellerId=${sellerId ?? "all"})`,
-  );
-  const incoming = safe.map(fromRow);
+  const incoming = (data ?? []).map(fromRow);
   upsertCache(incoming, sellerId);
   return incoming;
 }

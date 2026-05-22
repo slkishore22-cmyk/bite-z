@@ -1,16 +1,8 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { lazy, Suspense, useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getOrderById, getOrders } from "@/lib/sellerOrders";
+import OrderConfirmedAnimation from "../../components/OrderConfirmedAnimation";
 import { QRCodeSVG } from "qrcode.react";
-import UserLayout from "@/components/user/UserLayout";
-
-const OrderConfirmedAnimation = lazy(() => import("../../components/OrderConfirmedAnimation"));
-
-const statusCard: React.CSSProperties = {
-  background: "hsl(var(--user-surface-raised))",
-  border: "1px solid hsl(var(--user-border) / 0.82)",
-  boxShadow: "none",
-};
 
 const OrderStatus = () => {
   const navigate = useNavigate();
@@ -19,18 +11,12 @@ const OrderStatus = () => {
   const orderParamId = params.get("id");
 
   const [revealed, setRevealed] = useState(false);
-  const [showConfirmationAnimation, setShowConfirmationAnimation] = useState(false);
   const reduceMotion = useMemo(() => {
     if (typeof window === "undefined") return false;
     const nav = window.navigator as Navigator & { standalone?: boolean };
     const isAppleTouch = /iPad|iPhone|iPod/.test(nav.userAgent) ||
       (nav.platform === "MacIntel" && nav.maxTouchPoints > 1);
     return isAppleTouch || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setShowConfirmationAnimation(true), 100);
-    return () => window.clearTimeout(timer);
   }, []);
 
   // Pull the most recent order (or the one referenced in the URL).
@@ -69,7 +55,6 @@ const OrderStatus = () => {
   const showCodTimer = isCod && expiresAt != null && order?.status === "Pending";
 
   return (
-    <UserLayout>
     <div
       className="user-page w-full flex flex-col items-center"
       style={{
@@ -98,11 +83,7 @@ const OrderStatus = () => {
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
         }}
       >
-        {showConfirmationAnimation && (
-          <Suspense fallback={null}>
-            <OrderConfirmedAnimation reduceMotion={reduceMotion} />
-          </Suspense>
-        )}
+        <OrderConfirmedAnimation reduceMotion={reduceMotion} />
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-3 w-full">
@@ -111,9 +92,11 @@ const OrderStatus = () => {
             className="flex flex-col items-center justify-center"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 800ms ease both',
-              ...statusCard,
+              background: "#FFFFFF",
               padding: 20,
               borderRadius: 20,
+              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
+              border: "1px solid #F1F5F9",
             }}
           >
             <span
@@ -131,7 +114,7 @@ const OrderStatus = () => {
               style={{
                 padding: 14,
                 borderRadius: 18,
-                background: "hsl(var(--user-surface))",
+                background: "#FFFFFF",
                 border: "1px solid #E2E8F0",
                 boxShadow: "0 2px 12px -4px rgba(15,23,42,0.08)",
               }}
@@ -165,9 +148,11 @@ const OrderStatus = () => {
             className="flex flex-col items-center justify-center transition-all duration-400"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 900ms ease both',
-              ...statusCard,
+              background: "#FFFFFF",
               padding: 16,
               borderRadius: 16,
+              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
+              border: "1px solid #F1F5F9",
             }}
           >
             <span
@@ -218,9 +203,11 @@ const OrderStatus = () => {
             className="flex items-center justify-between"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 1050ms ease both',
-              ...statusCard,
+              background: "#FFFFFF",
               padding: 16,
               borderRadius: 16,
+              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
+              border: "1px solid #F1F5F9",
             }}
           >
             <div className="flex items-center" style={{ gap: 12 }}>
@@ -273,9 +260,11 @@ const OrderStatus = () => {
             className="relative overflow-hidden"
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 1200ms ease both',
-              ...statusCard,
+              background: "#FFFFFF",
               padding: 18,
               borderRadius: 16,
+              boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
+              border: "1px solid #F1F5F9",
             }}
           >
             <div
@@ -288,6 +277,7 @@ const OrderStatus = () => {
                 marginRight: -64,
                 marginTop: -64,
                 opacity: 0.1,
+                filter: "blur(48px)",
                 background:
                   "linear-gradient(135deg, #B4C5FF 0%, #2563EB 100%)",
               }}
@@ -373,9 +363,9 @@ const OrderStatus = () => {
             onClick={() => navigate("/app/home")}
             className="w-full font-bold transition-all duration-400"
             style={{
-              background: "hsl(var(--user-surface-raised))",
-              boxShadow: "none",
-              border: "1px solid hsl(var(--user-border) / 0.82)",
+              background: "#FFFFFF",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+              border: "1px solid #E2E8F0",
               color: "#0F172A",
               padding: "14px 0",
               borderRadius: 9999,
@@ -387,7 +377,6 @@ const OrderStatus = () => {
         </div>
       </main>
     </div>
-    </UserLayout>
   );
 };
 

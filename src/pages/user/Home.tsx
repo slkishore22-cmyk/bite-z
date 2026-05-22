@@ -293,7 +293,9 @@ const Home = () => {
                   width: 56,
                   height: 56,
                   borderRadius: 999,
-                  background: "hsl(var(--user-surface))",
+                  background: "rgba(255,255,255,0.7)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
                   marginBottom: 14,
                 }}
               >
@@ -357,8 +359,9 @@ const OfferCard = ({ offer, onClick }: { offer: Offer; onClick?: () => void }) =
         <span
           className="flex items-center gap-1.5"
           style={{
-            background: "hsl(var(--user-surface))",
-            border: "1px solid hsl(var(--user-border) / 0.75)",
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
             borderRadius: 999,
             padding: "3px 10px",
           }}
@@ -442,8 +445,10 @@ const RepeatCard = ({
           width: 40,
           height: 40,
           borderRadius: 999,
-          background: "hsl(var(--user-surface))",
-          boxShadow: "none",
+          background: "rgba(255,255,255,0.4)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          boxShadow: "inset 0 2px 8px rgba(0,0,0,0.04)",
           fontSize: 24,
           lineHeight: 1,
         }}
@@ -491,12 +496,13 @@ const RepeatCard = ({
       <div
         className="flex items-center shrink-0"
         style={{
-          background: "hsl(var(--user-surface))",
-          border: "1px solid hsl(var(--user-border) / 0.75)",
+          background: "rgba(255,255,255,0.4)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           borderRadius: 999,
           padding: "1px 5px",
           gap: 6,
-          boxShadow: "none",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         }}
       >
         <button
@@ -570,9 +576,10 @@ const CanteenCard = ({ spot, onClick }: { spot: Spot; onClick?: () => void }) =>
       height: 88,
       padding: "16px 24px",
       borderRadius: 48,
-      background: "hsl(var(--user-surface-raised))",
-      border: "1px solid hsl(var(--user-border) / 0.82)",
-      boxShadow: "none",
+      background: "rgba(255,255,255,0.55)",
+      backdropFilter: "blur(20px) saturate(180%)",
+      WebkitBackdropFilter: "blur(20px) saturate(180%)",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 6px 18px rgba(0,0,0,0.04)",
     }}
   >
     <div className="flex items-center gap-3 min-w-0">
@@ -582,7 +589,9 @@ const CanteenCard = ({ spot, onClick }: { spot: Spot; onClick?: () => void }) =>
           width: 48,
           height: 48,
           borderRadius: 999,
-          background: "hsl(var(--user-surface))",
+          background: "rgba(255,255,255,0.7)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
         }}
       >
         <span style={{ fontSize: 26, lineHeight: 1 }}>{spot.icon}</span>

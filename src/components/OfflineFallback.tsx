@@ -17,9 +17,9 @@ const OfflineFallback = ({ show }: { show?: boolean }) => {
       role="alert"
       aria-live="polite"
       style={{
-        position: "relative",
-        minHeight: "var(--app-vh, 100dvh)",
-        width: "100%",
+        position: "fixed",
+        inset: 0,
+        zIndex: 9998,
         background: "#F5F5F7",
         display: "flex",
         flexDirection: "column",
@@ -36,7 +36,11 @@ const OfflineFallback = ({ show }: { show?: boolean }) => {
           height: 72,
           borderRadius: 22,
           background: "rgba(255,255,255,0.7)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
           border: "1px solid rgba(255,255,255,0.8)",
+          boxShadow:
+            "0 10px 30px -10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
           display: "grid",
           placeItems: "center",
           marginBottom: 20,

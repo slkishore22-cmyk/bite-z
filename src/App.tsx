@@ -17,7 +17,6 @@ import { getRegisteredCanteensFromBackend } from "@/lib/sellerProfile";
 import { getUserSession } from "@/utils/sessionManager";
 import { pruneCartByCanteens } from "@/lib/userCart";
 import { applyPwaHeadForPath } from "@/lib/pwaLaunch";
-import { beginTrace, endTrace } from "@/lib/requestTrace";
 
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const UserHome = lazy(() => import("./pages/user/Home.tsx"));
@@ -51,7 +50,6 @@ const MaSales = lazy(() => import("./master-admin/pages/Sales.tsx"));
 const MaBehaviour = lazy(() => import("./master-admin/pages/Behaviour.tsx"));
 const MaProducts = lazy(() => import("./master-admin/pages/Products.tsx"));
 const MaAudit = lazy(() => import("./master-admin/pages/Audit.tsx"));
-const MaTraces = lazy(() => import("./master-admin/pages/Traces.tsx"));
 
 // Aggressive caching tuned for low-bandwidth campus networks.
 // Data stays "fresh" for 5 min, kept in memory for 24h, and persisted to
@@ -98,17 +96,6 @@ const PwaRouteSync = () => {
   return null;
 };
 
-// Wrap every route view in a labelled trace so the Trace Inspector can group
-// "all queries that happened on /master-admin/users".
-const RouteTraceSync = () => {
-  const location = useLocation();
-  useEffect(() => {
-    const id = beginTrace(`route:${location.pathname}`);
-    return () => endTrace(id);
-  }, [location.pathname]);
-  return null;
-};
-
 const App = () => (
   <PersistQueryClientProvider
     client={queryClient}
@@ -121,7 +108,6 @@ const App = () => (
       <AppDataPreloader />
       <BrowserRouter>
         <PwaRouteSync />
-        <RouteTraceSync />
         <Suspense fallback={<div className="app-route-loader" aria-label="Loading" />}>
           <Routes>
             <Route path="/" element={<RootRedirect />} />
@@ -164,7 +150,6 @@ const App = () => (
           <Route path="/master-admin/behaviour" element={<AdminRoute><MaBehaviour /></AdminRoute>} />
           <Route path="/master-admin/products" element={<AdminRoute><MaProducts /></AdminRoute>} />
           <Route path="/master-admin/audit" element={<AdminRoute><MaAudit /></AdminRoute>} />
-          <Route path="/master-admin/traces" element={<AdminRoute><MaTraces /></AdminRoute>} />
           <Route path="/master-admin" element={<Navigate to="/master-admin/overview" replace />} />
 
           <Route path="/404" element={<NotFound />} />

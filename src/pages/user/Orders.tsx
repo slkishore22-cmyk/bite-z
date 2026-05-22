@@ -239,9 +239,14 @@ const Section = ({
 
 const EmptyHint = ({ text }: { text: string }) => (
   <div
-    className="user-card"
     style={{
-      borderRadius: 18,
+      borderRadius: 22,
+      background: "rgba(255,255,255,0.7)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      border: "1px solid rgba(255,255,255,0.6)",
+      boxShadow:
+        "0 4px 24px -1px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,1)",
       padding: 18,
       color: "#6E6E73",
       fontSize: 13,
@@ -267,9 +272,15 @@ const GroupCard = ({
 
   return (
     <div
-      className="user-card overflow-hidden"
+      className="overflow-hidden"
       style={{
-        borderRadius: 18,
+        borderRadius: 22,
+        background: "rgba(255,255,255,0.7)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.6)",
+        boxShadow:
+          "0 4px 24px -1px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,1)",
       }}
     >
       <button
@@ -333,11 +344,11 @@ const GroupCard = ({
               }
               className="w-full text-left active:scale-[0.99] transition-transform"
               style={{
-                background: "hsl(var(--user-surface))",
+                background: "rgba(255,255,255,0.85)",
                 padding: 18,
                 borderRadius: 18,
-                border: "1px solid hsl(var(--user-border) / 0.82)",
-                boxShadow: "none",
+                border: "1px solid rgba(0,0,0,0.03)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
               }}
             >
               <div className="flex justify-between items-start mb-2">

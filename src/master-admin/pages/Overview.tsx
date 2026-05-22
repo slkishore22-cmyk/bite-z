@@ -1,4 +1,3 @@
-import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import {
   Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart,
@@ -187,14 +186,6 @@ function DangerZone() {
   const [confirmText, setConfirmText] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   const resetBtnStyle: React.CSSProperties = {
     background: "#7F1D1D",
     color: "#FCA5A5",
@@ -261,11 +252,11 @@ function DangerZone() {
         </div>
       </div>
 
-      {open && createPortal(
+      {open && (
         <div
           onClick={() => !busy && setOpen(false)}
           style={{
-            position: "fixed", inset: 0, background: "rgba(10,10,15,0.72)",
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
             display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
           }}
         >
@@ -312,8 +303,7 @@ function DangerZone() {
               </button>
             </div>
           </div>
-        </div>,
-        document.body,
+        </div>
       )}
     </>
   );

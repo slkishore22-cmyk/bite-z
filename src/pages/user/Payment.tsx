@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearCart, getCart } from "@/lib/userCart";
 import { createOrder, hasSoundPlayed, markSoundPlayed } from "@/lib/sellerOrders";
@@ -7,7 +7,6 @@ import { playOrderConfirmation } from "../../utils/orderConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserSession } from "@/utils/sessionManager";
 import { getActiveDiscountPctForSeller, loadOffersFromBackend } from "@/lib/sellerOffers";
-import UserLayout from "@/components/user/UserLayout";
 
 type RazorpayPaymentResponse = Record<string, unknown>;
 type RazorpayOptions = {
@@ -74,12 +73,15 @@ const releaseMobileScrollLocks = () => {
 };
 
 const liquidGlass: React.CSSProperties = {
-  background: "hsl(var(--user-surface-raised))",
-  borderRadius: 18,
-  boxShadow: "none",
+  background: "rgba(255,255,255,0.05)",
+  backdropFilter: "blur(40px)",
+  WebkitBackdropFilter: "blur(40px)",
+  borderRadius: 26,
+  boxShadow:
+    "inset 0 1.5px 0 0 rgba(255,255,255,0.55), 0 8px 32px rgba(0,0,0,0.06)",
   position: "relative",
   overflow: "hidden",
-  border: "1px solid hsl(var(--user-border) / 0.82)",
+  border: "1px solid rgba(0,0,0,0.03)",
 };
 
 const glassHighlight: React.CSSProperties = {
@@ -88,8 +90,9 @@ const glassHighlight: React.CSSProperties = {
   top: 0,
   left: 0,
   right: 0,
-  height: 0,
-  background: "transparent",
+  height: "45%",
+  background:
+    "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)",
   pointerEvents: "none",
   zIndex: 1,
 };
@@ -103,28 +106,13 @@ const Payment = () => {
   const [placing, setPlacing] = useState(false);
   const selectedCanteenId = params.get("canteenId");
 
-  // Preload Razorpay SDK + active offers on mount. Safari blocks the payment
-  // popup if too much async work happens between the user's tap and
-  // rzp.open(); preloading makes the open call near-synchronous.
-  useEffect(() => {
-    void loadRazorpay();
-    const cart = getCart();
-    const sellerKey =
-      (selectedCanteenId
-        ? cart.find((c) => c.canteenId === selectedCanteenId)
-        : cart[0])?.canteenId ?? null;
-    void loadOffersFromBackend(sellerKey).catch(() => []);
-  }, [selectedCanteenId]);
-
   const playOnlineSuccessOnce = useCallback((orderUid: string) => {
     if (hasSoundPlayed(orderUid)) return;
     markSoundPlayed(orderUid);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.(35);
     }
-    window.setTimeout(() => {
-      void playOrderConfirmation();
-    }, 100);
+    void playOrderConfirmation();
   }, []);
 
   const placeOrder = async (method: "Online" | "Cash") => {
@@ -142,14 +130,9 @@ const Payment = () => {
     setPlacing(true);
     const subtotal = activeCart.reduce((s, c) => s + c.price * c.qty, 0);
     const sellerKey = activeCart[0]?.canteenId ?? null;
-    // CRITICAL: Offers are valid for ONLINE payment only. Cash on Delivery
-    // customers are always charged the full bill — no discount.
-    const discountPct =
-      method === "Online" ? getActiveDiscountPctForSeller(sellerKey) : 0;
-    const totalAmount =
-      method === "Online"
-        ? Math.max(1, Math.round(subtotal * (1 - discountPct / 100)))
-        : subtotal;
+    await loadOffersFromBackend(sellerKey).catch(() => []);
+    const discountPct = getActiveDiscountPctForSeller(sellerKey);
+    const totalAmount = Math.max(1, Math.round(subtotal * (1 - discountPct / 100)));
 
     const firstCartItem = activeCart[0];
 
@@ -160,9 +143,6 @@ const Payment = () => {
         isSoundPlayed: false,
         sellerId: firstCartItem?.canteenId ?? null,
         sellerName: firstCartItem?.canteenName ?? null,
-        subtotal,
-        // Online: charge the discounted total. Cash: charge the full subtotal.
-        total: totalAmount,
         items: activeCart.map((c) => ({
           itemId: c.itemId,
           name: c.name,
@@ -181,16 +161,9 @@ const Payment = () => {
       }
       releaseMobileScrollLocks();
       setPlacing(false);
-      const navigateToSuccessPage = () => {
-        navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.uid}`, {
-          replace: true,
-        });
-      };
-      if (method === "Online" && paymentStatus === "SUCCESS") {
-        window.setTimeout(navigateToSuccessPage, 50);
-        return;
-      }
-      navigateToSuccessPage();
+      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.uid}`, {
+        replace: true,
+      });
     };
     try {
       if (method === "Cash") {
@@ -235,9 +208,9 @@ const Payment = () => {
           contact: session?.phone ?? "",
         },
         theme: { color: "#2563EB" },
-        handler: () => {
+        handler: async () => {
           // Razorpay success callback => Online payment SUCCESS => play once.
-          void finalize("SUCCESS");
+          await finalize("SUCCESS");
         },
         modal: {
           ondismiss: () => {
@@ -259,14 +232,13 @@ const Payment = () => {
   };
 
   return (
-    <UserLayout>
     <div
       className="user-page"
       style={{ color: "hsl(var(--user-text))", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* TopAppBar */}
       <header
-        className="user-topbar z-50 flex items-center px-6"
+        className="user-topbar fixed top-0 w-full z-50 flex items-center px-6"
         style={{
           height: "calc(64px + var(--ios-pwa-safe-top))",
           paddingTop: "var(--ios-pwa-safe-top)",
@@ -275,7 +247,7 @@ const Payment = () => {
         <div className="flex items-center w-full">
           <button
             onClick={() => navigate(-1)}
-            className="transition-all duration-[400ms] ease-in-out p-2 rounded-full active:scale-95 mr-2"
+            className="transition-all duration-[400ms] ease-in-out p-2 rounded-full active:scale-95 mr-2 hover:bg-black/5"
           >
             <span className="material-symbols-outlined" style={{ color: "#1D1D1F" }}>
               arrow_back
@@ -293,7 +265,7 @@ const Payment = () => {
       {/* Main Content Canvas */}
       <main
         className="user-content flex flex-col"
-        style={{ paddingTop: 24, gap: 32 }}
+        style={{ paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))", maxWidth: "56rem", gap: 48 }}
       >
         {/* Branding Hero Moment */}
         <div
@@ -308,7 +280,6 @@ const Payment = () => {
           <img
             alt="Premium Light Aesthetic"
             src={HERO_IMG}
-            loading="lazy"
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div
@@ -468,7 +439,6 @@ const Payment = () => {
         <div style={{ height: 48 }} />
       </main>
     </div>
-    </UserLayout>
   );
 };
 

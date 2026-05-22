@@ -1,4 +1,3 @@
-import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -44,14 +43,6 @@ const SellerMenu = () => {
   };
 
   const closeEdit = () => setEditing(null);
-
-  useEffect(() => {
-    if (!editing) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [editing]);
 
   const saveEdit = () => {
     if (!editing) return;
@@ -274,9 +265,9 @@ const SellerMenu = () => {
         ))}
 
         {/* Edit dialog */}
-        {editing && createPortal(
+        {editing && (
           <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 px-4 pb-6 pt-10 sm:items-center"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 pt-10 sm:items-center"
             onClick={closeEdit}
           >
             <div
@@ -392,8 +383,7 @@ const SellerMenu = () => {
                 </button>
               </div>
             </div>
-          </div>,
-          document.body,
+          </div>
         )}
       </div>
     </div>

@@ -346,8 +346,8 @@ const SellerOrders = () => {
 
       {/* Live syncing pill */}
       {tab === "live" && (
-        <div className="pointer-events-none sticky bottom-5 mt-6 flex justify-center">
-          <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2 shadow-card">
+        <div className="pointer-events-none fixed bottom-5 left-0 right-0 flex justify-center">
+          <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2 shadow-card backdrop-blur">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-destructive" />

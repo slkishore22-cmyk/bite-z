@@ -1,15 +1,13 @@
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-bitez-request-id",
+    "authorization, x-client-info, apikey, content-type",
 };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-  const requestId = req.headers.get("x-bitez-request-id") ?? "unknown";
-  console.log(JSON.stringify({ requestId, fn: "create-razorpay-order", at: "start" }));
   try {
     const body = await req.json().catch(() => ({}));
     const receipt = String(body.receipt ?? `rcpt_${Date.now()}`).slice(0, 40);

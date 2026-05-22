@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { queryWithTimeout } from "@/utils/networkStatus";
-import { enforceNoSeedData } from "@/lib/seedDataGuard";
 
 export type SellerProfile = {
   id: string;
@@ -130,12 +129,7 @@ export async function getRegisteredCanteensFromBackend(): Promise<SellerProfile[
     // Slow / offline — keep showing whatever we have locally instead of crashing.
     return getRegisteredCanteens();
   }
-  const safe = enforceNoSeedData(
-    data ?? [],
-    ["canteen_name", "canteen_location", "phone", "upi_id"],
-    "sellers (public canteens list)",
-  );
-  const rows = safe.map(fromSeller);
+  const rows = (data ?? []).map(fromSeller);
   writeCanteens(rows);
   return rows;
 }

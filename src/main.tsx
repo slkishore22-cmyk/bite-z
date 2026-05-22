@@ -2,10 +2,6 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { applyPwaHeadForPath, getAdminStandaloneRedirect } from "@/lib/pwaLaunch";
-import { installRequestTracing } from "@/lib/requestTrace";
-
-// Tag every Supabase fetch with a requestId and log it for admin inspection.
-installRequestTracing();
 
 const installRouteManifest = () => {
   applyPwaHeadForPath();

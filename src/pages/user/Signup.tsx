@@ -75,12 +75,14 @@ const Signup = () => {
         type="button"
         onClick={() => navigate(-1)}
         aria-label="Back"
-        className="sticky top-4 left-4 z-20 inline-flex items-center justify-center rounded-full"
+        className="fixed top-4 left-4 z-20 inline-flex items-center justify-center rounded-full"
         style={{
           width: 40,
           height: 40,
           background: "hsl(var(--user-surface) / 0.78)",
+          backdropFilter: "blur(12px)",
           border: "1px solid hsl(var(--user-border) / 0.8)",
+          boxShadow: "0 8px 22px hsl(220 25% 40% / 0.08)",
         }}
       >
         <span className="material-symbols-outlined" style={{ fontSize: 22, color: "#1D1D1F" }}>

@@ -223,6 +223,8 @@ const UserLogin = () => {
 
 export const lgStyle: React.CSSProperties = {
   background: "hsl(var(--user-surface) / 0.66)",
+  backdropFilter: "blur(18px) saturate(145%)",
+  WebkitBackdropFilter: "blur(18px) saturate(145%)",
   border: "1px solid hsl(var(--user-border) / 0.82)",
   boxShadow: "0 8px 24px hsl(220 25% 40% / 0.08)",
   height: 64,
@@ -248,6 +250,7 @@ export const BitezBloom = () => (
       width: 600,
       height: 600,
       background: "hsl(212 82% 66% / 0.12)",
+      filter: "blur(100px)",
     }}
   />
 );
