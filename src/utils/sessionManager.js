@@ -57,10 +57,16 @@ export function clearSellerSession() {
   removeSession(SELLER_KEY);
 }
 
-export function saveAdminSession() {
+export function saveAdminSession(data) {
+  // Always overwrite any previous admin session so two different master-admin
+  // accounts can never overlap on the same device.
+  removeSession(ADMIN_KEY);
+  const username =
+    typeof data === 'string' ? data : (data && data.username) || '';
   writeSession(ADMIN_KEY, {
     role: 'master_admin',
     authenticated: true,
+    username,
     savedAt: Date.now(),
   });
 }
