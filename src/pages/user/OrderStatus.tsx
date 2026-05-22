@@ -277,7 +277,6 @@ const OrderStatus = () => {
                 marginRight: -64,
                 marginTop: -64,
                 opacity: 0.1,
-                filter: "blur(48px)",
                 background:
                   "linear-gradient(135deg, #B4C5FF 0%, #2563EB 100%)",
               }}
