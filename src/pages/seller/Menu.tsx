@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -43,6 +44,14 @@ const SellerMenu = () => {
   };
 
   const closeEdit = () => setEditing(null);
+
+  useEffect(() => {
+    if (!editing) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [editing]);
 
   const saveEdit = () => {
     if (!editing) return;
