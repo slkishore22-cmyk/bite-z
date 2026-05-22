@@ -318,7 +318,7 @@ const Menu = () => {
           <div
             className="user-floating-action z-50"
             style={{
-              bottom: "calc(24px + var(--ios-pwa-safe-bottom))",
+              bottom: "calc(96px + var(--ios-pwa-safe-bottom))",
             }}
           >
             <div className="flex items-center justify-between" style={{ ...liquidGlass, padding: 16 }}>
