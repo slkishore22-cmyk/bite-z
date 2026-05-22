@@ -1,7 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  saveUserSession,
+  clearUserSession,
+  getUserSession,
+} from "@/utils/sessionManager";
 
-const SESSION_KEY = "bitez_user_session";
 const USERID_KEY = "bitez_user_id";
+// Legacy keys that older builds may have written. Purge on every read so a
+// stale identity from a previous account can never overlap the current one.
+const LEGACY_SESSION_KEYS = ["bitez_user_session_v1", "bitez-user-session"];
 
 export type UserSessionData = {
   id: string;
@@ -19,14 +26,20 @@ export function getStoredUserId() {
 }
 
 function persist(s: Omit<UserSessionData, "role" | "savedAt">) {
-  const full: UserSessionData = { ...s, role: "user", savedAt: Date.now() };
-  localStorage.setItem(SESSION_KEY, JSON.stringify(full));
-  localStorage.setItem(USERID_KEY, s.user_id);
-  return full;
+  // Always wipe the previous session first so two different user accounts
+  // can never blend on the same device (same bug we fixed for admins).
+  clearLocalSession();
+  saveUserSession(s);
+  try { localStorage.setItem(USERID_KEY, s.user_id); } catch { /* ignore */ }
+  return { ...s, role: "user", savedAt: Date.now() } as UserSessionData;
 }
 
 export function clearLocalSession() {
-  localStorage.removeItem(SESSION_KEY);
+  clearUserSession();
+  for (const k of LEGACY_SESSION_KEYS) {
+    try { localStorage.removeItem(k); } catch { /* ignore */ }
+    try { sessionStorage.removeItem(k); } catch { /* ignore */ }
+  }
   // keep bitez_user_id for auto-fill on next login
 }
 
@@ -95,4 +108,11 @@ export async function resetPin(userId: string, newPin: string) {
 
 export async function logoutUser() {
   clearLocalSession();
+  // Drop any cached user-scoped data so a different account signing in next
+  // never sees the previous user's cart/orders.
+  try { localStorage.removeItem("bitez-cache-v2"); } catch { /* ignore */ }
+  try { localStorage.removeItem(USERID_KEY); } catch { /* ignore */ }
 }
+
+// Re-export for callers that previously imported from this module.
+export { getUserSession };
