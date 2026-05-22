@@ -122,7 +122,9 @@ const Payment = () => {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.(35);
     }
-    void playOrderConfirmation();
+    window.setTimeout(() => {
+      void playOrderConfirmation();
+    }, 100);
   }, []);
 
   const placeOrder = async (method: "Online" | "Cash") => {
@@ -179,9 +181,16 @@ const Payment = () => {
       }
       releaseMobileScrollLocks();
       setPlacing(false);
-      navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.uid}`, {
-        replace: true,
-      });
+      const navigateToSuccessPage = () => {
+        navigate(`/app/order-status?method=${method === "Online" ? "upi" : "cod"}&id=${order.uid}`, {
+          replace: true,
+        });
+      };
+      if (method === "Online" && paymentStatus === "SUCCESS") {
+        window.setTimeout(navigateToSuccessPage, 50);
+        return;
+      }
+      navigateToSuccessPage();
     };
     try {
       if (method === "Cash") {
@@ -226,9 +235,9 @@ const Payment = () => {
           contact: session?.phone ?? "",
         },
         theme: { color: "#2563EB" },
-        handler: async () => {
+        handler: () => {
           // Razorpay success callback => Online payment SUCCESS => play once.
-          await finalize("SUCCESS");
+          void finalize("SUCCESS");
         },
         modal: {
           ondismiss: () => {
@@ -299,6 +308,7 @@ const Payment = () => {
           <img
             alt="Premium Light Aesthetic"
             src={HERO_IMG}
+            loading="lazy"
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div
