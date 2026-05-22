@@ -44,7 +44,7 @@ export default function Login() {
   };
 
   return (
-    <div className="ma-root" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+    <div className="ma-root" style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       <form onSubmit={submit} style={{
         width: "100%", maxWidth: 420, background: "#111118",

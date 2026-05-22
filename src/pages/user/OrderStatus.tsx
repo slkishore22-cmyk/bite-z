@@ -1,9 +1,10 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { lazy, Suspense, useEffect, useState, useMemo } from "react";
 import { getOrderById, getOrders } from "@/lib/sellerOrders";
-import OrderConfirmedAnimation from "../../components/OrderConfirmedAnimation";
 import { QRCodeSVG } from "qrcode.react";
 import UserLayout from "@/components/user/UserLayout";
+
+const OrderConfirmedAnimation = lazy(() => import("../../components/OrderConfirmedAnimation"));
 
 const statusCard: React.CSSProperties = {
   background: "hsl(var(--user-surface-raised))",
@@ -18,12 +19,18 @@ const OrderStatus = () => {
   const orderParamId = params.get("id");
 
   const [revealed, setRevealed] = useState(false);
+  const [showConfirmationAnimation, setShowConfirmationAnimation] = useState(false);
   const reduceMotion = useMemo(() => {
     if (typeof window === "undefined") return false;
     const nav = window.navigator as Navigator & { standalone?: boolean };
     const isAppleTouch = /iPad|iPhone|iPod/.test(nav.userAgent) ||
       (nav.platform === "MacIntel" && nav.maxTouchPoints > 1);
     return isAppleTouch || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowConfirmationAnimation(true), 100);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Pull the most recent order (or the one referenced in the URL).
@@ -91,7 +98,11 @@ const OrderStatus = () => {
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
         }}
       >
-        <OrderConfirmedAnimation reduceMotion={reduceMotion} />
+        {showConfirmationAnimation && (
+          <Suspense fallback={null}>
+            <OrderConfirmedAnimation reduceMotion={reduceMotion} />
+          </Suspense>
+        )}
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-3 w-full">
@@ -277,7 +288,6 @@ const OrderStatus = () => {
                 marginRight: -64,
                 marginTop: -64,
                 opacity: 0.1,
-                filter: "blur(48px)",
                 background:
                   "linear-gradient(135deg, #B4C5FF 0%, #2563EB 100%)",
               }}
