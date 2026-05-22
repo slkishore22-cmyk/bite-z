@@ -135,6 +135,8 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 * {
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
