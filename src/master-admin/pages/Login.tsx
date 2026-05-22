@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSession, loginMasterAdmin, setSession, logAudit } from "../auth";
-import { saveAdminSession } from "@/utils/sessionManager";
+import { getSession, loginMasterAdmin, setSession, clearSession, logAudit } from "../auth";
 import { useAdminPwa } from "../useAdminPwa";
 import "../theme.css";
 
@@ -32,8 +31,10 @@ export default function Login() {
         setError("Invalid credentials");
         return;
       }
+      // Wipe any prior admin session (different account, legacy key, etc.)
+      // before establishing the new one — prevents identity overlap.
+      clearSession();
       setSession(username.trim());
-      saveAdminSession();
       await logAudit("ADMIN_LOGIN", username.trim());
       navigate("/master-admin/overview", { replace: true });
     } catch (err) {
