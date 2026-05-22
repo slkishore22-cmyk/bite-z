@@ -255,7 +255,6 @@ const Cart = () => {
                             className="flex items-center"
                             style={{
                               background: "hsl(var(--user-surface-raised) / 0.82)",
-                              backdropFilter: "blur(12px)",
                               borderRadius: 9999,
                               padding: "3px 10px",
                               gap: 12,
