@@ -113,7 +113,7 @@ const SellerDashboard = () => {
             Overview of your canteen performance
           </p>
 
-          <button className="mt-4 flex w-full items-center gap-2 rounded-full bg-secondary/70 px-4 py-2.5 text-sm font-medium text-foreground/90 backdrop-blur transition hover:bg-secondary">
+          <button className="mt-4 flex w-full items-center gap-2 rounded-full bg-secondary/70 px-4 py-2.5 text-sm font-medium text-foreground/90 transition hover:bg-secondary">
             <span className="material-symbols-outlined text-muted-foreground" style={{ fontSize: 18 }}>
               calendar_today
             </span>
