@@ -32,6 +32,14 @@ export default function Overview() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   const today = todayISO();
   const yesterday = daysAgoISO(1);
   const todayRows = sales.filter((s) => s.date === today);
