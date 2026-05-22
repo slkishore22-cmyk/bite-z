@@ -1,7 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  getAdminSession,
+  saveAdminSession,
+  clearAdminSession,
+} from "@/utils/sessionManager";
 
-const SESSION_KEY = "ma_session_v1";
-const SESSION_MAX_MS = 8 * 60 * 60 * 1000;
+// Legacy key from when admin session was duplicated across two stores.
+// Cleared on read so old data can never resurface and overlap with a new login.
+const LEGACY_SESSION_KEY = "ma_session_v1";
 
 export type MaSession = {
   role: "master_admin";
@@ -11,33 +17,28 @@ export type MaSession = {
 };
 
 export function getSession(): MaSession | null {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw) as MaSession;
-    if (!s?.authenticated) return null;
-    if (Date.now() - s.timestamp > SESSION_MAX_MS) {
-      localStorage.removeItem(SESSION_KEY);
-      return null;
-    }
-    return s;
-  } catch {
-    return null;
-  }
+  try { localStorage.removeItem(LEGACY_SESSION_KEY); } catch { /* ignore */ }
+  try { sessionStorage.removeItem(LEGACY_SESSION_KEY); } catch { /* ignore */ }
+  const s = getAdminSession();
+  if (!s) return null;
+  return {
+    role: "master_admin",
+    authenticated: true,
+    username: s.username || "",
+    timestamp: s.savedAt || Date.now(),
+  };
 }
 
 export function setSession(username: string) {
-  const s: MaSession = {
-    role: "master_admin",
-    authenticated: true,
-    username,
-    timestamp: Date.now(),
-  };
-  localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+  // Single source of truth: sessionManager. Username is preserved so the UI
+  // can never display a different admin's identity than the one logged in.
+  saveAdminSession({ username });
 }
 
 export function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
+  try { localStorage.removeItem(LEGACY_SESSION_KEY); } catch { /* ignore */ }
+  try { sessionStorage.removeItem(LEGACY_SESSION_KEY); } catch { /* ignore */ }
+  clearAdminSession();
 }
 
 export async function loginMasterAdmin(username: string, password: string) {
