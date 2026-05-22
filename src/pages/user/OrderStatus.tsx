@@ -93,17 +93,17 @@ const OrderStatus = () => {
             style={{
               animation: reduceMotion ? "none" : 'ob-card-slide-up 500ms 800ms ease both',
               background: "#FFFFFF",
-              padding: 20,
+              padding: 24,
               borderRadius: 20,
               boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
               border: "1px solid #F1F5F9",
             }}
           >
             <span
-              className="uppercase mb-3"
+              className="uppercase mb-4"
               style={{
                 color: "#64748B",
-                fontSize: 11,
+                fontSize: 12,
                 letterSpacing: "0.12em",
                 fontWeight: 600,
               }}
@@ -112,7 +112,7 @@ const OrderStatus = () => {
             </span>
             <div
               style={{
-                padding: 14,
+                padding: 18,
                 borderRadius: 18,
                 background: "#FFFFFF",
                 border: "1px solid #E2E8F0",
@@ -128,7 +128,7 @@ const OrderStatus = () => {
                   payment: order?.payment ?? method,
                   ts: order?.createdAt ?? Date.now(),
                 })}
-                size={220}
+                size={320}
                 level="H"
                 bgColor="#FFFFFF"
                 fgColor="#0F172A"
@@ -136,8 +136,8 @@ const OrderStatus = () => {
               />
             </div>
             <p
-              className="mt-3"
-              style={{ color: "#64748B", fontSize: 11, textAlign: "center" }}
+              className="mt-4"
+              style={{ color: "#64748B", fontSize: 12, textAlign: "center" }}
             >
               Show this to the billing counter for instant printing
             </p>
