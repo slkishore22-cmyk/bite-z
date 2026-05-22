@@ -274,9 +274,9 @@ const SellerMenu = () => {
         ))}
 
         {/* Edit dialog */}
-        {editing && (
+        {editing && createPortal(
           <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 pt-10 sm:items-center"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/60 px-4 pb-6 pt-10 sm:items-center"
             onClick={closeEdit}
           >
             <div
@@ -392,7 +392,8 @@ const SellerMenu = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body,
         )}
       </div>
     </div>
