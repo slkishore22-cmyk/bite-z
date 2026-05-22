@@ -1,9 +1,10 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { lazy, Suspense, useEffect, useState, useMemo } from "react";
 import { getOrderById, getOrders } from "@/lib/sellerOrders";
-import OrderConfirmedAnimation from "../../components/OrderConfirmedAnimation";
 import { QRCodeSVG } from "qrcode.react";
 import UserLayout from "@/components/user/UserLayout";
+
+const OrderConfirmedAnimation = lazy(() => import("../../components/OrderConfirmedAnimation"));
 
 const statusCard: React.CSSProperties = {
   background: "hsl(var(--user-surface-raised))",
@@ -97,7 +98,11 @@ const OrderStatus = () => {
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
         }}
       >
-        {showConfirmationAnimation && <OrderConfirmedAnimation reduceMotion={reduceMotion} />}
+        {showConfirmationAnimation && (
+          <Suspense fallback={null}>
+            <OrderConfirmedAnimation reduceMotion={reduceMotion} />
+          </Suspense>
+        )}
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-3 w-full">
