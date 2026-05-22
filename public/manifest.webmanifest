@@ -3,7 +3,7 @@
   "short_name": "Bitez",
   "description": "Order from your campus canteen.",
   "id": "/app/",
-  "theme_color": "#050505",
+  "theme_color": "#E9EEF5",
   "background_color": "#F5F5F7",
   "display": "standalone",
   "orientation": "portrait",
