@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Shell from "../components/Shell";
-import { db } from "../db";
 import { logAudit, getSession } from "../auth";
 import { supabase } from "@/integrations/supabase/client";
 
