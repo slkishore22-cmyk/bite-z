@@ -56,11 +56,16 @@ export async function logAudit(
   details?: Record<string, unknown>,
 ) {
   try {
-    await supabase.from("admin_audit_log" as never).insert({
-      action_type,
-      target: target ?? null,
-      details: (details ?? null) as never,
-    } as never);
+    const s = getSession();
+    if (!s?.username) return;
+    await supabase.functions.invoke("admin-audit-log", {
+      body: {
+        username: s.username,
+        action_type,
+        target: target ?? null,
+        details: details ?? null,
+      },
+    });
   } catch {
     /* fire and forget */
   }
