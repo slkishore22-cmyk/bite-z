@@ -6,24 +6,26 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Writes a row to admin_audit_log using the service role. The caller must
-// pass the master-admin username+password; we re-verify before logging so
-// a leaked client cannot forge audit entries.
+// Writes a row to admin_audit_log using the service role. The caller passes
+// the logged-in admin username; we verify it exists in master_admin before
+// inserting. The table is fully locked to anon/authenticated so this is the
+// only write path. Reads are also restricted (service role only).
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    const { username, password, action_type, target, details } = await req.json();
-    if (!username || !password || !action_type) return json({ error: "missing fields" }, 400);
+    const { username, action_type, target, details } = await req.json();
+    if (!username || !action_type) return json({ error: "missing fields" }, 400);
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
-    const { data: ok, error: vErr } = await admin.rpc("verify_master_admin", {
-      p_username: username,
-      p_password: password,
-    });
-    if (vErr || !ok) return json({ error: "unauthorized" }, 401);
+    const { data: who } = await admin
+      .from("master_admin")
+      .select("id")
+      .eq("username", String(username))
+      .maybeSingle();
+    if (!who) return json({ error: "unauthorized" }, 401);
 
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
     const { error } = await admin.from("admin_audit_log").insert({
