@@ -4,7 +4,8 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import { toast } from "sonner";
 import Shell from "../components/Shell";
 import { db } from "../db";
-import { logAudit } from "../auth";
+import { logAudit, getSession } from "../auth";
+import { supabase } from "@/integrations/supabase/client";
 import { axisStyle, daysAgoISO, inr, todayISO, tooltipStyle } from "../format";
 
 type Seller = {
@@ -31,13 +32,15 @@ export default function SellerDetail() {
 
   const load = async () => {
     if (!id) return;
-    const [{ data: s }, { data: ss }, { data: p }, { data: ses }] = await Promise.all([
-      db.from("sellers").select("*").eq("id", id).maybeSingle(),
+    const username = getSession()?.username ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [{ data: sRes }, { data: ss }, { data: p }, { data: ses }] = await Promise.all([
+      (supabase as any).functions.invoke("admin-sellers", { body: { username, op: "get", id } }),
       db.from("seller_sales").select("date, total_orders, total_revenue").eq("seller_id", id).gte("date", daysAgoISO(30)).order("date"),
       db.from("seller_products").select("*").eq("seller_id", id),
       db.from("seller_sessions").select("logged_in_at, logged_out_at, ip_address").eq("seller_id", id).order("logged_in_at", { ascending: false }).limit(10),
     ]);
-    setSeller(s ?? null);
+    setSeller((sRes?.row ?? null) as Seller | null);
     setSales(ss ?? []);
     setProducts(p ?? []);
     setSessions(ses ?? []);
@@ -68,7 +71,11 @@ export default function SellerDetail() {
 
   const toggleSuspend = async () => {
     const next = !seller.is_suspended;
-    await db.from("sellers").update({ is_suspended: next }).eq("id", seller.id);
+    const username = getSession()?.username ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).functions.invoke("admin-sellers", {
+      body: { username, op: "suspend", id: seller.id, suspended: next },
+    });
     await logAudit(next ? "SELLER_SUSPENDED" : "SELLER_REACTIVATED", seller.id);
     toast.success(next ? "Suspended" : "Reactivated");
     load();
@@ -77,10 +84,12 @@ export default function SellerDetail() {
   const resetPassword = async () => {
     if (resetPwd.length < 8 || !/\d/.test(resetPwd)) return toast.error("Password ≥ 8 chars + number");
     if (resetPwd !== resetPwd2) return toast.error("Passwords do not match");
-    const { data: hash, error: he } = await db.rpc("hash_password", { p_password: resetPwd });
-    if (he) return toast.error(he.message);
-    const { error } = await db.from("sellers").update({ password_hash: hash }).eq("id", seller.id);
-    if (error) return toast.error(error.message);
+    const username = getSession()?.username ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: res, error } = await (supabase as any).functions.invoke("admin-sellers", {
+      body: { username, op: "reset_password", id: seller.id, password: resetPwd },
+    });
+    if (error || res?.error) return toast.error(error?.message || res?.error);
     await logAudit("SELLER_PASSWORD_RESET", seller.id);
     toast.success("Password reset");
     setResetPwd(""); setResetPwd2("");

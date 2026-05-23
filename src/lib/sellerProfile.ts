@@ -116,17 +116,18 @@ function fromSeller(row: any): SellerProfile {
 }
 
 export async function getRegisteredCanteensFromBackend(): Promise<SellerProfile[]> {
+  // Public canteen list — only non-sensitive columns are readable by anon.
+  // Bank/UPI/phone are intentionally not exposed to user-facing canteen cards.
   const { data, error } = await queryWithTimeout(
     db
       .from("sellers")
-      .select("id, canteen_name, canteen_location, canteen_type, phone, bank_account_number, bank_ifsc, upi_id, is_active, is_suspended")
+      .select("id, canteen_name, canteen_location, canteen_type, is_active, is_suspended")
       .eq("is_active", true)
       .eq("is_suspended", false)
       .order("created_at", { ascending: false }),
     5000,
   );
   if (error) {
-    // Slow / offline — keep showing whatever we have locally instead of crashing.
     return getRegisteredCanteens();
   }
   const rows = (data ?? []).map(fromSeller);
@@ -139,14 +140,16 @@ export async function loadCurrentSellerProfile(): Promise<SellerProfile> {
   const raw = window.localStorage.getItem(SESSION_KEY);
   const session = raw ? (JSON.parse(raw) as { id?: string }) : null;
   if (!session?.id) return empty;
-  const { data, error } = await db
-    .from("sellers")
-    .select("id, canteen_name, canteen_location, canteen_type, phone, bank_account_number, bank_ifsc, upi_id")
-    .eq("id", session.id)
-    .maybeSingle();
+  // Sensitive columns (phone, bank, UPI) require service role; go via edge fn.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = db as any;
+  const { data: res, error } = await sb.functions.invoke("seller-self", {
+    body: { seller_id: session.id, op: "get" },
+  });
   if (error) throw new Error(error.message);
-  if (!data) return empty;
-  const profile = fromSeller(data);
+  if (res?.error) throw new Error(res.error);
+  if (!res?.row) return empty;
+  const profile = fromSeller(res.row);
   writeProfile(profile);
   return profile;
 }
@@ -156,22 +159,26 @@ export async function saveProfileToBackend(p: Omit<SellerProfile, "id">): Promis
   const raw = window.localStorage.getItem(SESSION_KEY);
   const session = raw ? (JSON.parse(raw) as { id?: string }) : null;
   if (!session?.id) return saveProfile(p);
-  const { data, error } = await db
-    .from("sellers")
-    .update({
-      canteen_name: p.canteenName,
-      canteen_location: p.slogan,
-      canteen_type: p.icon,
-      phone: p.ownerPhone,
-      bank_account_number: p.accountNumber,
-      bank_ifsc: p.ifsc,
-      upi_id: p.upiId,
-    })
-    .eq("id", session.id)
-    .select("id, canteen_name, canteen_location, canteen_type, phone, bank_account_number, bank_ifsc, upi_id")
-    .single();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = db as any;
+  const { data: res, error } = await sb.functions.invoke("seller-self", {
+    body: {
+      seller_id: session.id,
+      op: "update",
+      patch: {
+        canteen_name: p.canteenName,
+        canteen_location: p.slogan,
+        canteen_type: p.icon,
+        phone: p.ownerPhone,
+        bank_account_number: p.accountNumber,
+        bank_ifsc: p.ifsc,
+        upi_id: p.upiId,
+      },
+    },
+  });
   if (error) throw new Error(error.message);
-  const next = fromSeller(data);
+  if (res?.error) throw new Error(res.error);
+  const next = fromSeller(res.row);
   writeProfile(next);
   return next;
 }

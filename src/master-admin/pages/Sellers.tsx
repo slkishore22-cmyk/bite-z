@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Shell from "../components/Shell";
 import { db } from "../db";
-import { logAudit } from "../auth";
+import { logAudit, getSession } from "../auth";
+import { supabase } from "@/integrations/supabase/client";
 import { inr, todayISO } from "../format";
 
 type Seller = {
@@ -23,11 +24,13 @@ export default function Sellers() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: s }, { data: ss }] = await Promise.all([
-      db.from("sellers").select("id, name, canteen_name, phone, is_active, is_suspended, created_at"),
+    const username = getSession()?.username ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [{ data: sRes }, { data: ss }] = await Promise.all([
+      (supabase as any).functions.invoke("admin-sellers", { body: { username, op: "list" } }),
       db.from("seller_sales").select("seller_id, total_orders, total_revenue").eq("date", todayISO()),
     ]);
-    setSellers(s ?? []);
+    setSellers((sRes?.rows ?? []) as Seller[]);
     setSales(ss ?? []);
     setLoading(false);
   };
@@ -62,8 +65,12 @@ export default function Sellers() {
 
   const toggleSuspend = async (s: Seller) => {
     const next = !s.is_suspended;
-    const { error } = await db.from("sellers").update({ is_suspended: next }).eq("id", s.id);
-    if (error) { toast.error(error.message); return; }
+    const username = getSession()?.username ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: res, error } = await (supabase as any).functions.invoke("admin-sellers", {
+      body: { username, op: "suspend", id: s.id, suspended: next },
+    });
+    if (error || res?.error) { toast.error(error?.message || res?.error); return; }
     await logAudit(next ? "SELLER_SUSPENDED" : "SELLER_REACTIVATED", s.id, { canteen_name: s.canteen_name });
     toast.success(next ? "Seller suspended" : "Seller reactivated");
     load();

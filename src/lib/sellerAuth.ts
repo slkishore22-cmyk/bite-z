@@ -38,26 +38,18 @@ export function clearSellerSession() {
 
 export async function loginSeller(identifier: string, password: string): Promise<SellerSession> {
   const id = identifier.trim();
-  // Look up seller by username OR email
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
-  const { data: seller, error } = await sb
-    .from("sellers")
-    .select("id, username, name, email, canteen_name, is_suspended, is_active")
-    .or(`username.eq.${id},email.eq.${id}`)
-    .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  if (!seller) throw new Error("Invalid username or password");
-  if (seller.is_suspended) throw new Error("Your account has been suspended. Contact admin.");
-  if (seller.is_active === false) throw new Error("Account is inactive");
-
-  const { data: ok, error: rpcErr } = await sb.rpc("verify_seller_password", {
-    p_seller_id: seller.id,
-    p_password: password,
+  // The sellers table is locked to service_role for sensitive columns
+  // (password_hash, email, phone, bank details). Login is done server-side.
+  const { data, error } = await sb.functions.invoke("seller-login", {
+    body: { identifier: id, password },
   });
-  if (rpcErr) throw new Error(rpcErr.message);
-  if (!ok) throw new Error("Invalid username or password");
+  if (error) throw new Error(error.message || "Login failed");
+  if (data?.error) throw new Error(data.error);
+  const seller = data?.session;
+  if (!seller?.id) throw new Error("Invalid username or password");
 
   // If a different seller was previously logged in on this device, wipe any
   // single-seller caches before storing the new session so the new canteen

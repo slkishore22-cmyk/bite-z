@@ -17,10 +17,10 @@ export default function SeedDataAlert() {
         (async () => {
           const { data } = await db
             .from("sellers")
-            .select("id, name, canteen_name, email, phone")
+            .select("id, name, canteen_name")
             .limit(500);
           const { flagged, reasons } = scanForSeedData(data ?? [], [
-            "id", "name", "canteen_name", "email", "phone",
+            "id", "name", "canteen_name",
           ]);
           if (!flagged.length) return null;
           return {
