@@ -13,8 +13,9 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    const { username, action_type, target, details } = await req.json();
-    if (!username || !action_type) return json({ error: "missing fields" }, 400);
+    const body = await req.json();
+    const { username, op, action_type, target, details } = body ?? {};
+    if (!username) return json({ error: "missing username" }, 400);
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -27,6 +28,18 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!who) return json({ error: "unauthorized" }, 401);
 
+    if (op === "list") {
+      const { data, error } = await admin
+        .from("admin_audit_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) return json({ error: error.message }, 500);
+      return json({ rows: data ?? [] });
+    }
+
+    // Default: append a log entry
+    if (!action_type) return json({ error: "missing action_type" }, 400);
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
     const { error } = await admin.from("admin_audit_log").insert({
       action_type: String(action_type).slice(0, 100),
