@@ -80,9 +80,9 @@ export async function loginSeller(identifier: string, password: string): Promise
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 
-  // Fire-and-forget session log
+  // Fire-and-forget session log (table is service-role only)
   try {
-    await sb.from("seller_sessions").insert({ seller_id: seller.id });
+    await sb.functions.invoke("seller-session-log", { body: { seller_id: seller.id } });
   } catch { /* ignore */ }
 
   return session;

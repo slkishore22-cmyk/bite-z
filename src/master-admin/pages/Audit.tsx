@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Shell from "../components/Shell";
-import { db } from "../db";
+import { supabase } from "@/integrations/supabase/client";
+import { getSession } from "../auth";
 
 type Row = { id: string; action_type: string; target: string | null; details: Record<string, unknown> | null; ip_address: string | null; created_at: string };
 
@@ -11,8 +12,12 @@ export default function Audit() {
   const [to, setTo] = useState("");
 
   useEffect(() => { (async () => {
-    const { data } = await db.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(500);
-    setRows(data ?? []);
+    const s = getSession();
+    if (!s?.username) return;
+    const { data } = await supabase.functions.invoke("admin-audit-log", {
+      body: { username: s.username, op: "list" },
+    });
+    setRows(((data as { rows?: Row[] })?.rows) ?? []);
   })(); }, []);
 
   const filtered = useMemo(() => rows.filter((r) => {
