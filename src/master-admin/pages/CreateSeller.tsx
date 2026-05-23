@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Shell from "../components/Shell";
 import { db } from "../db";
-import { logAudit } from "../auth";
+import { logAudit, getSession } from "../auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const generatePassword = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
@@ -36,13 +37,15 @@ export default function CreateSeller() {
 
     setSubmitting(true);
     try {
-      const { data: existing } = await db.from("sellers").select("id").eq("email", form.email).maybeSingle();
-      if (existing) { toast.error("Email already in use"); setSubmitting(false); return; }
+      const username = getSession()?.username ?? "";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      const { data: chk } = await sb.functions.invoke("admin-sellers", {
+        body: { username, op: "check_email", email: form.email },
+      });
+      if (chk?.exists) { toast.error("Email already in use"); setSubmitting(false); return; }
 
-      const { data: hash, error: he } = await db.rpc("hash_password", { p_password: form.password });
-      if (he) throw he;
-
-      const { data: inserted, error } = await db.from("sellers").insert({
+      const payload = {
         name: form.name, email: form.email, phone: form.phone,
         canteen_name: form.canteen_name, canteen_location: form.canteen_location,
         canteen_type: form.canteen_type,
@@ -51,11 +54,14 @@ export default function CreateSeller() {
         bank_account_number: form.bank_account_number || null,
         bank_ifsc: form.bank_ifsc || null,
         bank_name: form.bank_name || null,
-        password_hash: hash,
-      }).select("id").single();
+      };
+      const { data: res, error } = await sb.functions.invoke("admin-sellers", {
+        body: { username, op: "create", payload, password: form.password },
+      });
       if (error) throw error;
+      if (res?.error) throw new Error(res.error);
 
-      await logAudit("SELLER_CREATED", inserted?.id, { canteen_name: form.canteen_name, email: form.email });
+      await logAudit("SELLER_CREATED", res?.id, { canteen_name: form.canteen_name, email: form.email });
       toast.success("Seller account created. Share credentials securely.");
       setCreated({ username: form.username || slug(form.canteen_name), password: form.password });
     } catch (err) {
