@@ -205,25 +205,9 @@ const Menu = () => {
           }}
         >
           {/* Search + tabs (scrolls with page) */}
-          <div
-            style={{
-              paddingTop: 8,
-              paddingBottom: 8,
-              marginLeft: -16,
-              marginRight: -16,
-              paddingLeft: 16,
-              paddingRight: 16,
-            }}
-          >
+          <div style={{ paddingTop: 8, paddingBottom: 8 }}>
             {/* Search */}
-            <div
-              className="flex items-center gap-2"
-              style={{
-                height: 52,
-                borderRadius: 9999,
-                padding: "0 16px",
-              }}
-            >
+            <div className="flex items-center gap-2">
               <span
                 className="material-symbols-outlined"
                 style={{ fontSize: 22, color: "#2563eb" }}
