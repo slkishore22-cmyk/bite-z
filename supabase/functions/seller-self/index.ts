@@ -31,11 +31,13 @@ Deno.serve(async (req) => {
     }
 
     const cols = "id, canteen_name, canteen_location, canteen_type, phone, bank_account_number, bank_ifsc, upi_id";
+    // Public canteen listing must never expose phone, bank, or UPI details.
+    const publicCols = "id, canteen_name, canteen_location, canteen_type";
 
     if (op === "list_canteens") {
       const { data, error } = await admin
         .from("sellers")
-        .select(cols)
+        .select(publicCols)
         .eq("is_active", true)
         .eq("is_suspended", false)
         .order("created_at", { ascending: false });
