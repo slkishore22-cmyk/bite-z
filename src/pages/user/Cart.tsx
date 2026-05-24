@@ -112,7 +112,7 @@ const Cart = () => {
         </header>
 
         <main
-          className="user-content user-content-readable space-y-6"
+          className="user-content bg-[#01060a] user-content-readable space-y-6"
           style={{ paddingTop: "calc(80px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
         >
           {items.length === 0 ? (
