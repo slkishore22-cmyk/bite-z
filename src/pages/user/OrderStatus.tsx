@@ -77,7 +77,7 @@ const OrderStatus = () => {
       </header>
 
       <main
-        className="user-content bg-[#01060a] user-content-readable flex-1 flex flex-col items-center"
+        className="user-content user-content-readable flex-1 flex flex-col items-center"
         style={{
           paddingTop: 8,
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
