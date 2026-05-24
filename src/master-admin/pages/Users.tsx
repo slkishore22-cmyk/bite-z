@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Shell from "../components/Shell";
 import { db } from "../db";
+import { getSession } from "../auth";
 import { inr, todayISO } from "../format";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,10 +26,11 @@ export default function Users() {
 
   useEffect(() => {
     (async () => {
+      const username = getSession()?.username ?? "";
       const [{ data: sp }, { data: ua }, usersRes] = await Promise.all([
         db.from("user_spend").select("user_id, amount, product_names, created_at, payment_method"),
         db.from("user_analytics").select("user_id").gte("created_at", todayISO()),
-        supabase.functions.invoke("get-all-users"),
+        supabase.functions.invoke("get-all-users", { body: { username } }),
       ]);
       setSpends(sp ?? []);
       setAnalyticsToday(ua ?? []);

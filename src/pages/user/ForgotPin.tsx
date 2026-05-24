@@ -7,6 +7,7 @@ import { BitezBloom, btnStyle, lgStyle } from "./Login";
 const ForgotPin = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState("");
+  const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,11 +15,12 @@ const ForgotPin = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!/^[a-z0-9_]{3,30}$/.test(userId)) return toast.error("Enter your User ID");
+    if (!/^\d{10,15}$/.test(phone)) return toast.error("Enter your registered phone number");
     if (!/^\d{4}$/.test(pin)) return toast.error("PIN must be 4 digits");
     if (pin !== confirm) return toast.error("PINs don't match");
     setLoading(true);
     try {
-      await resetPin(userId, pin);
+      await resetPin(userId, phone, pin);
       toast.success("PIN reset successfully");
       setTimeout(() => navigate("/app/login", { replace: true }), 1500);
     } catch (err) {
@@ -66,6 +68,16 @@ const ForgotPin = () => {
               value={userId}
               onChange={(e) => setUserId(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
               placeholder="Your User ID"
+              className="flex-1 bg-transparent outline-none border-none"
+              style={{ fontSize: 17, color: "#1D1D1F" }}
+            />
+          </Row>
+          <Row icon="call">
+            <input
+              type="tel" inputMode="numeric" maxLength={15}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))}
+              placeholder="Registered phone number"
               className="flex-1 bg-transparent outline-none border-none"
               style={{ fontSize: 17, color: "#1D1D1F" }}
             />

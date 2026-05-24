@@ -99,9 +99,9 @@ export async function loginWithPin(userId: string, pin: string) {
   return persist(u);
 }
 
-export async function resetPin(userId: string, newPin: string) {
+export async function resetPin(userId: string, phone: string, newPin: string) {
   const { data, error } = await supabase.functions.invoke("user-forgot-pin", {
-    body: { user_id: userId, new_pin: newPin },
+    body: { user_id: userId, phone, new_pin: newPin },
   });
   await unwrap(data, error, "Could not reset PIN");
 }

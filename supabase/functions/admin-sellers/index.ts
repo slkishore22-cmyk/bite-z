@@ -49,7 +49,14 @@ Deno.serve(async (req) => {
     if (op === "get") {
       const { id } = body;
       if (!id) return json({ error: "missing id" }, 400);
-      const { data, error } = await admin.from("sellers").select("*").eq("id", id).maybeSingle();
+      // Explicitly exclude password_hash — never return credential material.
+      const { data, error } = await admin
+        .from("sellers")
+        .select(
+          "id, name, username, email, phone, canteen_name, canteen_location, canteen_type, bank_name, bank_ifsc, bank_account_number, upi_id, is_active, is_suspended, created_at, created_by",
+        )
+        .eq("id", id)
+        .maybeSingle();
       if (error) return json({ error: error.message }, 500);
       return json({ row: data });
     }

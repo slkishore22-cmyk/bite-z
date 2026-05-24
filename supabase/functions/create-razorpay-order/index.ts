@@ -13,11 +13,11 @@ Deno.serve(async (req) => {
     const receipt = String(body.receipt ?? `rcpt_${Date.now()}`).slice(0, 40);
     const subtotal = Number(body.subtotal);
     const sellerId = typeof body.sellerId === "string" ? body.sellerId : null;
-    const clientAmount = Number(body.amount);
 
     // Server is the source of truth for the chargeable amount. If a subtotal +
     // sellerId is provided we re-validate the active offer against the DB and
-    // recompute the discounted total so the client cannot tamper with it.
+    // recompute the discounted total so the client cannot tamper with it. The
+    // client-supplied amount is never trusted as a fallback.
     let amount = 0;
     if (subtotal && subtotal > 0) {
       let discountPct = 0;
@@ -60,8 +60,6 @@ Deno.serve(async (req) => {
         }
       }
       amount = Math.max(1, Math.round(subtotal * (1 - discountPct / 100)));
-    } else if (clientAmount && clientAmount > 0) {
-      amount = clientAmount;
     }
 
     if (!amount || amount <= 0) {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getSellerSession } from "@/lib/sellerAuth";
 import { Bell, BellOff, Smartphone, AlertCircle, Loader2, Send } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,12 @@ export function PushNotificationSettings() {
   const handleSendTest = async () => {
     setIsSendingTest(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      const seller = getSellerSession();
+      if (!seller?.id) throw new Error("Not authenticated");
       await supabase.functions.invoke("send-push-notification", {
         body: {
-          user_id: user.id,
+          user_id: seller.id,
+          seller_id: seller.id,
           payload: { title: "Test Notification", body: "Push is working!", url: "/" },
         },
       });
