@@ -36,6 +36,10 @@ export function PushNotificationSettings() {
         body: {
           user_id: user.id,
           payload: { title: "Test Notification", body: "Push is working!", url: "/" },
+          // Self-test requires a verified caller; this UI only runs for
+          // Supabase-authenticated users (admin/staff). For sellers, the
+          // seller_id should be added before calling. Anonymous customers
+          // cannot trigger push notifications.
         },
       });
       toast({ title: "Test sent" });
