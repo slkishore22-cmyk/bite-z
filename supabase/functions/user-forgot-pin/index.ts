@@ -20,11 +20,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS")
     return new Response("ok", { headers: corsHeaders });
   try {
-    const { user_id, new_pin } = await req.json();
+    const { user_id, phone, new_pin } = await req.json();
     const uid = String(user_id ?? "").trim().toLowerCase();
+    const ph = String(phone ?? "").replace(/\D/g, "");
     const p = String(new_pin ?? "");
     if (!/^[a-z0-9_]+$/.test(uid))
       return json({ error: "Invalid user ID" }, 400);
+    if (!/^\d{10,15}$/.test(ph))
+      return json({ error: "Registered phone number required" }, 400);
     if (!/^\d{4}$/.test(p))
       return json({ error: "PIN must be 4 digits" }, 400);
 
@@ -34,10 +37,17 @@ Deno.serve(async (req) => {
     );
     const { data } = await admin
       .from("users")
-      .select("id")
+      .select("id, phone")
       .eq("user_id", uid)
       .maybeSingle();
-    if (!data) return json({ error: "User ID not found" }, 404);
+    // Generic error to avoid leaking which factor failed (user enumeration).
+    if (!data) return json({ error: "User ID or phone number does not match" }, 404);
+    const dbPhone = String((data as { phone?: string }).phone ?? "").replace(/\D/g, "");
+    // Match on the last 10 digits to tolerate country-code variations.
+    const last = (s: string) => s.slice(-10);
+    if (!dbPhone || last(dbPhone) !== last(ph)) {
+      return json({ error: "User ID or phone number does not match" }, 404);
+    }
 
     const pinHash = await sha256Hex(p + uid);
     const { error } = await admin
