@@ -213,9 +213,6 @@ const Menu = () => {
               marginRight: -16,
               paddingLeft: 16,
               paddingRight: 16,
-              background: "rgba(245,245,247,0.85)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
             }}
           >
             {/* Search */}
