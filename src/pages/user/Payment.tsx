@@ -264,7 +264,7 @@ const Payment = () => {
 
       {/* Main Content Canvas */}
       <main
-        className="user-content flex flex-col"
+        className="user-content bg-[#01060a] flex flex-col"
         style={{ paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))", maxWidth: "56rem", gap: 48 }}
       >
         {/* Branding Hero Moment */}

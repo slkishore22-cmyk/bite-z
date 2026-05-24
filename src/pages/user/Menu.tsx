@@ -197,7 +197,7 @@ const Menu = () => {
 
         {/* Main content */}
         <div
-          className="user-content"
+          className="user-content bg-[#01060a]"
           style={{
             paddingTop: "calc(96px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 120,

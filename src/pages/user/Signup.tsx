@@ -90,7 +90,7 @@ const Signup = () => {
         </span>
       </button>
 
-      <div className="user-content pt-24 pb-12" style={{ maxWidth: 520 }}>
+      <div className="user-content bg-[#01060a] pt-24 pb-12" style={{ maxWidth: 520 }}>
         <div className="px-2 mb-10">
           <h1
             className="font-semibold leading-tight mb-1"

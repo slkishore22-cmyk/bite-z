@@ -93,7 +93,7 @@ const Orders = () => {
         }}
       >
         <main
-          className="user-content user-content-readable"
+          className="user-content bg-[#01060a] user-content-readable"
           style={{ paddingTop: "calc(32px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))" }}
         >
           {/* Editorial Header */}
