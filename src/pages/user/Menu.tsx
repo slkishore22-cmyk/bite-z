@@ -219,6 +219,7 @@ const Menu = () => {
             <div
               className="flex items-center gap-2"
               style={{
+                ...liquidGlass,
                 height: 52,
                 borderRadius: 9999,
                 padding: "0 16px",
@@ -257,6 +258,7 @@ const Menu = () => {
                     onClick={() => setActive(t.key)}
                     className="shrink-0"
                     style={{
+                      ...liquidGlass,
                       borderRadius: 9999,
                       padding: "8px 20px",
                       fontSize: 14,
