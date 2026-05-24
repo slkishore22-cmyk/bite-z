@@ -83,7 +83,7 @@ const UserLogin = () => {
         </div>
       </div>
 
-      <div className="user-content bg-[#01060a]" style={{ maxWidth: 448 }}>
+      <div className="user-content" style={{ maxWidth: 448 }}>
         <h2
           className="text-center mb-2"
           style={{ fontSize: 24, fontWeight: 700, color: "#1D1D1F" }}
