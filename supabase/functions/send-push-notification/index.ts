@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { user_id, payload, action } = await req.json();
+    const { user_id, payload, action, admin_username, seller_id } = await req.json();
 
     if (action === "public-key") {
       return new Response(JSON.stringify({ publicKey: vapidPublicKey || null }), {
@@ -203,6 +203,26 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Authorization: caller must be either a verified master_admin OR an
+    // active seller. Anonymous callers cannot send arbitrary notifications.
+    let authorized = false;
+    if (typeof admin_username === "string" && admin_username.trim()) {
+      const { data: who } = await supabase
+        .from("master_admin").select("id").eq("username", admin_username.trim()).maybeSingle();
+      if (who) authorized = true;
+    }
+    if (!authorized && typeof seller_id === "string" && seller_id) {
+      const { data: s } = await supabase
+        .from("sellers").select("id, is_active, is_suspended").eq("id", seller_id).maybeSingle();
+      if (s && s.is_active && !s.is_suspended) authorized = true;
+    }
+    if (!authorized) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { data: subscriptions, error: subError } = await supabase
       .from("push_subscriptions")
