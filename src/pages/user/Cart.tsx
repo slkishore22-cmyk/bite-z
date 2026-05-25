@@ -90,7 +90,7 @@ const Cart = () => {
             paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
           }}
         >
-          <div className="user-content user-content-readable flex items-center gap-3 py-4">
+          <div className="user-content border-rose-200 user-content-readable flex items-center gap-3 py-4">
             <button
               onClick={() => navigate(-1)}
               className="active:scale-95 transition-transform p-1 -ml-1"
