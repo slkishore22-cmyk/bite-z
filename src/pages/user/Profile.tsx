@@ -35,7 +35,7 @@ const Profile = () => {
       className="user-page pb-32 antialiased"
       style={{ color: "hsl(var(--user-text))" }}
     >
-      <main className="user-content user-content-readable pt-12">
+      <main className="user-content border-rose-200 user-content-readable pt-12">
         <h1 className="text-2xl font-bold tracking-tight mb-8">
           Hey, {firstName} 👋
         </h1>

@@ -52,7 +52,7 @@ const ForgotPin = () => {
         <span className="material-symbols-outlined" style={{ fontSize: 22, color: "#1D1D1F" }}>arrow_back</span>
       </button>
 
-      <div className="user-content pt-32 pb-12" style={{ maxWidth: 448 }}>
+      <div className="user-content border-rose-200 pt-32 pb-12" style={{ maxWidth: 448 }}>
         <h1 className="font-semibold leading-tight mb-1"
           style={{ fontSize: 34, color: "#1D1D1F", letterSpacing: "-0.022em" }}>
           Reset PIN
