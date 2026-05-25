@@ -196,19 +196,34 @@ const Menu = () => {
           <div style={{ width: 0, height: 40, flexShrink: 0 }} />
         </div>
 
-        {/* Search + tabs (scrolls with page) */}
+        {/* Search + tabs (floating, sticky) */}
         <div
           style={{
+            position: "sticky",
+            top: 8,
+            zIndex: 20,
             maxWidth: 672,
             marginInline: "auto",
             paddingTop: 8,
-            paddingBottom: 8,
+            paddingBottom: 12,
             paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
             paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
+            background: "transparent",
+            pointerEvents: "none",
           }}
         >
             {/* Search */}
-            <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2"
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: 9999,
+                padding: "10px 16px",
+                boxShadow: "0 6px 20px -8px rgba(17,24,39,0.18)",
+                pointerEvents: "auto",
+              }}
+            >
               <span
                 className="material-symbols-outlined"
                 style={{ fontSize: 22, color: "#2563eb" }}
@@ -231,7 +246,16 @@ const Menu = () => {
             {/* Tabs */}
             <div
               className="no-scrollbar flex gap-3 overflow-x-auto"
-              style={{ marginTop: 16, marginBottom: 8 }}
+              style={{
+                marginTop: 12,
+                marginBottom: 0,
+                background: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: 9999,
+                padding: "6px 8px",
+                boxShadow: "0 6px 20px -8px rgba(17,24,39,0.18)",
+                pointerEvents: "auto",
+              }}
             >
               {TABS.map((t) => {
                 const isActive = t.key === active;
@@ -247,6 +271,7 @@ const Menu = () => {
                       fontSize: 14,
                       fontWeight: 600,
                       color: isActive ? "#2563eb" : "#4B5563",
+                      background: isActive ? "#EFF6FF" : "transparent",
                       transition: "all 400ms ease",
                     }}
                   >
@@ -264,6 +289,7 @@ const Menu = () => {
           style={{
             maxWidth: 672,
             marginInline: "auto",
+            paddingTop: 20,
             paddingBottom: 120,
             paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
             paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
