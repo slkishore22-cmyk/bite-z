@@ -20,8 +20,9 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const active = pathToTab(pathname);
+  const isMenuPage = pathname.startsWith("/app/menu/");
   const hideNav =
-    pathname.startsWith("/app/menu/") ||
+    isMenuPage ||
     pathname.startsWith("/app/payment") ||
     pathname.startsWith("/app/order-status");
 
@@ -40,7 +41,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div
-        className="user-shell"
+        className={isMenuPage ? "user-shell user-shell-menu-plain" : "user-shell"}
         style={{
           paddingBottom: hideNav
             ? "var(--ios-pwa-safe-bottom)"

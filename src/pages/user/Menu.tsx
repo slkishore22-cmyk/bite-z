@@ -152,14 +152,15 @@ const Menu = () => {
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
-        {/* Fixed header */}
+        {/* Header */}
         <div
-          className="user-topbar fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
+          className="relative z-10 mx-auto flex items-center justify-between"
           style={{
             paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 16,
             paddingLeft: 24,
             paddingRight: 24,
+            maxWidth: 672,
           }}
         >
           <button
@@ -195,17 +196,17 @@ const Menu = () => {
           <div style={{ width: 0, height: 40, flexShrink: 0 }} />
         </div>
 
-        {/* Main content */}
+        {/* Search + tabs (scrolls with page) */}
         <div
-          className="user-content"
           style={{
-            paddingTop: "calc(112px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
-            paddingBottom: 120,
             maxWidth: 672,
+            marginInline: "auto",
+            paddingTop: 8,
+            paddingBottom: 8,
+            paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
+            paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
           }}
         >
-          {/* Search + tabs (scrolls with page) */}
-          <div style={{ paddingTop: 8, paddingBottom: 8 }}>
             {/* Search */}
             <div className="flex items-center gap-2">
               <span
@@ -254,10 +255,20 @@ const Menu = () => {
                 );
               })}
             </div>
-          </div>
+        </div>
 
-          {/* Food list */}
-          <div ref={inventoryRef} className="space-y-8">
+        {/* Food list */}
+        <div
+          ref={inventoryRef}
+          className="space-y-8"
+          style={{
+            maxWidth: 672,
+            marginInline: "auto",
+            paddingBottom: 120,
+            paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
+            paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
+          }}
+        >
             {visible.map((it, idx) => {
               const n = qtyOf(it.id);
               return (
@@ -295,7 +306,6 @@ const Menu = () => {
               </div>
               )
             )}
-          </div>
         </div>
 
         {/* Floating order panel */}
