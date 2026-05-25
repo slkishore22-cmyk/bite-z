@@ -152,14 +152,15 @@ const Menu = () => {
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
-        {/* Fixed header */}
+        {/* Header */}
         <div
-          className="user-topbar fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
+          className="relative z-10 mx-auto flex items-center justify-between"
           style={{
             paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
             paddingBottom: 16,
             paddingLeft: 24,
             paddingRight: 24,
+            maxWidth: 672,
           }}
         >
           <button
@@ -199,7 +200,7 @@ const Menu = () => {
         <div
           className="user-content"
           style={{
-            paddingTop: "calc(112px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+            paddingTop: 0,
             paddingBottom: 120,
             maxWidth: 672,
           }}

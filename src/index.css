@@ -400,11 +400,11 @@ All colors MUST be HSL.
   }
 
   .user-shell-menu-plain {
-    background: hsl(var(--background)) !important;
+    background: hsl(var(--user-app-bg)) !important;
   }
 
   .user-shell-menu-plain .user-topbar {
-    background: hsl(var(--background)) !important;
+    background: hsl(var(--user-app-bg)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border-bottom: 0 !important;
