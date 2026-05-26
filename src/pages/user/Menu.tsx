@@ -152,49 +152,51 @@ const Menu = () => {
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
-        {/* Header — back only */}
-        <div
-          className="relative z-10 mx-auto flex items-center"
-          style={{
-            paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
-            paddingBottom: 8,
-            paddingLeft: 16,
-            paddingRight: 16,
-            maxWidth: 672,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => navigate("/app/home")}
-            aria-label="Back"
-            className="flex items-center justify-center"
-            style={{ width: 40, height: 40 }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 24, color: "#4B5563" }}
-            >
-              arrow_back
-            </span>
-          </button>
-        </div>
-
-        {/* Search + tabs (floating, sticky) */}
+        {/* Fixed top bar: back + search + tabs */}
         <div
           style={{
-            position: "sticky",
-            top: 8,
-            zIndex: 20,
-            maxWidth: 672,
-            marginInline: "auto",
-            paddingTop: 8,
-            paddingBottom: 12,
-            paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
-            paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 40,
             background: "hsl(var(--user-app-bg))",
-            pointerEvents: "none",
+            paddingTop: "calc(8px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
+            paddingBottom: 12,
           }}
         >
+          <div
+            className="mx-auto flex items-center"
+            style={{
+              maxWidth: 672,
+              paddingLeft: 16,
+              paddingRight: 16,
+              paddingBottom: 8,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => navigate("/app/home")}
+              aria-label="Back"
+              className="flex items-center justify-center"
+              style={{ width: 40, height: 40 }}
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: 24, color: "#4B5563" }}
+              >
+                arrow_back
+              </span>
+            </button>
+          </div>
+          <div
+            style={{
+              maxWidth: 672,
+              marginInline: "auto",
+              paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
+              paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
+            }}
+          >
             {/* Search */}
             <div
               className="flex items-center gap-2"
@@ -204,7 +206,6 @@ const Menu = () => {
                 borderRadius: 9999,
                 padding: "10px 16px",
                 boxShadow: "0 6px 20px -8px rgba(17,24,39,0.18)",
-                pointerEvents: "auto",
               }}
             >
               <span
@@ -237,7 +238,6 @@ const Menu = () => {
                 borderRadius: 9999,
                 padding: "6px 6px",
                 boxShadow: "0 6px 20px -8px rgba(17,24,39,0.18)",
-                pointerEvents: "auto",
               }}
             >
               {TABS.map((t) => {
@@ -263,6 +263,7 @@ const Menu = () => {
                 );
               })}
             </div>
+          </div>
         </div>
 
         {/* Food list */}
@@ -272,7 +273,7 @@ const Menu = () => {
           style={{
             maxWidth: 672,
             marginInline: "auto",
-            paddingTop: 20,
+            paddingTop: "calc(var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing) + 160px)",
             paddingBottom: 120,
             paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
             paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
