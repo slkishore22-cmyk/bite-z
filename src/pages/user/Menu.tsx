@@ -60,6 +60,27 @@ const Menu = () => {
   // Live favorites used only for the heart UI (so the heart appears immediately
   // when the user double-taps), without re-sorting the visible list.
   const [favoritesLive, setFavoritesLive] = useState(() => getFavorites());
+  // Show the search/category bars as a floating header only while the user is
+  // scrolling down. When scrolling up (or at the top), let them flow naturally
+  // with the page so the layout feels calm.
+  const [floatingBars, setFloatingBars] = useState(false);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY;
+      if (y <= 40) {
+        setFloatingBars(false);
+      } else if (delta > 2) {
+        setFloatingBars(true);
+      } else if (delta < -2) {
+        setFloatingBars(false);
+      }
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const refreshLocal = () => setInventory(getInventory(id));
@@ -182,9 +203,11 @@ const Menu = () => {
         {/* Search + tabs (floating, sticky) */}
         <div
           style={{
-            position: "sticky",
-            top: 8,
-            zIndex: 20,
+            position: floatingBars ? "fixed" : "relative",
+            top: floatingBars ? "calc(8px + var(--ios-pwa-safe-top))" : undefined,
+            left: 0,
+            right: 0,
+            zIndex: 30,
             maxWidth: 672,
             marginInline: "auto",
             paddingTop: 8,
@@ -193,6 +216,9 @@ const Menu = () => {
             paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
             background: "transparent",
             pointerEvents: "none",
+            transform: floatingBars ? "translateY(0)" : "translateY(0)",
+            transition: "transform 280ms ease, opacity 280ms ease",
+            animation: floatingBars ? "slideDownBars 280ms ease both" : undefined,
           }}
         >
             {/* Search */}
