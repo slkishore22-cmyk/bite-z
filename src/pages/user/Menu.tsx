@@ -191,7 +191,7 @@ const Menu = () => {
             paddingBottom: 12,
             paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
             paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
-            background: "hsl(var(--user-app-bg))",
+            background: "transparent",
             pointerEvents: "none",
           }}
         >
@@ -199,11 +199,13 @@ const Menu = () => {
             <div
               className="flex items-center gap-2"
               style={{
-                background: "#ffffff",
+                background: "rgba(255,255,255,0.85)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
                 border: "1px solid #e5e7eb",
                 borderRadius: 9999,
                 padding: "10px 16px",
-                boxShadow: "0 6px 20px -8px rgba(17,24,39,0.18)",
+                boxShadow: "0 10px 30px -10px rgba(17,24,39,0.25)",
                 pointerEvents: "auto",
               }}
             >
@@ -232,11 +234,13 @@ const Menu = () => {
               style={{
                 marginTop: 12,
                 marginBottom: 0,
-                background: "#ffffff",
+                background: "rgba(255,255,255,0.85)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
                 border: "1px solid #e5e7eb",
                 borderRadius: 9999,
                 padding: "6px 6px",
-                boxShadow: "0 6px 20px -8px rgba(17,24,39,0.18)",
+                boxShadow: "0 10px 30px -10px rgba(17,24,39,0.25)",
                 pointerEvents: "auto",
               }}
             >
