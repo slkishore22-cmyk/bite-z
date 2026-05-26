@@ -210,6 +210,12 @@ button:disabled, a[aria-disabled="true"], [role="button"][aria-disabled="true"] 
 
 /* Skeleton shimmer used by loading placeholders. */
 @keyframes bitez-shimmer {
+}
+
+@keyframes slideDownBars {
+  from { transform: translateY(-120%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
