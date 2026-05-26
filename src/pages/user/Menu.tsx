@@ -208,7 +208,7 @@ const Menu = () => {
             paddingBottom: 12,
             paddingLeft: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px))",
             paddingRight: "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right, 0px))",
-            background: "transparent",
+            background: "hsl(var(--user-app-bg))",
             pointerEvents: "none",
           }}
         >
@@ -252,7 +252,7 @@ const Menu = () => {
                 background: "#ffffff",
                 border: "1px solid #e5e7eb",
                 borderRadius: 9999,
-                padding: "6px 8px",
+                padding: "6px 6px",
                 boxShadow: "0 6px 20px -8px rgba(17,24,39,0.18)",
                 pointerEvents: "auto",
               }}
@@ -264,11 +264,11 @@ const Menu = () => {
                     key={t.key}
                     type="button"
                     onClick={() => setActive(t.key)}
-                    className="shrink-0"
+                    className="flex-1 min-w-0 whitespace-nowrap"
                     style={{
                       borderRadius: 9999,
-                      padding: "8px 20px",
-                      fontSize: 14,
+                      padding: "8px clamp(10px, 3vw, 20px)",
+                      fontSize: "clamp(12px, 3.4vw, 14px)",
                       fontWeight: 600,
                       color: isActive ? "#2563eb" : "#4B5563",
                       background: isActive ? "#EFF6FF" : "transparent",
