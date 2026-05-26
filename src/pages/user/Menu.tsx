@@ -152,14 +152,14 @@ const Menu = () => {
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
-        {/* Header */}
+        {/* Header — back only */}
         <div
-          className="relative z-10 mx-auto flex items-center justify-between"
+          className="relative z-10 mx-auto flex items-center"
           style={{
             paddingTop: "calc(12px + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))",
-            paddingBottom: 16,
-            paddingLeft: 24,
-            paddingRight: 24,
+            paddingBottom: 8,
+            paddingLeft: 16,
+            paddingRight: 16,
             maxWidth: 672,
           }}
         >
@@ -167,33 +167,16 @@ const Menu = () => {
             type="button"
             onClick={() => navigate("/app/home")}
             aria-label="Back"
-            className="flex items-center gap-3"
-            style={{ minWidth: 0, flex: 1, overflow: "hidden" }}
+            className="flex items-center justify-center"
+            style={{ width: 40, height: 40 }}
           >
             <span
               className="material-symbols-outlined"
-              style={{ fontSize: 24, color: "#4B5563", flexShrink: 0 }}
+              style={{ fontSize: 24, color: "#4B5563" }}
             >
               arrow_back
             </span>
-            <span
-              style={{
-                fontSize: 22,
-                fontWeight: 600,
-                letterSpacing: "-0.02em",
-                color: "#111827",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                flex: 1,
-                minWidth: 0,
-                paddingRight: 16,
-              }}
-            >
-              {title}
-            </span>
           </button>
-          <div style={{ width: 0, height: 40, flexShrink: 0 }} />
         </div>
 
         {/* Search + tabs (floating, sticky) */}
