@@ -395,11 +395,7 @@ All colors MUST be HSL.
   }
 
   .user-shell {
-    width: 100%;
-    min-height: var(--app-vh, 100dvh);
-    background: transparent;
-    color: hsl(var(--user-text));
-    overflow-x: clip;
+    display: contents;
   }
 
   .user-shell-menu-plain {
@@ -419,6 +415,8 @@ All colors MUST be HSL.
     background: transparent !important;
     color: hsl(var(--user-text));
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --user-page-max: 72rem;
+    --user-page-pad: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left, 0px));
   }
 
   .user-content {
@@ -523,6 +521,8 @@ All colors MUST be HSL.
 
   .user-home-screen {
     min-height: var(--app-vh, 100dvh);
+    width: min(100%, var(--user-page-max));
+    margin-inline: auto;
     --home-greeting-top: calc(env(safe-area-inset-top, 0px) + clamp(20px, 5svh, 44px));
     --home-greeting-gap: clamp(24px, 5.5svh, 52px);
     --home-section-gap: clamp(28px, 5.5svh, 48px);
