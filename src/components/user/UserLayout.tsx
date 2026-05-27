@@ -40,16 +40,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div
-        className={isMenuPage ? "user-shell user-shell-menu-plain" : "user-shell"}
-        style={{
-          paddingBottom: hideNav
-            ? "var(--ios-pwa-safe-bottom)"
-            : "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom))",
-        }}
-      >
-        {children}
-      </div>
+      {children}
       {!hideNav && (
         <LiquidGlassNav activeId={active} onChange={(id) => navigateToTab(id as UserTab)} />
       )}
