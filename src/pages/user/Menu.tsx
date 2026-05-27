@@ -181,7 +181,7 @@ const Menu = () => {
             paddingBottom: 8,
             paddingLeft: 16,
             paddingRight: 16,
-            maxWidth: 672,
+            maxWidth: 1120,
           }}
         >
           <button
@@ -210,7 +210,7 @@ const Menu = () => {
             left: 0,
             right: 0,
             zIndex: 30,
-            maxWidth: 672,
+            maxWidth: 1120,
             marginInline: "auto",
             paddingTop: 8,
             paddingBottom: 12,
@@ -300,9 +300,9 @@ const Menu = () => {
         {/* Food list */}
         <div
           ref={inventoryRef}
-          className="space-y-8"
+          className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           style={{
-            maxWidth: 672,
+            maxWidth: 1120,
             marginInline: "auto",
             paddingTop: 20,
             paddingBottom: 120,
