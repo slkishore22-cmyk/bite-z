@@ -397,9 +397,7 @@ All colors MUST be HSL.
   .user-shell {
     width: 100%;
     min-height: var(--app-vh, 100dvh);
-    background:
-      radial-gradient(circle at 50% -18%, hsl(212 68% 91% / 0.9), transparent 42%),
-      linear-gradient(180deg, hsl(var(--user-app-bg-soft)), hsl(var(--user-app-bg)) 38%, hsl(214 28% 92%));
+    background: transparent;
     color: hsl(var(--user-text));
     overflow-x: clip;
   }
