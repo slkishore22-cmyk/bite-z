@@ -204,7 +204,9 @@ const Menu = () => {
         <div
           style={{
             position: floatingBars ? "fixed" : "relative",
-            top: floatingBars ? "calc(8px + var(--ios-pwa-safe-top))" : undefined,
+            top: floatingBars
+              ? "calc(8px + env(safe-area-inset-top, 0px) + var(--ios-pwa-safe-top) + var(--ios-pwa-top-breathing))"
+              : undefined,
             left: 0,
             right: 0,
             zIndex: 30,
