@@ -72,9 +72,9 @@ const Menu = () => {
       if (y <= 40) {
         setFloatingBars(false);
       } else if (delta > 2) {
-        setFloatingBars(true);
-      } else if (delta < -2) {
         setFloatingBars(false);
+      } else if (delta < -2) {
+        setFloatingBars(true);
       }
       lastY = y;
     };
