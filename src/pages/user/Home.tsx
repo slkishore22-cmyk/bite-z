@@ -154,7 +154,7 @@ const Home = () => {
         className="user-home-screen user-page antialiased"
         style={{
           color: "hsl(var(--user-text))",
-          paddingBottom: 120,
+          paddingBottom: "calc(var(--user-bottom-nav-height) + var(--ios-pwa-safe-bottom) + 40px)",
           fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
         }}
       >
@@ -164,8 +164,8 @@ const Home = () => {
           style={{
             paddingTop: "var(--home-greeting-top, calc(env(safe-area-inset-top, 0px) + clamp(20px, 5svh, 44px)))",
             marginTop: 0,
-            paddingLeft: 24,
-            paddingRight: 24,
+            paddingLeft: "var(--user-page-pad)",
+            paddingRight: "var(--user-page-pad)",
             fontSize: 28,
             fontWeight: 800,
             letterSpacing: 0,
@@ -181,8 +181,8 @@ const Home = () => {
           <div
             className="no-scrollbar flex gap-4 overflow-x-auto"
               style={{
-                paddingLeft: 24,
-                paddingRight: 24,
+                paddingLeft: "var(--user-page-pad)",
+                paddingRight: "var(--user-page-pad)",
                 paddingBottom: 8,
                 marginBottom: "var(--home-section-gap, 48px)",
               }}
@@ -203,8 +203,8 @@ const Home = () => {
           <>
             <h2
               style={{
-                paddingLeft: 24,
-                paddingRight: 24,
+                paddingLeft: "var(--user-page-pad)",
+                paddingRight: "var(--user-page-pad)",
                 fontSize: 22,
                 fontWeight: 800,
                 letterSpacing: "-0.02em",
@@ -216,8 +216,8 @@ const Home = () => {
             </h2>
             <div
               style={{
-                paddingLeft: 24,
-                paddingRight: 24,
+                paddingLeft: "var(--user-page-pad)",
+                paddingRight: "var(--user-page-pad)",
                 marginBottom: "var(--home-section-gap, 48px)",
                 overflow: "hidden",
               }}
@@ -259,8 +259,8 @@ const Home = () => {
         {/* Pick a Spot? */}
         <h2
           style={{
-            paddingLeft: 24,
-            paddingRight: 24,
+            paddingLeft: "var(--user-page-pad)",
+            paddingRight: "var(--user-page-pad)",
             fontSize: 22,
             fontWeight: 800,
             letterSpacing: "-0.02em",
@@ -273,7 +273,7 @@ const Home = () => {
         {spots.length > 0 ? (
           <div
             className="flex flex-col gap-3"
-            style={{ paddingLeft: 24, paddingRight: 24 }}
+            style={{ paddingLeft: "var(--user-page-pad)", paddingRight: "var(--user-page-pad)" }}
           >
             {spots.map((s, i) => (
               <CanteenCard key={i} spot={s} onClick={() => navigate(`/app/menu/${s.id}`)} />
@@ -282,7 +282,7 @@ const Home = () => {
         ) : canteensLoading ? (
           <CanteenListSkeleton rows={3} />
         ) : (
-          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+          <div style={{ paddingLeft: "var(--user-page-pad)", paddingRight: "var(--user-page-pad)" }}>
             <div
               className="cb-glass flex flex-col items-center text-center"
               style={{ padding: "28px 24px", borderRadius: 28 }}
